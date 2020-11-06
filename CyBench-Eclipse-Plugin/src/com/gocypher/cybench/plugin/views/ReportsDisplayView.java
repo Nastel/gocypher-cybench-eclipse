@@ -14,6 +14,7 @@ import com.gocypher.cybench.plugin.model.NameValueEntry;
 import com.gocypher.cybench.plugin.model.NameValueModelProvider;
 import com.gocypher.cybench.plugin.model.ReportFileEntry;
 import com.gocypher.cybench.plugin.model.ReportFileEntryComparator;
+import com.gocypher.cybench.plugin.model.ReportHandlerService;
 
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.graphics.Color;
@@ -75,6 +76,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 
 	@Inject IWorkbench workbench;
 	@Inject ESelectionService selectionService ;
+	@Inject ReportHandlerService reportService ;
 	
 	private TableViewer reportsListViewer;
 	private Text reportTextArea ;
@@ -94,7 +96,8 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	 
 	@PostConstruct
 	public void init ( ) {
-		//System.out.println("--->Init called:"+selectionService);
+		System.out.println("--->Init called:"+reportService);
+		this.reportService.prepareReportDisplayModel();
 		this.loadData();
 	}
 	
