@@ -11,9 +11,10 @@ public enum NameValueModelProvider {
 	private NameValueModelProvider () {
 		this.entries = new ArrayList<>() ;
 		
-		entries.add(new NameValueEntry ("name", "My report")) ;
+		/*entries.add(new NameValueEntry ("name", "My report")) ;
 		entries.add(new NameValueEntry ("timestamp", "2020-11-06")) ;
 		entries.add(new NameValueEntry ("score", "5,500.23")) ;
+		*/
 		
 	}
 

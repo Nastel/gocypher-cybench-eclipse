@@ -42,6 +42,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -112,8 +113,11 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		}
 		Collections.sort(listOfFiles, new ReportFileEntryComparator ());
 		if (listOfFiles.size() > 0) {
-			this.reportRawData =  CybenchUtils.loadFile(listOfFiles.get(0).getFullPathToFile()) ;
+			this.reportRawData =  CybenchUtils.loadFile(listOfFiles.get(0).getFullPathToFile()) ;	
+			this.extractReportProperties(this.reportRawData, NameValueModelProvider.INSTANCE.getEntries());
 		}
+		
+		
 		
 		//System.out.println("Reports:"+listOfFiles);
 	}
@@ -316,10 +320,16 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 				if (obj instanceof ReportFileEntry) {
 					ReportFileEntry file = (ReportFileEntry)obj ;
 					reportRawData = CybenchUtils.loadFile(file.getFullPathToFile()) ;
+					
+					extractReportProperties(reportRawData, NameValueModelProvider.INSTANCE.getEntries());
+					reportDetailsViewer.setInput(NameValueModelProvider.INSTANCE.getEntries());
+					reportDetailsViewer.refresh();
+					
 					//System.out.println("Report Raw data:"+reportRawData);
-					reportTextArea.setText(reportRawData);
+					/*reportTextArea.setText(reportRawData);
 					reportTextArea.redraw();
 					reportTextArea.update();
+					*/
 				}
 				
 				//showMessage("Double-click detected on "+obj.getClass());
@@ -353,9 +363,15 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		reportsListViewer.setInput(listOfFiles);
 		reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
 		reportsListViewer.refresh();
-		reportTextArea.setText(reportRawData);
+		
+		extractReportProperties(reportRawData, NameValueModelProvider.INSTANCE.getEntries());
+		reportDetailsViewer.setInput(NameValueModelProvider.INSTANCE.getEntries());
+		reportDetailsViewer.refresh();
+		
+		/*reportTextArea.setText(reportRawData);
 		reportTextArea.redraw();
 		reportTextArea.update();
+		*/
 	}
 	
 
@@ -421,9 +437,15 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
         
         return viewerColumn;
     }
-	private void extractReportProperties (String reportJSON) {
+	private void extractReportProperties (String reportJSON, List<NameValueEntry>listOfProperties) {
+		listOfProperties.clear();
 		//NameValueModelProvider.INSTANCE.getEntries().add(new NameValueEntry("custom1","custom2")) ;
-		JSONUtils.parseJsonIntoMap(reportJSON ) ;
+		Map<String, Object> reportMap = (Map<String,Object>)JSONUtils.parseJsonIntoMap(reportJSON ) ;
+		
+		reportMap.keySet().forEach(key ->{
+			listOfProperties.add(new  NameValueEntry (key,reportMap.get(key) != null ?reportMap.get(key).toString():"")) ;
+		});
+		
 		
 	}
 }
