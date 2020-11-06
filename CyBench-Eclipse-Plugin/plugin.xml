@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="FirstPlugin.commands.category"
+            name="CyBench Tools">
+      </category>
+      <command
+            categoryId="FirstPlugin.commands.category"
+            name="Run CyBench All tests"
+            id="FirstPlugin.commands.sampleCommand">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="com.gocypher.cybench.plugin.handlers.BenchmarkLauncherHandler"
+            commandId="FirstPlugin.commands.sampleCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="FirstPlugin.commands.sampleCommand"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               id="FirstPlugin.menus.sampleMenu"
+               label="CyBench Tools"
+               mnemonic="M">
+            <command
+                  commandId="FirstPlugin.commands.sampleCommand"
+                  id="FirstPlugin.menus.sampleCommand"
+                  mnemonic="S">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="FirstPlugin.toolbars.sampleToolbar">
+            <command
+                  id="FirstPlugin.toolbars.sampleCommand"
+                  commandId="FirstPlugin.commands.sampleCommand"
+                  icon="icons/cybench_symbol_small.png"                
+                  tooltip="Launch CyBench Benchmark">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="CyBenchTools"
+            name="CyBench Tools">
+      </category>
+      <view
+            category="CyBenchTools"
+            class="com.gocypher.cybench.plugin.views.ReportsDisplayView"
+            icon="icons/cybench_symbol_small.png"
+            id="com.gocypher.cybench.plugin.views.ReportsDisplayView"
+            inject="true"
+            name="Cybench Reports">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               id="com.gocypher.cybench.plugin.views.ReportsDisplayView"
+               ratio="0.5"
+               relationship="right"
+               relative="org.eclipse.ui.views.ProblemView">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>
+
+</plugin>
