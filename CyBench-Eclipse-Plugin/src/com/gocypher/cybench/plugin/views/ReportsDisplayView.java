@@ -108,32 +108,52 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	
 	@PostConstruct
 	public void init ( ) {
-		System.out.println("--->Init called:"+reportService);
+		//System.out.println("--->Init called:"+reportService);
 		//System.out.println("Titles:"+CybenchUtils.titles);
-		this.selectionService.addSelectionListener(new ISelectionListener() {
+		//System.out.println("Part properties:"+this.getViewSite().getSecondaryId());
+		
+		
+		
+		/*this.selectionService.addSelectionListener(new ISelectionListener() {
 			
 			@Override
 			public void selectionChanged(MPart sourcePart, Object selection) {
 				if (selection instanceof ReportFileEntry) {
-					System.out.println("Selection service:"+sourcePart +";"+selection);
-					selectedReport = (ReportFileEntry)selection ;
-					reportUIModel = reportService.prepareReportDisplayModel(selectedReport) ;
-					refreshView();
+					System.out.println("Selection service:"+sourcePart.getElementId() +";"+selection);
+					//selectedReport = (ReportFileEntry)selection ;
+					//reportUIModel = reportService.prepareReportDisplayModel(selectedReport) ;
+					//refreshView();
 					
 					
 				}
 				
 			}
 		});
-		
+		*/
 		//this.reportService.prepareReportDisplayModel();
-		//this.loadData();
+		this.loadData();
 		
 	}
 	
 	private void loadData () {
-		String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
-		System.out.println("Reports default directory:"+pathToPluginLocalStateDirectory);
+		//String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
+		//System.out.println("Reports default directory:"+pathToPluginLocalStateDirectory);
+		
+		IViewPart explorerView = workbench.getActiveWorkbenchWindow().getActivePage().findView(CyBenchExplorerView.ID) ;
+		if (explorerView instanceof CyBenchExplorerView 
+				&& this.getViewSite().getSecondaryId() != null 
+				&& !this.getViewSite().getSecondaryId().isEmpty()) {
+			
+				System.out.println("Explorer:"+explorerView);
+				CyBenchExplorerView cybenchExplorerView = (CyBenchExplorerView)explorerView ;
+				
+				String hashCodeStr = this.getViewSite().getSecondaryId() ;
+				ReportFileEntry entry = cybenchExplorerView.findEntryByHashCode(Integer.parseInt(hashCodeStr));			
+				reportUIModel = reportService.prepareReportDisplayModel(entry) ;
+				this.setPartName(entry.getName());
+		}
+		
+		
 		//this.listOfFiles.clear();
 		/*List<File>reportsFiles = CybenchUtils.listFilesInDirectory(pathToPluginLocalStateDirectory) ;
 		
@@ -195,7 +215,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		reportsListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		reportsListViewer.setInput(this.reportUIModel.getListOfBenchmarks());
 		reportsListViewer.setLabelProvider(new ViewLabelProvider());
-		//reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
+		reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
 		
 		workbench.getHelpSystem().setHelp(reportsListViewer.getControl(), "CyBenchLauncherPlugin.viewer");
 		getSite().setSelectionProvider(reportsListViewer);
@@ -236,6 +256,8 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		this.createHWAttributesViewer(reportTabs);
 		hwPropertiesTab.setControl(hwAttributesViewer.getControl());
 		
+		
+		setDataForSecondaryDisplayElements() ;
 		
 		/*reportTextArea = new Text (rightGroup, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL ) ;
 		reportTextArea.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
@@ -437,14 +459,21 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		reportsListViewer.setInput(this.reportUIModel.getListOfBenchmarks());
 		reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
 		reportsListViewer.refresh();
+		setDataForSecondaryDisplayElements();
 		
+			
+		/*reportTextArea.setText(reportRawData);
+		reportTextArea.redraw();
+		reportTextArea.update();
+		*/
+	}
+	
+	private void setDataForSecondaryDisplayElements () {
 		if (this.reportUIModel.getListOfBenchmarks().size()>0) {
 			reportTabs.setSelection(0);
 			NameValueEntry selEntry = this.reportUIModel.getListOfBenchmarks().get(0) ;
 			if (reportUIModel.getBenchmarksAttributes().get(selEntry.getName()) != null){
-				
-				//NameValueModelProvider.INSTANCE.getEntries().clear();
-				//NameValueModelProvider.INSTANCE.getEntries().addAll(reportUIModel.getBenchmarksAttributes().get(selEntry.getName()) ) ;
+			
 				reportDetailsViewer.setInput(reportUIModel.getBenchmarksAttributes().get(selEntry.getName()));
 				reportDetailsViewer.refresh();
 				
@@ -455,14 +484,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 				hwAttributesViewer.refresh();
 			}
 		}
-			
-		/*reportTextArea.setText(reportRawData);
-		reportTextArea.redraw();
-		reportTextArea.update();
-		*/
 	}
-	
-
 	private void createReportDetailsViewer (Composite parent) {
 		reportDetailsViewer = new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION  );
 		createColumns(parent, reportDetailsViewer);

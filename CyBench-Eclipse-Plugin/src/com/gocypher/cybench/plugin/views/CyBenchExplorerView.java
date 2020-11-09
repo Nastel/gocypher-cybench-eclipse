@@ -4,6 +4,7 @@ package com.gocypher.cybench.plugin.views;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.*;
 
+import com.gocypher.cybench.launcher.utils.Constants;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.NameValueModelProvider;
@@ -79,7 +80,7 @@ public class CyBenchExplorerView extends ViewPart {
 		List<File>reportsFiles = CybenchUtils.listFilesInDirectory(pathToPluginLocalStateDirectory) ;
 		
 		for (File file:reportsFiles) {
-			if (file.getName().endsWith(".json")) {
+			if (file.getName().endsWith(Constants.REPORT_FILE_EXTENSION)) {
 				ReportFileEntry entry = new ReportFileEntry() ;
 				entry.create(file);
 				listOfFiles.add(entry) ;
@@ -90,7 +91,17 @@ public class CyBenchExplorerView extends ViewPart {
 		//System.out.println("Reports:"+listOfFiles);
 	}
 	
-
+	public ReportFileEntry findEntryByHashCode (int hashCode) {
+		
+		for (ReportFileEntry item:listOfFiles) {
+			System.out.println("Report entry hashcode:"+item.hashCode());
+			//Shall do different approach because hashcode after restart is different
+			if (item.hashCode() == hashCode) {
+				return item ;
+			}
+		}
+		return null ;
+	}
 	class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
 		@Override
 		public String getColumnText(Object obj, int index) {
@@ -189,7 +200,30 @@ public class CyBenchExplorerView extends ViewPart {
 				
 				IStructuredSelection selection = reportsListViewer.getStructuredSelection();
 				Object obj = selection.getFirstElement();
-				selectionService.setSelection(obj);
+				
+				
+				
+				ReportFileEntry entry = (ReportFileEntry)obj ;
+				//System.out.println("Will open:"+entry.getName());
+				
+				
+				try {
+					IWorkbenchPage page = workbench.getActiveWorkbenchWindow().getActivePage() ;
+					/*for (String item: page.getShowViewShortcuts()) {
+						System.out.println("View:"+item);
+					};
+					*/
+					page.showView(ReportsDisplayView.ID, entry.hashCode()+"", IWorkbenchPage.VIEW_ACTIVATE);
+				
+					//selectionService.setSelection(obj);
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				
+				
+				
+				
 				//showMessage("Double-click detected on "+obj.getClass());
 				
 			}
