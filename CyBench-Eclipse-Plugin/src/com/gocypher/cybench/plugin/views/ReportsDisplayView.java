@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.part.*;
 
 import com.gocypher.cybench.core.utils.JSONUtils;
+import com.gocypher.cybench.launcher.utils.Constants;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.ICybenchPartView;
@@ -15,6 +16,7 @@ import com.gocypher.cybench.plugin.model.NameValueModelProvider;
 import com.gocypher.cybench.plugin.model.ReportFileEntry;
 import com.gocypher.cybench.plugin.model.ReportFileEntryComparator;
 import com.gocypher.cybench.plugin.model.ReportHandlerService;
+import com.gocypher.cybench.plugin.model.ReportUIModel;
 
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.graphics.Color;
@@ -24,7 +26,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.e4.ui.workbench.modeling.ISelectionListener;
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.*;
@@ -78,7 +82,11 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	@Inject ESelectionService selectionService ;
 	@Inject ReportHandlerService reportService ;
 	
+	private CTabFolder reportTabs ;
 	private TableViewer reportsListViewer;
+	private TableViewer jvmAttributesViewer;
+	private TableViewer hwAttributesViewer;
+	
 	private Text reportTextArea ;
 	
 	
@@ -86,29 +94,51 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	private Action action2;
 	private Action doubleClickAction;
 	
-	private List<ReportFileEntry> listOfFiles = new ArrayList<>();
-	private String reportRawData = "" ; 
+	//private List<ReportFileEntry> listOfFiles = new ArrayList<>();
+	private String reportRawData = "" ;
+	
+	private ReportFileEntry selectedReport ;
 	
 	private TableViewer reportDetailsViewer ;
+	private ReportUIModel reportUIModel = new ReportUIModel();
 	
 	private static Color colorGray= Display.getCurrent().getSystemColor(
             SWT.COLOR_GRAY);
 	 
+	
 	@PostConstruct
 	public void init ( ) {
 		System.out.println("--->Init called:"+reportService);
-		this.reportService.prepareReportDisplayModel();
-		this.loadData();
+		//System.out.println("Titles:"+CybenchUtils.titles);
+		this.selectionService.addSelectionListener(new ISelectionListener() {
+			
+			@Override
+			public void selectionChanged(MPart sourcePart, Object selection) {
+				if (selection instanceof ReportFileEntry) {
+					System.out.println("Selection service:"+sourcePart +";"+selection);
+					selectedReport = (ReportFileEntry)selection ;
+					reportUIModel = reportService.prepareReportDisplayModel(selectedReport) ;
+					refreshView();
+					
+					
+				}
+				
+			}
+		});
+		
+		//this.reportService.prepareReportDisplayModel();
+		//this.loadData();
+		
 	}
 	
 	private void loadData () {
 		String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
 		System.out.println("Reports default directory:"+pathToPluginLocalStateDirectory);
-		this.listOfFiles.clear();
-		List<File>reportsFiles = CybenchUtils.listFilesInDirectory(pathToPluginLocalStateDirectory) ;
+		//this.listOfFiles.clear();
+		/*List<File>reportsFiles = CybenchUtils.listFilesInDirectory(pathToPluginLocalStateDirectory) ;
 		
 		for (File file:reportsFiles) {
-			if (file.getName().endsWith(".json")) {
+			if (file.getName().endsWith(Constants.REPORT_FILE_EXTENSION)) {
 				ReportFileEntry entry = new ReportFileEntry() ;
 				entry.create(file);
 				listOfFiles.add(entry) ;
@@ -119,7 +149,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 			this.reportRawData =  CybenchUtils.loadFile(listOfFiles.get(0).getFullPathToFile()) ;	
 			this.extractReportProperties(this.reportRawData, NameValueModelProvider.INSTANCE.getEntries());
 		}
-		
+		*/
 		
 		
 		//System.out.println("Reports:"+listOfFiles);
@@ -157,15 +187,15 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	
 	private void createLeftSide (SashForm sash) {
 		Group leftGroup = new Group(sash, SWT.NONE) ;
-		leftGroup.setText("Available Reports");
+		leftGroup.setText("Available Benchmarks");
 		leftGroup.setLayout(new FillLayout());
 		
 		reportsListViewer = new TableViewer(leftGroup, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER );
 		//viewer.getTable().setLinesVisible(true);
 		reportsListViewer.setContentProvider(ArrayContentProvider.getInstance());
-		reportsListViewer.setInput(this.listOfFiles);
+		reportsListViewer.setInput(this.reportUIModel.getListOfBenchmarks());
 		reportsListViewer.setLabelProvider(new ViewLabelProvider());
-		reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
+		//reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
 		
 		workbench.getHelpSystem().setHelp(reportsListViewer.getControl(), "CyBenchLauncherPlugin.viewer");
 		getSite().setSelectionProvider(reportsListViewer);
@@ -177,10 +207,36 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	}
 	private void createRightSide (SashForm sash) {
 		Group rightGroup = new Group(sash, SWT.NONE);
-		rightGroup.setText("Report details");
+		rightGroup.setText( "Details");
 		rightGroup.setLayout(new FillLayout());
 		
-		this.createReportDetailsViewer(rightGroup);
+		reportTabs = new CTabFolder(rightGroup, SWT.BOTTOM);
+		GridData data = new GridData(SWT.FILL,
+                SWT.FILL, true, true,
+                2, 1);
+		reportTabs.setLayoutData(data);
+        
+  
+        CTabItem benchmarkDetailsTab = new CTabItem(reportTabs, SWT.NONE);       
+        reportTabs.setSelection(0);
+        benchmarkDetailsTab.setText("Benchmark Details");
+       		
+		this.createReportDetailsViewer(reportTabs);
+		benchmarkDetailsTab.setControl(reportDetailsViewer.getControl());
+		
+		CTabItem jvmPropertiesTab = new CTabItem(reportTabs, SWT.NONE);       		
+		jvmPropertiesTab.setText("JVM Properties");
+		
+		this.createJVMAttributesViewer(reportTabs);
+		jvmPropertiesTab.setControl(jvmAttributesViewer.getControl());
+		
+		CTabItem hwPropertiesTab = new CTabItem(reportTabs, SWT.NONE);       		
+		hwPropertiesTab.setText("HW Properties");
+		
+		this.createHWAttributesViewer(reportTabs);
+		hwPropertiesTab.setControl(hwAttributesViewer.getControl());
+		
+		
 		/*reportTextArea = new Text (rightGroup, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL ) ;
 		reportTextArea.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
                 | GridData.HORIZONTAL_ALIGN_FILL  | GridData.VERTICAL_ALIGN_FILL));
@@ -320,13 +376,28 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 			public void run() {
 				IStructuredSelection selection = reportsListViewer.getStructuredSelection();
 				Object obj = selection.getFirstElement();
+				//System.out.println("Selected on the left:"+obj + ";"+obj.getClass());
+				if (obj instanceof NameValueEntry) {
+					NameValueEntry selEntry = (NameValueEntry)obj ;
+					if (reportUIModel.getBenchmarksAttributes().get(selEntry.getName()) != null){
+											
+						//ameValueModelProvider.INSTANCE.getEntries().clear();
+						//NameValueModelProvider.INSTANCE.getEntries().addAll(reportUIModel.getBenchmarksAttributes().get(selEntry.getName()) ) ;
+						//reportDetailsViewer.setInput(NameValueModelProvider.INSTANCE.getEntries());
+						reportDetailsViewer.setInput(reportUIModel.getBenchmarksAttributes().get(selEntry.getName()));
+						reportDetailsViewer.refresh();
+					}
+					reportTabs.setSelection(0);
+						
+				}
+				
 				if (obj instanceof ReportFileEntry) {
 					ReportFileEntry file = (ReportFileEntry)obj ;
-					reportRawData = CybenchUtils.loadFile(file.getFullPathToFile()) ;
+					//reportRawData = CybenchUtils.loadFile(file.getFullPathToFile()) ;
 					
-					extractReportProperties(reportRawData, NameValueModelProvider.INSTANCE.getEntries());
-					reportDetailsViewer.setInput(NameValueModelProvider.INSTANCE.getEntries());
-					reportDetailsViewer.refresh();
+					//extractReportProperties(reportRawData, NameValueModelProvider.INSTANCE.getEntries());
+					//reportDetailsViewer.setInput(NameValueModelProvider.INSTANCE.getEntries());
+					//reportDetailsViewer.refresh();
 					
 					//System.out.println("Report Raw data:"+reportRawData);
 					/*reportTextArea.setText(reportRawData);
@@ -363,14 +434,28 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	@Override
 	public void refreshView () {
 		loadData();
-		reportsListViewer.setInput(listOfFiles);
+		reportsListViewer.setInput(this.reportUIModel.getListOfBenchmarks());
 		reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
 		reportsListViewer.refresh();
 		
-		extractReportProperties(reportRawData, NameValueModelProvider.INSTANCE.getEntries());
-		reportDetailsViewer.setInput(NameValueModelProvider.INSTANCE.getEntries());
-		reportDetailsViewer.refresh();
-		
+		if (this.reportUIModel.getListOfBenchmarks().size()>0) {
+			reportTabs.setSelection(0);
+			NameValueEntry selEntry = this.reportUIModel.getListOfBenchmarks().get(0) ;
+			if (reportUIModel.getBenchmarksAttributes().get(selEntry.getName()) != null){
+				
+				//NameValueModelProvider.INSTANCE.getEntries().clear();
+				//NameValueModelProvider.INSTANCE.getEntries().addAll(reportUIModel.getBenchmarksAttributes().get(selEntry.getName()) ) ;
+				reportDetailsViewer.setInput(reportUIModel.getBenchmarksAttributes().get(selEntry.getName()));
+				reportDetailsViewer.refresh();
+				
+				jvmAttributesViewer.setInput(reportUIModel.getListOfJVMProperties());
+				jvmAttributesViewer.refresh();
+				
+				hwAttributesViewer.setInput(reportUIModel.getListOfHwProperties());
+				hwAttributesViewer.refresh();
+			}
+		}
+			
 		/*reportTextArea.setText(reportRawData);
 		reportTextArea.redraw();
 		reportTextArea.update();
@@ -391,7 +476,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
         reportDetailsViewer.setContentProvider(new ArrayContentProvider());
         // Get the content for the viewer, setInput will call getElements in the
         // contentProvider
-        reportDetailsViewer.setInput(NameValueModelProvider.INSTANCE.getEntries());
+        //reportDetailsViewer.setInput(NameValueModelProvider.INSTANCE.getEntries());
 		
         
      // Layout the viewer
@@ -405,6 +490,49 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
         
 	}
 	
+	private void createJVMAttributesViewer (Composite parent) {
+		jvmAttributesViewer = new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION  );
+		createColumns(parent, jvmAttributesViewer);
+		
+		final Table table = jvmAttributesViewer.getTable();
+        table.setHeaderVisible(true);
+        table.setLinesVisible(true);
+        table.setHeaderBackground(colorGray);
+                
+        jvmAttributesViewer.setContentProvider(new ArrayContentProvider());
+        // Layout the viewer
+        GridData gridData = new GridData();
+        gridData.verticalAlignment = GridData.FILL;
+        gridData.horizontalSpan = 2;
+        gridData.grabExcessHorizontalSpace = true;
+        gridData.grabExcessVerticalSpace = true;
+        gridData.horizontalAlignment = GridData.FILL;
+        
+        jvmAttributesViewer.getControl().setLayoutData(gridData);
+        
+	}
+	
+	private void createHWAttributesViewer (Composite parent) {
+		hwAttributesViewer = new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION  );
+		createColumns(parent, hwAttributesViewer);
+		
+		final Table table = hwAttributesViewer.getTable();
+        table.setHeaderVisible(true);
+        table.setLinesVisible(true);
+        table.setHeaderBackground(colorGray);
+                
+        hwAttributesViewer.setContentProvider(new ArrayContentProvider());
+        // Layout the viewer
+        GridData gridData = new GridData();
+        gridData.verticalAlignment = GridData.FILL;
+        gridData.horizontalSpan = 2;
+        gridData.grabExcessHorizontalSpace = true;
+        gridData.grabExcessVerticalSpace = true;
+        gridData.horizontalAlignment = GridData.FILL;
+        
+        hwAttributesViewer.getControl().setLayoutData(gridData);
+		
+	}
 	private void createColumns(final Composite parent, final TableViewer viewer) {
 		String[] titles = { "Attribute Name", "Attribute Value"};
         int[] bounds = { 400, 400 };
@@ -440,15 +568,5 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
         
         return viewerColumn;
     }
-	private void extractReportProperties (String reportJSON, List<NameValueEntry>listOfProperties) {
-		listOfProperties.clear();
-		//NameValueModelProvider.INSTANCE.getEntries().add(new NameValueEntry("custom1","custom2")) ;
-		Map<String, Object> reportMap = (Map<String,Object>)JSONUtils.parseJsonIntoMap(reportJSON ) ;
-		
-		reportMap.keySet().forEach(key ->{
-			listOfProperties.add(new  NameValueEntry (key,reportMap.get(key) != null ?reportMap.get(key).toString():"")) ;
-		});
-		
-		
-	}
+	
 }

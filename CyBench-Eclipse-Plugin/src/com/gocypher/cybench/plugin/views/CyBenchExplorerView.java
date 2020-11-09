@@ -102,7 +102,7 @@ public class CyBenchExplorerView extends ViewPart {
 		}
 		@Override
 		public Image getImage(Object obj) {
-			return workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
+			return workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);
 		}
 	}
 
@@ -184,9 +184,14 @@ public class CyBenchExplorerView extends ViewPart {
 				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
 		doubleClickAction = new Action() {
 			public void run() {
+				
+				//System.out.println("Selection service:"+selectionService);
+				
 				IStructuredSelection selection = reportsListViewer.getStructuredSelection();
 				Object obj = selection.getFirstElement();
-				showMessage("Double-click detected on "+obj.toString());
+				selectionService.setSelection(obj);
+				//showMessage("Double-click detected on "+obj.getClass());
+				
 			}
 		};
 	}
