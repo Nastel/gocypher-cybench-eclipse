@@ -7,6 +7,7 @@ import org.eclipse.ui.part.*;
 import com.gocypher.cybench.launcher.utils.Constants;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
+import com.gocypher.cybench.plugin.model.ICybenchPartView;
 import com.gocypher.cybench.plugin.model.NameValueModelProvider;
 import com.gocypher.cybench.plugin.model.ReportFileEntry;
 import com.gocypher.cybench.plugin.model.ReportFileEntryComparator;
@@ -49,7 +50,7 @@ import javax.inject.Inject;
  * <p>
  */
 
-public class CyBenchExplorerView extends ViewPart {
+public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 
 	/**
 	 * The ID of the view as specified by the extension.
@@ -247,5 +248,13 @@ public class CyBenchExplorerView extends ViewPart {
 	@Override
 	public void setFocus() {
 		reportsListViewer.getControl().setFocus();
+	}
+
+	@Override
+	public void refreshView() {
+		this.loadData();
+		this.reportsListViewer.setInput(this.listOfFiles);
+		this.reportsListViewer.refresh();
+		
 	}
 }
