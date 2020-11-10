@@ -49,6 +49,7 @@ import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.ICybenchPartView;
 import com.gocypher.cybench.plugin.model.LaunchConfiguration;
+import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
 import com.gocypher.cybench.plugin.views.ReportsDisplayView;
 
@@ -248,8 +249,10 @@ public class SampleLaunchConfiguration extends org.eclipse.debug.core.model.Laun
 						out.println("                                 Finished CyBench benchmarks                             ");
 						out.println("-----------------------------------------------------------------------------------------");
 						//cyBenchConsole.activate();
-											
-						Display.getDefault().asyncExec(new Runnable() {
+							
+						GuiUtils.refreshCybenchExplorer();
+						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);
+						/*Display.getDefault().asyncExec(new Runnable() {
 						    public void run() {
 						    	try {
 						    		System.out.println("Will open part for reports");
@@ -264,7 +267,8 @@ public class SampleLaunchConfiguration extends org.eclipse.debug.core.model.Laun
 						    		e.printStackTrace();
 						    	}
 						    }
-						});	
+						});
+						*/	
 					} catch (CoreException e) {
 					    System.err.println(e.getMessage());
 					}

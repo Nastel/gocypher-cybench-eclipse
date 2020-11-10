@@ -6,6 +6,15 @@ import java.util.Base64;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
+
+import com.gocypher.cybench.plugin.model.ICybenchPartView;
+import com.gocypher.cybench.plugin.views.CyBenchExplorerView;
+import com.gocypher.cybench.plugin.views.ReportsDisplayView;
+
 public class GuiUtils {
 
 	public static ResourceBundle titles = ResourceBundle.getBundle("titles");
@@ -76,6 +85,45 @@ public class GuiUtils {
     		return new String (Base64.getDecoder().decode(base64String.getBytes())) ;
     	}
     	return null ;
+    }
+    
+    public static void refreshCybenchExplorer () {
+    	Display.getDefault().asyncExec(new Runnable() {
+		    public void run() {
+		    	try {		    	
+		    		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();		    	
+					IViewPart view = page.findView(CyBenchExplorerView.ID) ;
+		    		if (view instanceof ICybenchPartView) {
+		    			((ICybenchPartView)view).refreshView();
+		    		}
+//			    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportsDisplayView.ID) ; 
+		    	}catch (Exception e) {
+		    		e.printStackTrace();
+		    	}
+		    }
+		});	
+    }
+    public static void openReportDisplayView (String fullPathToReport) {
+    	if (fullPathToReport != null && !fullPathToReport.isEmpty()) {
+	    	Display.getDefault().asyncExec(new Runnable() {
+			    public void run() {
+			    	try {
+			    		System.out.println("Will open part for reports");
+			    		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			    		
+			    		String reportIdentifier = encodeBase64(fullPathToReport) ;
+			    		page.showView(ReportsDisplayView.ID,reportIdentifier , IWorkbenchPage.VIEW_ACTIVATE);			
+		    		
+	//			    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportsDisplayView.ID) ; 
+			    	}catch (Exception e) {
+			    		e.printStackTrace();
+			    	}
+			    }
+			});	
+    	}
+    	else {
+    		System.err.println("Error: full path to report is null or empty, view can't be opened!");
+    	}
     }
 	 
 
