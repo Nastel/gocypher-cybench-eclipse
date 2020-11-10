@@ -5,12 +5,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -20,17 +19,21 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.e4.ui.di.UISynchronize;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
-import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.gocypher.cybench.core.utils.JSONUtils;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
@@ -39,22 +42,113 @@ import com.gocypher.cybench.plugin.model.ICybenchPartView;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
 import com.gocypher.cybench.plugin.views.ReportsDisplayView;
 
-public class BenchmarkLauncherHandler extends AbstractHandler {
+public class LaunchShortcut implements ILaunchShortcut {
 
 	@Inject
 	ESelectionService selectionService ;
 	
-	@Inject UISynchronize sync;
+	@Inject 
+	UISynchronize sync;
 	
+	String selectedPath;
 	
+//    @Override 
+//    public void launch(ISelection selection, String mode) {
+//    
+//        System.out.println("Execution Mode: " + mode);
+//
+//    	System.out.println(System.getProperty("line.separator"));
+//    	 if (selection instanceof IStructuredSelection) {
+//    		 IStructuredSelection ss = (IStructuredSelection) selection;
+//    		 Object element = ss.getFirstElement();
+//    		  if (element instanceof IResource) {
+//    	         IResource resElement = (IResource) element;
+//    			 System.out.println("Resource element:"+ (IResource) element+System.getProperty("line.separator"));
+//				 System.out.println("Full File Path: "+resElement.getFullPath()+System.getProperty("line.separator"));
+//				 selectedPath = resElement.getFullPath()+System.getProperty("line.separator");
+//    		  } else if (element instanceof IAdaptable) {
+//			     IAdaptable adaptable = (IAdaptable)element;
+//			     Object adapter = adaptable.getAdapter(IResource.class);
+//			     IResource res = (IResource) adapter;
+//				 System.out.println("Resource adapter:"+ (IResource) adapter+System.getProperty("line.separator"));
+//				 System.out.println("Full File Path: "+res.getFullPath()+System.getProperty("line.separator"));
+//				 selectedPath = res.getFullPath()+System.getProperty("line.separator");
+//		      }
+//		 }
+//    	String selectedProjectRun = selection.toString();
+//
+//    	String path = selectedProjectRun.substring(3, selectedProjectRun.length()-1)+System.getProperty("line.separator");
+//    	switch(selectedProjectRun.charAt(1)) {
+//    	case 'P':
+//            System.out.println("Selected project name: " + path);
+//    		break;
+//    	case 'F':
+//            System.out.println("Selected folder name: " + path);
+//    		break;
+//    	case 'L':
+//            System.out.println("Selected class file run name: " + path);
+//    		break;
+//		default:
+//			System.out.println("The selected value was not recognized as a Folder, Project or Class");
+//    	
+//    	}
+//    }
+
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		/*
-		*/
+	public void launch(ISelection selection, String mode) {
 		try {
-			String launchPath = "";
-			launchPath = "C:/streams/tests/cybench-eclipse-backup-2020-11-05/cybench-eclipse-backup-2020-11-05/demo-jmh-tests/target/classes";
+			
+			   System.out.println("Execution Mode: " + mode);
+
+		    	System.out.println(System.getProperty("line.separator"));
+		    	 if (selection instanceof IStructuredSelection) {
+		    		 IStructuredSelection ss = (IStructuredSelection) selection;
+		    		 Object element = ss.getFirstElement();
+		    		  if (element instanceof IProject) {
+		    	         IProject iproject = (IProject) element;
+		    			 String real_file_path = iproject.getLocation().toString();
+		    			 System.out.println("real_file_path: "+ real_file_path);
+			    		 System.out.println("Resource element file: "+ iproject);
+						 selectedPath = iproject.getLocation().toString();
+		    		  }
+		    		  else if (element instanceof IResource) {
+		    	         IResource resElement = (IResource) element;
+		    			 System.out.println("Resource element:"+ (IResource) element);
+						 System.out.println("Full File Path: "+resElement.getFullPath().toString());
+						 System.out.println("Full File getLocation: "+resElement.getLocation().toString());
+						 selectedPath = resElement.getLocation().toString();
+		    		  } else if (element instanceof IAdaptable) {
+					     IAdaptable adaptable = (IAdaptable)element;
+					     Object adapter = adaptable.getAdapter(IResource.class);
+					     IResource res = (IResource) adapter;
+						 System.out.println("Resource adapter:"+ (IResource) adapter);
+						 System.out.println("Full File Path: "+res.getFullPath().toString());
+						 System.out.println("Full File getLocation: "+res.getLocation().toString());
+						 selectedPath = res.getLocation().toString();
+				      }
+				 }
+	    	String selectedProjectRun = selection.toString();
+	     	String path = selectedProjectRun.substring(3, selectedProjectRun.length()-1)+System.getProperty("line.separator");
+	    	switch(selectedProjectRun.charAt(1)) {
+	    	case 'P':
+	    		selectedPath = selectedPath + "/target/classes";
+	    		break;
+	    	case 'F':
+	    		selectedPath = selectedPath + "/target/classes";
+	    		break;
+	    	case 'L':
+//	    		selectedPath = selectedPath;
+	    		break;
+			default:
+				System.out.println("The selection was not recognized as a Folder, Project or Class");
+	    	}
+	    	
+			System.out.println("selectedPath: "+selectedPath);
+			
+//    	    File exeFile=new File(".",selectedPath);
+//			System.out.println("Path: "+exeFile.getAbsolutePath());
 			System.out.println("Sync service:"+sync+";"+selectionService);
+	    	System.out.println(System.getProperty("line.separator"));
 			String msg = "" ;
 			MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
 			cyBenchConsole.clearConsole();
@@ -65,7 +159,7 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 			out.println("                                 Starting CyBench benchmarks                             ");
 			out.println("-----------------------------------------------------------------------------------------");
 			
-			List<String> programArguments = new ArrayList<>() ;
+			List<String>programArguments = new ArrayList<>() ;
 			
 			String bundlePaths = ""
 			//+Platform.getBundle("CyBenchLauncherPlugin").getLocation() +";"
@@ -80,8 +174,10 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 			System.out.println(bundlePaths);
 			String classPath= System.getProperty("java.class.path") ;
 			System.out.println("Classpath found:"+classPath);
+			System.out.println("selectedPath: "+selectedPath);
 			
-			classPath += ";"+launchPath ;
+			
+			classPath += ";"+selectedPath ;
 			//System.setProperty("java.class.path", classPath) ;
 			
 			System.out.println("Location of workspace:"+ResourcesPlugin.getWorkspace().getRoot().getRawLocationURI().toASCIIString() );
@@ -109,24 +205,16 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 			final ILaunchConfigurationWorkingCopy config = launchType.newInstance(null, "CyBench plugin");
 			    
 			    
+
+			System.out.println("selectedPath: "+selectedPath);
 			
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
-			String[] classpath = new String[] { 
-					launchPath
-					//,"e:/benchmarks/eclipse_plugin_ws/DemoBenchmarksProject/lib/jmh-core-1.26.jar"
-					//,"e:/benchmarks/eclipse_plugin_ws/DemoBenchmarksProject/lib/jmh-generator-annprocess-1.26.jar"
-					//,"e:/benchmarks/eclipse_plugin_ws/DemoBenchmarksProject/lib/jopt-simple-4.6.jar"
-					//,"e:/benchmarks/eclipse_plugin_ws/DemoBenchmarksProject/lib/commons-math3-3.2.jar"
-					//,"e:/benchmarks/eclipse_plugin/plugins/CyBenchLauncherPlugin_1.0.0.jar"
-					//,"e:/benchmarks/eclipse_plugin/plugins/com.gocypher.cybench.externals_1.0.0.jar"
-					//,"e:/benchmarks/eclipse_plugin/dependencies/gocypher-cybench-client.jar"
+			String[] classpath = new String[] { selectedPath
 					,LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true)
 					,LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) 
-					//,"E:/benchmarks/eclipse_plugin_ws/com.gocypher.cybench.externals"
 					};
-			//e:\benchmarks\eclipse_plugin_ws\demo-jmh-tests\target\classes\
 			
-			
+		
 			List classpathMementos = new ArrayList();
 			for (int i = 0; i < classpath.length; i++) {
 			    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classpath[i]));
@@ -135,7 +223,7 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 			        classpathMementos.add(cpEntry.getMemento());
 			    } catch (CoreException e) {
 			        System.err.println(e.getMessage());
-			        LauncherUtils.showMsgBox(e.getMessage(),event);
+//			        this.showMsgBox(e.getMessage(),event);
 			    }
 			}
 			System.out.println("Classpath:"+classpathMementos);
@@ -148,7 +236,7 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 			
 			//config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "com.local.demo.DemoRunner");
 			//config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "com.gocypher.cybench.launcher.BenchmarkRunner");
-			
+		
 			new Thread ( new Runnable() {
 				
 				@Override
@@ -185,76 +273,38 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 						    public void run() {
 						    	try {
 						    		System.out.println("Will open part for reports");
-						    		IWorkbenchPage page = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage();
+						    		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 						    		page.showView(ReportsDisplayView.ID) ;
-						    		
-						    		IViewPart view = page.findView(ReportsDisplayView.ID) ;
+									IViewPart view = page.findView(ReportsDisplayView.ID) ;
 						    		if (view instanceof ICybenchPartView) {
-						    			((ICybenchPartView)view).refreshView();
-						    		}
-						    		
-						    		
+					    			((ICybenchPartView)view).refreshView();
+					    		}
+//							    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportsDisplayView.ID) ; 
 						    	}catch (Exception e) {
 						    		e.printStackTrace();
 						    	}
 						    }
-						});
-											
+						});	
 					} catch (CoreException e) {
 					    System.err.println(e.getMessage());
 					    //this.showMsgBox(e.getMessage(),event);
 					}
-					
 				}
 			}).start();
-		
-			
-		
-				
 		//this.showMsgBox("Reality:"+LauncherDemo.resultsMap, event);
 		//this.launchCyBenchLauncher();
-		
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
-	}
-	
-	/*private void launchCyBenchLauncher () {
-		int forks = 1 ;
-		int measurementIterations = 1 ;
-		int warmUpIterations = 1 ;
-		int warmUpSeconds = 5 ;
-		int threads = 1 ;
-		
-		try {
-			OptionsBuilder optBuild = new OptionsBuilder();
-			Options opt = optBuild
-					.forks(forks)				
-					.measurementIterations(measurementIterations)
-					.warmupIterations(warmUpIterations)
-					.warmupTime(TimeValue.seconds(warmUpSeconds))
-					.threads(threads)
-					.shouldDoGC(true)
-					.detectJvmArgs()
-					// .addProfiler(StackProfiler.class)
-					// .addProfiler(HotspotMemoryProfiler.class)
-					// .addProfiler(HotspotRuntimeProfiler.class)
-					// .addProfiler(JavaFlightRecorderProfiler.class)
-					
-					.build();
-	
-			Runner runner = new Runner(opt);
-		
-			Collection<RunResult> results = runner.run() ;
-			
-			System.out.println("Cybench launch result items:"+results.size());
-		}catch (Throwable t) {
-			t.printStackTrace();
-		}
-		
 		
 	}
-	*/
+    
+	@Override
+	public void launch(IEditorPart arg0, String arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+   
+
 
 }

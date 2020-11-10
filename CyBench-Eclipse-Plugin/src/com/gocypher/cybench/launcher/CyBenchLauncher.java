@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.openjdk.jmh.profile.GCProfiler;
@@ -44,6 +46,7 @@ public class CyBenchLauncher {
 		System.out.println("Launcher classpath:"+System.getProperty("java.class.path"));
 		long start = System.currentTimeMillis();
 		LauncherConfiguration launcherConfiguration = new LauncherConfiguration () ;
+		fillLaunchConfigurations(launcherConfiguration);
 		
 		if (args != null && args.length > 0) {
 			System.out.println("Launcher program arguments:"+args[0]);
@@ -53,7 +56,8 @@ public class CyBenchLauncher {
 			}
 		}
 		//FIXME implement loading of custom benchmark meta data
-		
+
+    	System.out.println(System.getProperty("line.separator"));
 		
 		System.out.println("Collecting hardware, software information...");
         HardwareProperties hwProperties = CollectSystemInformation.getEnvironmentProperties();
@@ -119,6 +123,7 @@ public class CyBenchLauncher {
         
         String reportJSON = JSONUtils.marshalToPrettyJson(report);
         System.out.println(reportJSON);
+        System.out.println(launcherConfiguration.getPathToPlainReportFile());
         CybenchUtils.storeResultsToFile(launcherConfiguration.getPathToPlainReportFile(), reportJSON);
         CybenchUtils.storeResultsToFile(launcherConfiguration.getPathToEncryptedReportFile(), reportEncrypted);
         
@@ -177,4 +182,58 @@ public class CyBenchLauncher {
 
         return customUserProperties;
     }
+	
+	private static void fillLaunchConfigurations(LauncherConfiguration launcherConfiguration) {
+		System.out.println(checkNullAndReturnString("REPORT_NAME"));
+		System.out.println(checkNullAndReturnString("REPORT_FOLDER"));
+		System.out.println(checkNullAndReturnString("BENCHMARK_REPORT_STATUS"));
+
+		System.out.println(checkNullAndReturnInt("TREADS_COUNT"));
+		System.out.println(checkNullAndReturnInt("FORKS_COUNT"));
+		System.out.println(checkNullAndReturnInt("WARMUP_ITERATION"));
+		System.out.println(checkNullAndReturnInt("MEASURMENT_ITERATIONS"));
+		System.out.println(checkNullAndReturnInt("WARMUP_SECONDS"));
+		
+
+		System.out.println(checkNullAndReturnBoolean("SHOULD_SEND_REPORT_CYBENCH"));
+		System.out.println(checkNullAndReturnString("CUSTOM_USER_PROPERTIES"));
+		
+		launcherConfiguration.setReportName(checkNullAndReturnString("REPORT_NAME"));
+//		launcherConfiguration.setPathToPlainReportFile(checkNullAndReturnString("REPORT_FOLDER"));
+		launcherConfiguration.setReportUploadStatus(checkNullAndReturnString("BENCHMARK_REPORT_STATUS"));
+
+		launcherConfiguration.setThreads(checkNullAndReturnInt("TREADS_COUNT"));
+		launcherConfiguration.setForks(checkNullAndReturnInt("FORKS_COUNT"));
+		launcherConfiguration.setWarmUpIterations(checkNullAndReturnInt("WARMUP_ITERATION"));
+		launcherConfiguration.setMeasurementIterations(checkNullAndReturnInt("MEASURMENT_ITERATIONS"));
+		launcherConfiguration.setWarmUpSeconds(checkNullAndReturnInt("WARMUP_SECONDS"));
+
+		launcherConfiguration.setShouldSendReportToCyBench(checkNullAndReturnBoolean("SHOULD_SEND_REPORT_CYBENCH"));
+		launcherConfiguration.setUserProperties(checkNullAndReturnString("CUSTOM_USER_PROPERTIES"));
+		   
+		   
+//		launcherConfiguration.setWarmUpSeconds(Integer.parseInt(checkNullAndReturn("DEXECUTION_SCORE")));
+//		launcherConfiguration.setWarmUpSeconds(Integer.parseInt(checkNullAndReturn("DEXECUTION_SCORE")));
+	}
+	
+	private static String checkNullAndReturnString(String propertyName)  {
+		if(System.getProperty(propertyName)!= null) {
+			return System.getProperty(propertyName);
+		}
+		return "";
+	}
+	
+	private static int checkNullAndReturnInt(String propertyName)  {
+		if(System.getProperty(propertyName)!= null) {
+			return Integer.parseInt(System.getProperty(propertyName));
+		}
+		return 1;
+	}
+	
+	private static boolean checkNullAndReturnBoolean(String propertyName)  {
+		if(System.getProperty(propertyName)!= null) {
+			return Boolean.parseBoolean(System.getProperty(propertyName));
+		}
+		return false;
+	}
 }
