@@ -145,7 +145,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 				&& this.getViewSite().getSecondaryId() != null 
 				&& !this.getViewSite().getSecondaryId().isEmpty()) {
 			
-				System.out.println("Explorer:"+explorerView);
+				//System.out.println("Explorer:"+explorerView);
 				CyBenchExplorerView cybenchExplorerView = (CyBenchExplorerView)explorerView ;
 				
 				//String reportIdentifier = this.getViewSite().getSecondaryId() ;	

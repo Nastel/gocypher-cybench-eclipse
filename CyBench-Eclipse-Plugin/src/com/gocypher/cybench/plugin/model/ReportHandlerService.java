@@ -19,7 +19,7 @@ public class ReportHandlerService {
 	
 	
 	public ReportUIModel prepareReportDisplayModel (ReportFileEntry reportFile) {
-		System.out.println("Works using dependency injection");		
+		//System.out.println("Works using dependency injection");		
 			
 		ReportUIModel model = this.deserializaReportIntoUIModel(CybenchUtils.loadFile(reportFile.getFullPathToFile())) ;
 		

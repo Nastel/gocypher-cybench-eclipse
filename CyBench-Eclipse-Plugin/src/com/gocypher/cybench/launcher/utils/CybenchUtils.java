@@ -90,15 +90,15 @@ public class CybenchUtils {
 		return content ;
 	}
 	
-	public static List<File> listFilesInDirectory (String pathTodirectory) {
+	public static List<File> listFilesInDirectory (String pathToDirectory) {
 		try {
-			List<File> filesInFolder = Files.walk(Paths.get(pathTodirectory))
+			List<File> filesInFolder = Files.walk(Paths.get(pathToDirectory))
 	                .filter(Files::isRegularFile)
 	                .map(Path::toFile)
 	                .collect(Collectors.toList());
 			return filesInFolder ;
 		}catch (Exception e) {
-			System.err.println ("Directory not opened:"+pathTodirectory+" Error:"+e.getMessage()) ;
+			System.err.println ("Directory not opened:"+pathToDirectory+" Error:"+e.getMessage()) ;
 		}
 		return new ArrayList<>() ;
 	}
@@ -106,11 +106,18 @@ public class CybenchUtils {
 		return sdf.format(new Date (timestamp)) ;		
 	}
 	
-	
-	
-
-    
-
-
+	/*public static List<File> walkAndFindReports (List<String>pathsToDirectories) {
+		List<File> reports = new ArrayList<>() ;
+		for (String pathToDirectory:pathsToDirectories) {
+			List<File>files = listFilesInDirectory(pathToDirectory) ;
+			for (File file:files) {
+				if (file.getName().endsWith(Constants.REPORT_FILE_EXTENSION)) {
+					reports.add(file) ;
+				}
+			}
+		}
+		return reports;
+	}
+	*/
    
 }

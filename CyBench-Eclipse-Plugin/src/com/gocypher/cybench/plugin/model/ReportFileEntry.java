@@ -62,7 +62,10 @@ public class ReportFileEntry implements Serializable{
 
 	@Override
 	public String toString() {
-		return this.name+" ("+this.timeStampStr+")";
+		if (this.timeStampStr != null ) {
+			return this.name+" ("+this.timeStampStr+")";
+		}
+		return this.name ;
 	}
 
 	public long getTimestamp() {
