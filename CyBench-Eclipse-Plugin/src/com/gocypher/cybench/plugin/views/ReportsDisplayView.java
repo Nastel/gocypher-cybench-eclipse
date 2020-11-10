@@ -17,6 +17,7 @@ import com.gocypher.cybench.plugin.model.ReportFileEntry;
 import com.gocypher.cybench.plugin.model.ReportFileEntryComparator;
 import com.gocypher.cybench.plugin.model.ReportHandlerService;
 import com.gocypher.cybench.plugin.model.ReportUIModel;
+import com.gocypher.cybench.plugin.utils.GuiUtils;
 
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.graphics.Color;
@@ -147,10 +148,15 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 				System.out.println("Explorer:"+explorerView);
 				CyBenchExplorerView cybenchExplorerView = (CyBenchExplorerView)explorerView ;
 				
-				String reportIdentifier = this.getViewSite().getSecondaryId() ;
-				ReportFileEntry entry = cybenchExplorerView.findEntryByIdentifier(reportIdentifier);			
+				//String reportIdentifier = this.getViewSite().getSecondaryId() ;	
+				//ReportFileEntry entry = cybenchExplorerView.findEntryByIdentifier(reportIdentifier);
+				
+				ReportFileEntry entry = new ReportFileEntry() ;
+				entry.setFullPathToFile(GuiUtils.decodeBase64(this.getViewSite().getSecondaryId()));
+				
 				reportUIModel = reportService.prepareReportDisplayModel(entry) ;
-				this.setPartName(entry.getName());
+				
+				this.setPartName(reportUIModel.getReportTitle());
 		}
 		
 		

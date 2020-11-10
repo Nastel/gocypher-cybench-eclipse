@@ -20,14 +20,17 @@ public class NameValueEntry {
 		this.value = value ;
 	}
 	
-	 public void addPropertyChangeListener(String propertyName,
+	public boolean hasValue () {
+		return value != null && !value.trim().isEmpty() ;
+	}
+	public void addPropertyChangeListener(String propertyName,
 	            PropertyChangeListener listener) {
 	        propertyChangeSupport.addPropertyChangeListener(propertyName, listener);
 	    }
 
-	    public void removePropertyChangeListener(PropertyChangeListener listener) {
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
 	        propertyChangeSupport.removePropertyChangeListener(listener);
-	    }
+	}
 	
 	public String getName() {
 		return name;

@@ -42,6 +42,8 @@ public class ReportHandlerService {
 		ReportUIModel model = new ReportUIModel() ;
 		Map<String, Object> reportMap = (Map<String,Object>)JSONUtils.parseJsonIntoMap(rawReport ) ;
 		
+		this.extractBaseProperties(model, reportMap);
+		
 		Map<String,Object>benchmarksByCategories= (Map<String,Object>) reportMap.get("benchmarks") ;
 		if (benchmarksByCategories != null) {
 			Iterator<String>it = benchmarksByCategories.keySet().iterator() ;
@@ -78,6 +80,22 @@ public class ReportHandlerService {
 		return model ;
 		
 	}
+	private void extractBaseProperties (ReportUIModel model,Map<String,Object>reportProperties) {
+		Long timestamp = (Long)reportProperties.get("timestamp") ;
+		if (timestamp != null) {
+			model.addBaseProperty("timestamp", CybenchUtils.formatTimestamp(timestamp)); 
+		}
+		Double totalScore = (Double)reportProperties.get("totalScore") ;
+		if (totalScore != null) {
+			model.addBaseProperty("totalScore", GuiUtils.convertNumToStringByLength(totalScore.toString()) ); 
+		}
+		Map<String,Object> benchmarkSettings = (Map<String,Object>)reportProperties.get("benchmarkSettings") ;
+		if (benchmarkSettings != null) {
+			model.addBaseProperty ("benchReportName",(String)benchmarkSettings.get("benchReportName")) ;
+		}
+		
+	}
+	
 	private void extractBenchmarkProperties(ReportUIModel model, String benchmarkName, Map<String,Object>benchmarkProperties) {
 		
 		benchmarkProperties.keySet().forEach(key ->{

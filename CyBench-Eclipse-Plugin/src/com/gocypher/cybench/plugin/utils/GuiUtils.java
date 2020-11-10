@@ -2,6 +2,7 @@ package com.gocypher.cybench.plugin.utils;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Base64;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -63,7 +64,19 @@ public class GuiUtils {
         decimalFormat.setMinimumFractionDigits(maxFractionDigits);
         decimalFormat.setDecimalFormatSymbols(symbols);
         return decimalFormat.format(value);
-    } 
+    }
+    public static String encodeBase64 (String plainString) {
+    	if (plainString != null) {
+    		return new String (Base64.getEncoder().encode(plainString.getBytes())) ;
+    	}
+    	return null ;
+    }
+    public static String decodeBase64 (String base64String) {
+    	if (base64String != null) {
+    		return new String (Base64.getDecoder().decode(base64String.getBytes())) ;
+    	}
+    	return null ;
+    }
 	 
 
 }

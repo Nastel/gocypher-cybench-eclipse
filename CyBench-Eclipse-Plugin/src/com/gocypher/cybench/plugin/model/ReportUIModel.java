@@ -38,7 +38,21 @@ public class ReportUIModel {
 		}
 		this.benchmarksAttributes.get(benchmarkName).add( new NameValueEntry(attributeName,attributeValue)) ;
 	}
-
+	public String getReportTitle () {
+		String title = "Report-" ;
+		if (this.baseProperties.get("benchReportName") != null && this.baseProperties.get("benchReportName").hasValue()) {
+			title = this.baseProperties.get("benchReportName").getValue() + "-" ;
+		}
+		if (this.baseProperties.get("totalScore") != null && this.baseProperties.get("totalScore").hasValue()) {
+			title += this.baseProperties.get("totalScore").getValue() ;
+		}
+		
+		if (this.baseProperties.get("timestamp") != null && this.baseProperties.get("timestamp").hasValue()) {
+			title += " ("+this.baseProperties.get("timestamp").getValue()+")" ;
+		}
+		return title ;
+		
+	}
 	public Map<String, NameValueEntry> getBaseProperties() {
 		return baseProperties;
 	}
