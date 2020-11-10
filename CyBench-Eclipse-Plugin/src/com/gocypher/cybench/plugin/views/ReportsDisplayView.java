@@ -147,8 +147,8 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 				System.out.println("Explorer:"+explorerView);
 				CyBenchExplorerView cybenchExplorerView = (CyBenchExplorerView)explorerView ;
 				
-				String hashCodeStr = this.getViewSite().getSecondaryId() ;
-				ReportFileEntry entry = cybenchExplorerView.findEntryByHashCode(Integer.parseInt(hashCodeStr));			
+				String reportIdentifier = this.getViewSite().getSecondaryId() ;
+				ReportFileEntry entry = cybenchExplorerView.findEntryByIdentifier(reportIdentifier);			
 				reportUIModel = reportService.prepareReportDisplayModel(entry) ;
 				this.setPartName(entry.getName());
 		}

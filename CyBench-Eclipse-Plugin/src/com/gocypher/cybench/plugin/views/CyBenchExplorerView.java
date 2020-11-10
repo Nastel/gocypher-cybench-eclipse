@@ -91,12 +91,12 @@ public class CyBenchExplorerView extends ViewPart {
 		//System.out.println("Reports:"+listOfFiles);
 	}
 	
-	public ReportFileEntry findEntryByHashCode (int hashCode) {
+	public ReportFileEntry findEntryByIdentifier (String identifier) {
 		
 		for (ReportFileEntry item:listOfFiles) {
-			System.out.println("Report entry hashcode:"+item.hashCode());
-			//Shall do different approach because hashcode after restart is different
-			if (item.hashCode() == hashCode) {
+			System.out.println("Report entry identifier:"+item.getReportIdentifier());
+			if (item.getReportIdentifier() != null 
+					&& item.getReportIdentifier().equals(identifier)) {
 				return item ;
 			}
 		}
@@ -213,7 +213,7 @@ public class CyBenchExplorerView extends ViewPart {
 						System.out.println("View:"+item);
 					};
 					*/
-					page.showView(ReportsDisplayView.ID, entry.hashCode()+"", IWorkbenchPage.VIEW_ACTIVATE);
+					page.showView(ReportsDisplayView.ID, entry.getReportIdentifier(), IWorkbenchPage.VIEW_ACTIVATE);
 				
 					//selectionService.setSelection(obj);
 				}catch (Exception e) {

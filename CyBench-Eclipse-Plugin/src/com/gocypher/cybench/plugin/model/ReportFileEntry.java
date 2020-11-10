@@ -3,6 +3,7 @@ package com.gocypher.cybench.plugin.model;
 import java.io.File;
 import java.io.Serializable;
 
+import com.gocypher.cybench.core.utils.SecurityUtils;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 
 public class ReportFileEntry implements Serializable{
@@ -16,6 +17,7 @@ public class ReportFileEntry implements Serializable{
 	private String name ;
 	private long timestamp ;
 	private String timeStampStr ;
+	private String reportIdentifier ;
 	
 	public ReportFileEntry () {
 		
@@ -24,6 +26,7 @@ public class ReportFileEntry implements Serializable{
 	public void create (File file) {
 		this.name = file.getName() ;
 		this.fullPathToFile = file.toString() ;
+		this.reportIdentifier = SecurityUtils.computeStringHash(this.fullPathToFile) ;
 		
 		String timeInMilis = this.name.substring(this.name.lastIndexOf("-")+1,this.name.lastIndexOf(".")) ;
 		if (timeInMilis != null && ! timeInMilis.isEmpty()) {
@@ -67,6 +70,14 @@ public class ReportFileEntry implements Serializable{
 
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
+	}
+
+	public String getReportIdentifier() {
+		return reportIdentifier;
+	}
+
+	public void setReportIdentifier(String reportIdentifier) {
+		this.reportIdentifier = reportIdentifier;
 	}
 	
 	

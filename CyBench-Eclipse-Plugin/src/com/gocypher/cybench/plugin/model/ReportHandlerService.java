@@ -10,6 +10,7 @@ import org.eclipse.e4.core.di.annotations.Creatable;
 
 import com.gocypher.cybench.core.utils.JSONUtils;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
+import com.gocypher.cybench.plugin.utils.GuiUtils;
 
 @Creatable
 @Singleton
@@ -51,7 +52,7 @@ public class ReportHandlerService {
 					String benchmarkName = (String)benchmarkItem.get("name") ;
 					String score = "" ;
 					if (benchmarkItem.get("score") != null) {
-						score = addParentheses(CybenchUtils.convertNumToStringByLength(benchmarkItem.get("score").toString())) ;
+						score = addParentheses(GuiUtils.convertNumToStringByLength(benchmarkItem.get("score").toString())) ;
 					}
 					model.addToListOfBenchmarks(benchmarkName,score );
 					
@@ -80,12 +81,12 @@ public class ReportHandlerService {
 	private void extractBenchmarkProperties(ReportUIModel model, String benchmarkName, Map<String,Object>benchmarkProperties) {
 		
 		benchmarkProperties.keySet().forEach(key ->{
-			model.addToBenchmarksAttributes(benchmarkName, CybenchUtils.getKeyName(key), convertValueToString(benchmarkProperties.get(key)));		
+			model.addToBenchmarksAttributes(benchmarkName, GuiUtils.getKeyName(key), convertValueToString(benchmarkProperties.get(key)));		
 		});
 	}
 	private void extractProperties (Map<String,Object>properties, List<NameValueEntry> listOfProperties) {
 		properties.keySet().forEach(key ->{			
-			listOfProperties.add( new NameValueEntry (CybenchUtils.getKeyName(key), convertValueToString(properties.get(key))));		
+			listOfProperties.add( new NameValueEntry (GuiUtils.getKeyName(key), convertValueToString(properties.get(key))));		
 		});
 	}
 	private String addParentheses(String value) {
@@ -100,7 +101,7 @@ public class ReportHandlerService {
 				return value.toString() ;
 			}
 			if (value instanceof Number) {
-				return CybenchUtils.convertNumToStringByLength(value.toString()) ;
+				return GuiUtils.convertNumToStringByLength(value.toString()) ;
 			}
 		}
 		
