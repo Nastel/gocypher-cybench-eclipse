@@ -19,6 +19,9 @@ public class LauncherConfiguration {
 	
 	private boolean shouldSendReportToCyBench = false;
 	
+	private double executionScore = -1.0d;
+	private boolean shouldSaveReportToFile = false;
+	
 	public LauncherConfiguration() {
 	
 	}
@@ -127,6 +130,30 @@ public class LauncherConfiguration {
 
 	public void setPathToEncryptedReportFile(String pathToEncryptedReportFile) {
 		this.pathToEncryptedReportFile = pathToEncryptedReportFile;
+	}
+
+
+
+	public double getExecutionScore() {
+		return executionScore;
+	}
+
+
+
+	public void setExecutionScore(double executionScore) {
+		this.executionScore = executionScore;
+	}
+
+
+
+	public boolean isShouldSaveReportToFile() {
+		return shouldSaveReportToFile;
+	}
+
+
+
+	public void setShouldSaveReportToFile(boolean shouldSaveReportToFile) {
+		this.shouldSaveReportToFile = shouldSaveReportToFile;
 	}
 	
 	

@@ -1,6 +1,18 @@
 package com.gocypher.cybench.plugin.views;
 
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.internal.resources.BuildConfiguration;
+import org.eclipse.core.resources.IBuildConfiguration;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourceAttributes;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -34,7 +46,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
     private Text reportsFolder;
     private Button browse;
 
-    private Text launchPath;
+    private Combo launchPath;
     private Text reportName;
     private Combo reportUploadStatus;
     
@@ -58,13 +70,17 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
         Composite comp = new Group(parent, SWT.BORDER);
         setControl(comp);
 
+	    List<String> jmhBenchmarkProjectsPaths = getProjectPaths(); 
+	    String[] itemsArray = new String[jmhBenchmarkProjectsPaths.size()];
+        itemsArray = jmhBenchmarkProjectsPaths.toArray(itemsArray);
+        
         GridLayoutFactory.swtDefaults().numColumns(10).applyTo(comp); 
         
         /* Benchmarking settings GROUP */
         benchmarking = prepareBenchmarkConfigurationGroup(comp);
         
         /* Configuration GROUP */
-        configuration = prepareCyBenchConfigurations(comp);
+        configuration = prepareCyBenchConfigurations(comp, itemsArray);
 	        
         /* Execution Conditions GROUP */
         conditions = prepareConditionGroup(comp);
@@ -118,7 +134,8 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
 			return benchmarking;
     }
 
-    private Group  prepareCyBenchConfigurations(Composite comp) {
+    private Group  prepareCyBenchConfigurations(Composite comp, String[] itemsArray) {
+    	  
     	 configuration = new Group(comp, SWT.NONE);
          configuration.setText("Configuration");
          configuration.setLayout(new GridLayout(10, false));
@@ -129,8 +146,10 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
 
  	        /* Report launch path input field */
  	        Label reportlaunchPathLabel = new Label(configuration, SWT.NONE);
+ 	        launchPath = new Combo(configuration, SWT.BORDER); 
+ 	        launchPath.setItems(itemsArray);
+ 	        launchPath.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
  	        reportlaunchPathLabel.setText("Execution Absolute Path:");
- 	        launchPath = new Text(configuration, SWT.BORDER);
  	        
  	        /* Report status input field */
  	        Label benchmarkUploadStatusLabel = new Label(configuration, SWT.NONE);
@@ -308,6 +327,27 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
     @Override
     public String getName() {
         return "CyBench properties";
+    }
+    
+    private List<String> getProjectPaths() {
+    	List<String> projectPaths = new ArrayList<String>();
+//    	String test = ResourcesPlugin.getWorkspace().getRoot().getRawLocationURI().toASCIIString();
+    	IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
+    	for(IProject proj : projects) {
+//    		IPath projectRoot = proj.getRawLocation();
+//    		System.out.println(proj.getFullPath());
+//    		System.out.println(proj.getRawLocation());
+    		projectPaths.add(proj.getRawLocation().toString()+"/target/classes");
+//    		try {
+//				IBuildConfiguration[] cfgyest = proj.getBuildConfigs();
+//			} catch (CoreException e) {
+//				e.printStackTrace();
+//			}
+//    		ResourceAttributes resource = proj.getResourceAttributes();
+    	}
+    	
+ 
+    	return projectPaths;
     }
 
 }

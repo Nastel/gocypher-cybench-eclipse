@@ -6,7 +6,7 @@
 	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
 	    <launchConfigurationType
 	        name="Cybench launch"
-	        delegate="com.gocypher.cybench.plugin.handlers.SampleLaunchConfiguration"
+	        delegate="com.gocypher.cybench.plugin.handlers.LaunchRunConfiguration"
 	        modes="run"
 	        id="com.gocypher.cybench.plugin.launchConfigurationType">
 	    </launchConfigurationType>
@@ -17,7 +17,7 @@
 	    point="org.eclipse.debug.ui.launchShortcuts">
 	    <shortcut
 	        class="com.gocypher.cybench.plugin.handlers.LaunchShortcut"
-	        icon="icons/favicon_symbol.png"
+	        icon="icons/cybench_symbol_small.png"
 	        id="com.gocypher.cybench.plugin.shortcut"
 	        label="Cybench launcher"
 	        modes="run">
@@ -50,7 +50,7 @@
 	    <launchConfigurationTypeImage
 	            id="com.gocypher.cybench.plugin.launchconfigurationtypeimage"
 	            configTypeID="com.gocypher.cybench.plugin.launchConfigurationType"
-	            icon="icons/favicon_symbol.png">
+	            icon="icons/cybench_symbol_small.png">
 	    </launchConfigurationTypeImage>
 	</extension>
 

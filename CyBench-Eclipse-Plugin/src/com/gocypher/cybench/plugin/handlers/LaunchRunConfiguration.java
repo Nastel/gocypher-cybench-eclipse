@@ -53,7 +53,7 @@ import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
 import com.gocypher.cybench.plugin.views.ReportsDisplayView;
 
-public class SampleLaunchConfiguration extends org.eclipse.debug.core.model.LaunchConfigurationDelegate {
+public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchConfigurationDelegate {
 	
 	@Inject
 	ESelectionService selectionService ;

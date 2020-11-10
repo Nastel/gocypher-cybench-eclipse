@@ -123,8 +123,9 @@ public class CyBenchLauncher {
         
         String reportJSON = JSONUtils.marshalToPrettyJson(report);
         System.out.println(reportJSON);
-        System.out.println(launcherConfiguration.getPathToPlainReportFile());
-        CybenchUtils.storeResultsToFile(launcherConfiguration.getPathToPlainReportFile(), reportJSON);
+        String pathToReportFile = launcherConfiguration.getPathToPlainReportFile();
+        System.out.println(pathToReportFile);
+        CybenchUtils.storeResultsToFile(pathToReportFile, reportJSON);
         CybenchUtils.storeResultsToFile(launcherConfiguration.getPathToEncryptedReportFile(), reportEncrypted);
         
 		//System.out.println("Result:"+ComputationUtils.log10(new BigDecimal(1000)));
@@ -212,8 +213,8 @@ public class CyBenchLauncher {
 		launcherConfiguration.setUserProperties(checkNullAndReturnString("CUSTOM_USER_PROPERTIES"));
 		   
 		   
-//		launcherConfiguration.setWarmUpSeconds(Integer.parseInt(checkNullAndReturn("DEXECUTION_SCORE")));
-//		launcherConfiguration.setWarmUpSeconds(Integer.parseInt(checkNullAndReturn("DEXECUTION_SCORE")));
+		launcherConfiguration.setExecutionScore(checkNullAndReturnInt("DEXECUTION_SCORE"));
+		launcherConfiguration.setShouldSaveReportToFile(checkNullAndReturnBoolean("DSHOULD_SAVE_REPOT_TO_FILE"));
 	}
 	
 	private static String checkNullAndReturnString(String propertyName)  {
