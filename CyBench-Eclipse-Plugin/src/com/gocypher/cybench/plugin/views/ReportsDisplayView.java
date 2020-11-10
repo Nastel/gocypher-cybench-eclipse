@@ -221,7 +221,9 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		reportsListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		reportsListViewer.setInput(this.reportUIModel.getListOfBenchmarks());
 		reportsListViewer.setLabelProvider(new ViewLabelProvider());
-		reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
+		if (this.reportUIModel.getListOfBenchmarks().size() > 0) {
+			reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
+		}
 		
 		workbench.getHelpSystem().setHelp(reportsListViewer.getControl(), "CyBenchLauncherPlugin.viewer");
 		getSite().setSelectionProvider(reportsListViewer);

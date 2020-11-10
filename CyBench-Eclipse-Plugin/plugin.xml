@@ -86,7 +86,7 @@
    </extension>
    <extension
          point="org.eclipse.ui.menus">
-      <menuContribution
+      <!--menuContribution
             locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
                id="FirstPlugin.menus.sampleMenu"
@@ -98,8 +98,8 @@
                   mnemonic="S">
             </command>
          </menu>
-      </menuContribution>
-      <menuContribution
+      </menuContribution-->
+      <!--menuContribution
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
          <toolbar
                id="FirstPlugin.toolbars.sampleToolbar">
@@ -110,7 +110,7 @@
                   tooltip="Launch CyBench Benchmark">
             </command>
          </toolbar>
-      </menuContribution>
+      </menuContribution-->
    </extension>
    <extension
          point="org.eclipse.ui.views">
