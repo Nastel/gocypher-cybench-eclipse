@@ -64,9 +64,9 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	
 	private List<ReportFileEntry> listOfFiles = new ArrayList<>();
 	
-	private Action action1;
-	private Action action2;
-	private Action doubleClickAction;
+	private Action refreshAction;
+	//private Action action2;
+	private Action openSelectedReportAction;
 	
 	@PostConstruct
 	public void init ( ) {
@@ -157,35 +157,35 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
-		manager.add(action1);
-		manager.add(new Separator());
-		manager.add(action2);
+		manager.add(refreshAction);
+		//manager.add(new Separator());
+		//manager.add(action2);
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
-		manager.add(action1);
-		manager.add(action2);
+		manager.add(refreshAction);
+		//manager.add(action2);
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
-		manager.add(action1);
-		manager.add(action2);
+		manager.add(refreshAction);
+		//manager.add(action2);
 	}
 
 	private void makeActions() {
-		action1 = new Action() {
+		refreshAction = new Action() {
 			public void run() {
-				showMessage("Action 1 executed");
+				refreshView();
 			}
 		};
-		action1.setText("Action 1");
-		action1.setToolTipText("Action 1 tooltip");
-		action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
-			getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+		refreshAction.setText("Reload CyBench Explorer");
+		refreshAction.setToolTipText("Reload CyBench Explorer");
+		refreshAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
+			getImageDescriptor(ISharedImages.IMG_ELCL_SYNCED));
 		
-		action2 = new Action() {
+		/*action2 = new Action() {
 			public void run() {
 				showMessage("Action 2 executed");
 			}
@@ -194,7 +194,8 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 		action2.setToolTipText("Action 2 tooltip");
 		action2.setImageDescriptor(workbench.getSharedImages().
 				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-		doubleClickAction = new Action() {
+		*/
+		openSelectedReportAction = new Action() {
 			public void run() {
 				
 				//System.out.println("Selection service:"+selectionService);
@@ -234,16 +235,17 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	private void hookDoubleClickAction() {
 		reportsListViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
-				doubleClickAction.run();
+				openSelectedReportAction.run();
 			}
 		});
 	}
-	private void showMessage(String message) {
+	/*private void showMessage(String message) {
 		MessageDialog.openInformation(
 				reportsListViewer.getControl().getShell(),
 			"CyBench Explorer",
 			message);
 	}
+	*/
 
 	@Override
 	public void setFocus() {
