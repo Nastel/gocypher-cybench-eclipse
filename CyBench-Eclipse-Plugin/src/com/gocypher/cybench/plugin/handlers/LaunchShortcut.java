@@ -121,6 +121,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 		    		  } else if (element instanceof IAdaptable) {
 					     IAdaptable adaptable = (IAdaptable)element;
 					     Object adapter = adaptable.getAdapter(IResource.class);
+					     
 					     IResource res = (IResource) adapter;
 						 System.out.println("Resource adapter:"+ (IResource) adapter);
 						 System.out.println("Full File Path: "+res.getFullPath().toString());

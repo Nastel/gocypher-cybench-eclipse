@@ -185,22 +185,22 @@ public class CyBenchLauncher {
     }
 	
 	private static void fillLaunchConfigurations(LauncherConfiguration launcherConfiguration) {
-		System.out.println(checkNullAndReturnString("REPORT_NAME"));
-		System.out.println(checkNullAndReturnString("REPORT_FOLDER"));
-		System.out.println(checkNullAndReturnString("BENCHMARK_REPORT_STATUS"));
-
-		System.out.println(checkNullAndReturnInt("TREADS_COUNT"));
-		System.out.println(checkNullAndReturnInt("FORKS_COUNT"));
-		System.out.println(checkNullAndReturnInt("WARMUP_ITERATION"));
-		System.out.println(checkNullAndReturnInt("MEASURMENT_ITERATIONS"));
-		System.out.println(checkNullAndReturnInt("WARMUP_SECONDS"));
-		
-
-		System.out.println(checkNullAndReturnBoolean("SHOULD_SEND_REPORT_CYBENCH"));
-		System.out.println(checkNullAndReturnString("CUSTOM_USER_PROPERTIES"));
+//		System.out.println(checkNullAndReturnString("REPORT_NAME"));
+//		System.out.println(checkNullAndReturnString("REPORT_FOLDER"));
+//		System.out.println(checkNullAndReturnString("BENCHMARK_REPORT_STATUS"));
+//
+//		System.out.println(checkNullAndReturnInt("TREADS_COUNT"));
+//		System.out.println(checkNullAndReturnInt("FORKS_COUNT"));
+//		System.out.println(checkNullAndReturnInt("WARMUP_ITERATION"));
+//		System.out.println(checkNullAndReturnInt("MEASURMENT_ITERATIONS"));
+//		System.out.println(checkNullAndReturnInt("WARMUP_SECONDS"));
+//		
+//
+//		System.out.println(checkNullAndReturnBoolean("SHOULD_SEND_REPORT_CYBENCH"));
+//		System.out.println(checkNullAndReturnString("CUSTOM_USER_PROPERTIES"));
 		
 		launcherConfiguration.setReportName(checkNullAndReturnString("REPORT_NAME"));
-//		launcherConfiguration.setPathToPlainReportFile(checkNullAndReturnString("REPORT_FOLDER"));
+		launcherConfiguration.setPathToPlainReportFile(checkNullAndReturnString("REPORT_FOLDER"));
 		launcherConfiguration.setReportUploadStatus(checkNullAndReturnString("BENCHMARK_REPORT_STATUS"));
 
 		launcherConfiguration.setThreads(checkNullAndReturnInt("TREADS_COUNT"));

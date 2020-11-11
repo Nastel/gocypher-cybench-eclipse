@@ -1,21 +1,17 @@
 package com.gocypher.cybench.plugin.views;
 
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.internal.resources.BuildConfiguration;
-import org.eclipse.core.resources.IBuildConfiguration;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -257,10 +253,12 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
     @Override
     public void initializeFrom(ILaunchConfiguration configuration) {
         try {
-            String reportFolderDef = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, "/report");
+        	IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
+        	
+            String reportFolderDef = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, "./report");
             String reportNameDef = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "CyBench Report");
             String reportUploadStatusDef = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
-            String launchPathDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_PATH, "");
+            String launchPathDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_PATH, projects[0].getRawLocation().toString()+"/target/classes");
            
             int threadDef = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
             int forksDef  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
@@ -331,22 +329,34 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
     
     private List<String> getProjectPaths() {
     	List<String> projectPaths = new ArrayList<String>();
-//    	String test = ResourcesPlugin.getWorkspace().getRoot().getRawLocationURI().toASCIIString();
-    	IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
-    	for(IProject proj : projects) {
-//    		IPath projectRoot = proj.getRawLocation();
-//    		System.out.println(proj.getFullPath());
-//    		System.out.println(proj.getRawLocation());
-    		projectPaths.add(proj.getRawLocation().toString()+"/target/classes");
-//    		try {
-//				IBuildConfiguration[] cfgyest = proj.getBuildConfigs();
-//			} catch (CoreException e) {
-//				e.printStackTrace();
-//			}
-//    		ResourceAttributes resource = proj.getResourceAttributes();
-    	}
-    	
- 
+    	try {
+    		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
+	    	for(IProject proj : projects) {
+	    		String projectPackageFullPath = "";
+	    		if(proj.getRawLocation()!=null) {
+	    			projectPackageFullPath = proj.getLocation().toPortableString();
+	    			System.out.println(projectPackageFullPath);
+	        		projectPackageFullPath = projectPackageFullPath.substring(0, projectPackageFullPath.lastIndexOf('/'));
+	    		}
+	    		IJavaProject javaProject = JavaCore.create(proj);
+    			if(javaProject.getOutputLocation()!=null) {
+    				projectPackageFullPath += javaProject.getOutputLocation().toPortableString();
+    			}
+    			projectPaths.add(projectPackageFullPath);
+//    		    System.out.println("CLASSPATH_FILE_NAME: "+ IJavaProject.CLASSPATH_FILE_NAME);
+//    			System.out.println("determineModulesOfProjectsWithNonEmptyClasspath: "+javaProject.determineModulesOfProjectsWithNonEmptyClasspath());
+//    			System.out.println("getAllPackageFragmentRoots: "+javaProject.getAllPackageFragmentRoots());
+//    			System.out.println("getClasspathEntryFor: "+javaProject.getClasspathEntryFor(proj.getLocation()));
+//    			System.out.println("getModuleDescription: "+javaProject.getModuleDescription());
+//    			System.out.println("OUTPUT_LOCATION: "+javaProject.getOutputLocation().toPortableString());
+//    			System.out.println("getPackageFragmentRoots: "+javaProject.getPackageFragmentRoots());
+//    			System.out.println("getRawClasspath: "+javaProject.getRawClasspath());
+//    			System.out.println("readOutputLocation: "+javaProject.readOutputLocation());;
+//    			System.out.println("readRawClasspath(): "+javaProject.readRawClasspath());
+	    	}
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+		}
     	return projectPaths;
     }
 
