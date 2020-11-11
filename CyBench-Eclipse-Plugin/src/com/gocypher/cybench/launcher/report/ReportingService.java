@@ -5,8 +5,6 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.jar.Manifest;
-
 import com.gocypher.cybench.core.utils.JSONUtils;
 import org.openjdk.jmh.results.RunResult;
 //import org.slf4j.Logger;
@@ -190,18 +188,18 @@ public class ReportingService {
         return benchmarkProperties;
     }
 
-    protected String getVersion(String fullClassName) {
-        try {
-            Class<?> clazz = Class.forName(fullClassName);
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            Manifest manifest = new Manifest(loader.getResourceAsStream("META-INF/MANIFEST.MF"));
-            String benchmarkPackageString = clazz.getPackage().getName().replace(".", "-")+"-version";
-            return manifest.getMainAttributes().getValue(benchmarkPackageString);
-        } catch (Exception e) {
-        	System.out.println("Could not locate the benchmark version"+e);
-        }
-        return null;
-    }
+//    protected String getVersion(String fullClassName) {
+//        try {
+//            Class<?> clazz = Class.forName(fullClassName);
+//            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+//            Manifest manifest = new Manifest(loader.getResourceAsStream("META-INF/MANIFEST.MF"));
+//            String benchmarkPackageString = clazz.getPackage().getName().replace(".", "-")+"-version";
+//            return manifest.getMainAttributes().getValue(benchmarkPackageString);
+//        } catch (Exception e) {
+//        	System.out.println("Could not locate the benchmark version"+e);
+//        }
+//        return null;
+//    }
 
     public String prepareReportForDelivery(SecurityBuilder securityBuilder, BenchmarkOverviewReport report) {
         try {

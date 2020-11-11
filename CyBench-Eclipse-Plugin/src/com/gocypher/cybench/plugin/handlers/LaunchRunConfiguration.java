@@ -55,12 +55,6 @@ import com.gocypher.cybench.plugin.views.ReportsDisplayView;
 
 public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchConfigurationDelegate {
 	
-	@Inject
-	ESelectionService selectionService ;
-	
-	@Inject 
-	UISynchronize sync;
-	
 	private String reportFolder;
 	private String reportName;
 	private String launchPath;
@@ -124,27 +118,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			throws CoreException {
 		try {
 	    	setRunConfigurationProperties(configuration);
-	        System.out.println("REPORT_NAME: "+reportName);
-	        System.out.println("LAUNCH_PATH: "+launchPath);
-	        System.out.println("REPORT_FOLDER: "+reportFolder);
-	        System.out.println("BENCHMARK_REPORT_STATUS: "+reportUploadStatus);
-	        
-	        System.out.println("TREADS_COUNT: "+thread);
-	        System.out.println("FORKS_COUNT: "+forks);
-	        System.out.println("WARMUP_ITERATION: "+warmupIterations);
-	        System.out.println("MEASURMENT_ITERATIONS: "+measurmentIterations);
-	        System.out.println("WARMUP_SECONDS: "+warmupSeconds);
-	        
-	        System.out.println("SHOULD_SAVE_REPOT_TO_FILE: "+storeReportInFile);
-	        System.out.println("SHOULD_SEND_REPORT_CYBENCH: "+sendReportCybnech);
 
-	        System.out.println("CUSTOM_USER_PROPERTIES: "+userProperties);
-	        System.out.println("EXECUTION_SCORE: "+excutionScoreBoundary);        
-			
-//    	    File exeFile=new File(".",selectedPath);
-//			System.out.println("Path: "+exeFile.getAbsolutePath());
-			System.out.println("Sync service:"+sync+";"+selectionService);
-	    	System.out.println(System.getProperty("line.separator"));
 			String msg = "" ;
 			MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
 			cyBenchConsole.clearConsole();
@@ -155,54 +129,19 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			out.println("                                 Starting CyBench benchmarks                             ");
 			out.println("-----------------------------------------------------------------------------------------");
 			
-			List<String>programArguments = new ArrayList<>() ;
-			
-			String bundlePaths = ""
-			//+Platform.getBundle("CyBenchLauncherPlugin").getLocation() +";"
-			//+Platform.getBundle("com.gocypher.cybench.externals").getLocation()
-			;
-			
-			bundlePaths += LauncherUtils.resolveBundleLocation("CyBenchLauncherPlugin", true) ;
-			bundlePaths += ";" ;
-			bundlePaths += LauncherUtils.resolveBundleLocation("com.gocypher.cybench.externals", false) ;
-		
-			
-			System.out.println(bundlePaths);
-			String classPath= System.getProperty("java.class.path") ;
-			System.out.println("Classpath found:"+classPath);
-			System.out.println("selectedPath: "+launchPath);
-			
-			
-			classPath += ";"+launchPath ;
-			//System.setProperty("java.class.path", classPath) ;
-			
-			System.out.println("Location of workspace:"+ResourcesPlugin.getWorkspace().getRoot().getRawLocationURI().toASCIIString() );
-		
+//			System.out.println("Location of workspace:"+ResourcesPlugin.getWorkspace().getRoot().getRawLocationURI().toASCIIString() );
 			String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
-			System.out.println("Location of bundle state:"+pathToPluginLocalStateDirectory) ;
-			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(pathToPluginLocalStateDirectory, true) ;
-			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(pathToPluginLocalStateDirectory, true) ;
-					
-			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
-			
-			IPath pluginPath = ResourcesPlugin.getPlugin().getStateLocation() ;
-			System.out.println("Plugin path:"+pluginPath.toOSString());
-			
-				
-			if (projects != null) {
-				for (IProject project:projects) {
-					System.out.println(project.getFullPath());
-				}
-			}
-			
-			
+//			System.out.println("Location of bundle state:"+pathToPluginLocalStateDirectory) ;
+//			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(pathToPluginLocalStateDirectory, true, reportName) ;
+//			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(pathToPluginLocalStateDirectory, true, reportName);
+			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(reportFolder, true, reportName.replaceAll(" ", "_").toLowerCase()) ;
+			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(reportFolder, true, reportName.replaceAll(" ", "_").toLowerCase()) ;
+	
 			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager() ;
 			ILaunchConfigurationType launchType = manager.getLaunchConfigurationType("org.eclipse.jdt.launching.localJavaApplication");
 			final ILaunchConfigurationWorkingCopy config = launchType.newInstance(null, "CyBench plugin");
 			    
-			    
 			setEnvironmentProperties(config);
-			System.out.println("selectedPath: "+launchPath);
 			
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
 			String[] classpath = new String[] { launchPath
@@ -211,7 +150,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 					};
 			
 		
-			List classpathMementos = new ArrayList();
+			List<String> classpathMementos = new ArrayList<String>();
 			for (int i = 0; i < classpath.length; i++) {
 			    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classpath[i]));
 			    cpEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
@@ -219,32 +158,25 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			        classpathMementos.add(cpEntry.getMemento());
 			    } catch (CoreException e) {
 			        System.err.println(e.getMessage());
-//			        this.showMsgBox(e.getMessage(),event);
 			    }
 			}
 			System.out.println("Classpath:"+classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
-			
-			
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, pathToTempReportPlainFile+" "+pathToTempReportEncryptedFile);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "com.gocypher.cybench.launcher.CyBenchLauncher");
 			
-			//config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "com.local.demo.DemoRunner");
-			//config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "com.gocypher.cybench.launcher.BenchmarkRunner");
 		
 			new Thread ( new Runnable() {
 				
 				@Override
 				public void run() {
 					try {
-						//IProgressMonitor monitor =  //PlatformUI.getWorkbench().getProgressService() ;
 					    ILaunch launchedBenchmarks = config.launch(ILaunchManager.RUN_MODE, null);
 					  
 					    out.println("Waiting for CyBench to finish...");
 					    
 					    while (!launchedBenchmarks.isTerminated()) {
-					    	//out.println("Waiting for CyBench to finish:"+launchedBenchmarks.isTerminated());
 					    	try {
 					    		Thread.sleep(1000);
 					    	}catch (Exception e) {
@@ -252,18 +184,14 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 					    	}
 					    }
 					    out.println("Finished CyBench tests:"+launchedBenchmarks.isTerminated());
-					    
 						String results = CybenchUtils.loadFile(pathToTempReportPlainFile) ;
 						if (results != null && !results.isEmpty()) {
 								out.println("Results from tests:"+JSONUtils.parseJsonIntoMap(results));
 						}
-						//this.showMsgBox("Results from tests:"+results, event);				
-						
-						
 						out.println("-----------------------------------------------------------------------------------------");
 						out.println("                                 Finished CyBench benchmarks                             ");
 						out.println("-----------------------------------------------------------------------------------------");
-						//cyBenchConsole.activate();
+						
 						
 						GuiUtils.refreshCybenchExplorer();
 						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);					
@@ -302,7 +230,6 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		System.out.println("-DFORKS_COUNT="+forks+
 				" -DTHREADS_COUNT="+thread+
 				" -DREPORT_NAME=\""+reportName+"\""+
-				" -DREPORT_FOLDER=\""+reportFolder+"\""+
 				" -DBENCHMARK_REPORT_STATUS=\""+reportUploadStatus+"\""+
 				" -DWARMUP_ITERATION="+warmupIterations+
 				" -DMEASURMENT_ITERATIONS="+measurmentIterations+
@@ -315,7 +242,6 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-DFORKS_COUNT="+forks+
 				" -DTHREADS_COUNT="+thread+
 				" -DREPORT_NAME=\""+reportName+"\""+
-				" -DREPORT_FOLDER=\""+reportFolder+"\""+
 				" -DBENCHMARK_REPORT_STATUS=\""+reportUploadStatus+"\""+
 				" -DWARMUP_ITERATION="+warmupIterations+
 				" -DMEASURMENT_ITERATIONS="+measurmentIterations+

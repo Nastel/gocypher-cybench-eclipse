@@ -23,14 +23,17 @@ public class CybenchUtils {
 	
 	
 	
-	public static String generatePlainReportFilename (String path, boolean shouldIncludeSlash) {
-		return generateReportFileName (path,shouldIncludeSlash,"json") ;
+	public static String generatePlainReportFilename (String path,  boolean shouldIncludeSlash, String reportName) {
+		return generateReportFileName (path,shouldIncludeSlash,"cybench", reportName) ;
 	}
-	public static String generateEncryptedReportFilename (String path, boolean shouldIncludeSlash) {
-		return generateReportFileName (path,shouldIncludeSlash,"cyb") ;
+	public static String generateEncryptedReportFilename (String path, boolean shouldIncludeSlash, String reportName) {
+		return generateReportFileName (path,shouldIncludeSlash,"cyb", reportName) ;
 	}
-	private static String generateReportFileName (String path, boolean shouldIncludeSlash, String extension) {
-		String fileName = "report-"+System.currentTimeMillis()+"."+extension ;
+	private static String generateReportFileName (String path, boolean shouldIncludeSlash, String extension, String reportName) {
+		if(reportName==null || reportName.equals("")) {
+			reportName = "CyBench Report";
+		}
+		String fileName = reportName+"-"+System.currentTimeMillis()+"-" ;
 		if (shouldIncludeSlash) {
 			return path+"/"+fileName ;
 		}

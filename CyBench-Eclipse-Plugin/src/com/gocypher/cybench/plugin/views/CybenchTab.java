@@ -253,12 +253,14 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
     @Override
     public void initializeFrom(ILaunchConfiguration configuration) {
         try {
-        	IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
-        	
+        	List<String> paths =  getProjectPaths();
+        	String launchPathDef = "";
             String reportFolderDef = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, "./report");
             String reportNameDef = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "CyBench Report");
             String reportUploadStatusDef = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
-            String launchPathDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_PATH, projects[0].getRawLocation().toString()+"/target/classes");
+            if(paths.get(0)!= null) {
+            	launchPathDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_PATH, paths.get(0));
+            }
            
             int threadDef = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
             int forksDef  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
@@ -335,7 +337,6 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
 	    		String projectPackageFullPath = "";
 	    		if(proj.getRawLocation()!=null) {
 	    			projectPackageFullPath = proj.getLocation().toPortableString();
-	    			System.out.println(projectPackageFullPath);
 	        		projectPackageFullPath = projectPackageFullPath.substring(0, projectPackageFullPath.lastIndexOf('/'));
 	    		}
 	    		IJavaProject javaProject = JavaCore.create(proj);

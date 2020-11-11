@@ -28,6 +28,7 @@ import com.gocypher.cybench.launcher.environment.model.HardwareProperties;
 import com.gocypher.cybench.launcher.environment.model.JVMProperties;
 import com.gocypher.cybench.launcher.environment.services.CollectSystemInformation;
 import com.gocypher.cybench.launcher.model.BenchmarkOverviewReport;
+import com.gocypher.cybench.launcher.model.BenchmarkReport;
 import com.gocypher.cybench.launcher.report.DeliveryService;
 import com.gocypher.cybench.launcher.report.ReportingService;
 import com.gocypher.cybench.launcher.utils.ComputationUtils;
@@ -43,7 +44,7 @@ public class CyBenchLauncher {
 	
 	public static void main(String[] args) throws Exception{
 		System.out.println("CyBench launcher started.");
-		System.out.println("Launcher classpath:"+System.getProperty("java.class.path"));
+//		System.out.println("Launcher classpath:"+System.getProperty("java.class.path"));
 		long start = System.currentTimeMillis();
 		LauncherConfiguration launcherConfiguration = new LauncherConfiguration () ;
 		fillLaunchConfigurations(launcherConfiguration);
@@ -120,13 +121,18 @@ public class CyBenchLauncher {
             responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted);
             report.setReportURL(responseWithUrl);
         }
-        
+        Double reportScore = 0.0;
+        for (RunResult item :results){
+            if (item.getPrimaryResult() != null) {
+            	reportScore = item.getPrimaryResult().getScore();
+            }
+        }
         String reportJSON = JSONUtils.marshalToPrettyJson(report);
         System.out.println(reportJSON);
         String pathToReportFile = launcherConfiguration.getPathToPlainReportFile();
-        System.out.println(pathToReportFile);
-        CybenchUtils.storeResultsToFile(pathToReportFile, reportJSON);
-        CybenchUtils.storeResultsToFile(launcherConfiguration.getPathToEncryptedReportFile(), reportEncrypted);
+        System.out.println("Store file at: "+pathToReportFile);
+        CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cybench", reportJSON);
+        CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cyb", reportEncrypted);
         
 		//System.out.println("Result:"+ComputationUtils.log10(new BigDecimal(1000)));
 	}
@@ -185,22 +191,7 @@ public class CyBenchLauncher {
     }
 	
 	private static void fillLaunchConfigurations(LauncherConfiguration launcherConfiguration) {
-//		System.out.println(checkNullAndReturnString("REPORT_NAME"));
-//		System.out.println(checkNullAndReturnString("REPORT_FOLDER"));
-//		System.out.println(checkNullAndReturnString("BENCHMARK_REPORT_STATUS"));
-//
-//		System.out.println(checkNullAndReturnInt("TREADS_COUNT"));
-//		System.out.println(checkNullAndReturnInt("FORKS_COUNT"));
-//		System.out.println(checkNullAndReturnInt("WARMUP_ITERATION"));
-//		System.out.println(checkNullAndReturnInt("MEASURMENT_ITERATIONS"));
-//		System.out.println(checkNullAndReturnInt("WARMUP_SECONDS"));
-//		
-//
-//		System.out.println(checkNullAndReturnBoolean("SHOULD_SEND_REPORT_CYBENCH"));
-//		System.out.println(checkNullAndReturnString("CUSTOM_USER_PROPERTIES"));
-		
 		launcherConfiguration.setReportName(checkNullAndReturnString("REPORT_NAME"));
-		launcherConfiguration.setPathToPlainReportFile(checkNullAndReturnString("REPORT_FOLDER"));
 		launcherConfiguration.setReportUploadStatus(checkNullAndReturnString("BENCHMARK_REPORT_STATUS"));
 
 		launcherConfiguration.setThreads(checkNullAndReturnInt("TREADS_COUNT"));
