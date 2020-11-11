@@ -19,23 +19,61 @@ public class ReportFileEntry implements Serializable{
 	private long timestamp ;
 	private String timeStampStr ;
 	private String reportIdentifier ;
+	private double score ;
+	private String scoreStr ;
 	
 	public ReportFileEntry () {
 		
 	}
 
 	public void create (File file) {
-		this.name = file.getName() ;
+		//this.name = file.getName() ;
 		this.fullPathToFile = file.toString() ;
 		this.reportIdentifier = GuiUtils.encodeBase64(this.fullPathToFile) ;
 		
-		String timeInMilis = this.name.substring(this.name.lastIndexOf("-")+1,this.name.lastIndexOf(".")) ;
+		this.extractMetaDataFromFileName(file.getName());
+		
+		/*String timeInMilis = this.name.substring(this.name.lastIndexOf("-")+1,this.name.lastIndexOf(".")) ;
 		if (timeInMilis != null && ! timeInMilis.isEmpty()) {
 			this.timestamp = Long.parseLong(timeInMilis) ;
 			this.timeStampStr = CybenchUtils.formatTimestamp (this.timestamp) ;
 		}
-	}
+		*/
 		
+	}
+	private void extractMetaDataFromFileName (String fileName) {
+		String meta = fileName.substring(0,fileName.lastIndexOf(".")) ;
+		
+		String[] arr = meta.split("-") ;
+		if (arr != null && arr.length >=3) {		
+			try {
+				
+				this.score = Double.parseDouble(arr[arr.length -1]) ;
+				this.scoreStr = GuiUtils.convertNumToStringByLength(arr[arr.length -1]) ;
+				
+				this.timestamp = Long.parseLong(arr[arr.length -2]) ;
+				this.timeStampStr = CybenchUtils.formatTimestamp (this.timestamp) ;
+				this.name = "" ;
+				for (int i = 0; i < arr.length -2;i++) {
+					
+					this.name += arr[i] ;
+					
+				}
+				this.name = this.name.replaceAll("_"," ");
+				
+			}catch (Exception e) {
+				this.timestamp = 0 ;
+				this.timeStampStr = null ;
+				this.score = 0 ;
+				this.scoreStr = null ;
+				this.name = fileName ;
+			}
+		
+		}
+		else {
+			this.name = fileName ;
+		}
+	}
 	public String getFullPathToFile() {
 		return fullPathToFile;
 	}
@@ -62,9 +100,10 @@ public class ReportFileEntry implements Serializable{
 
 	@Override
 	public String toString() {
-		if (this.timeStampStr != null ) {
+		/*if (this.timeStampStr != null ) {
 			return this.name+" ("+this.timeStampStr+")";
 		}
+		*/
 		return this.name ;
 	}
 
@@ -83,6 +122,23 @@ public class ReportFileEntry implements Serializable{
 	public void setReportIdentifier(String reportIdentifier) {
 		this.reportIdentifier = reportIdentifier;
 	}
+
+	public double getScore() {
+		return score;
+	}
+
+	public void setScore(double score) {
+		this.score = score;
+	}
+
+	public String getScoreStr() {
+		return scoreStr;
+	}
+
+	public void setScoreStr(String scoreStr) {
+		this.scoreStr = scoreStr;
+	}
+	
 	
 	
 	
