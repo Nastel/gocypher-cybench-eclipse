@@ -109,6 +109,27 @@ public class CybenchUtils {
 		return sdf.format(new Date (timestamp)) ;		
 	}
 	
+	public static String findPathToFileByPrefix (String partialPathToFile) {
+		//E:\benchmarks\runtime-EclipseApplication\demo-jmh-tests\reports/first_real_launch-1605086893862
+		
+		String filePath = null ;
+		if (partialPathToFile != null) {
+			String directory = partialPathToFile.substring(0, partialPathToFile.lastIndexOf("/")) ;
+			String prefix = partialPathToFile.substring(partialPathToFile.lastIndexOf("/")+1) ;
+			List<File> files = listFilesInDirectory(directory) ;
+			for (File file:files) {
+				if (file.getName().endsWith(Constants.REPORT_FILE_EXTENSION)) {
+					if (file.getName().startsWith(prefix)) {
+						filePath = file.getAbsolutePath() ;
+					}
+				}
+			}
+		}
+		
+		
+		return filePath ;
+	}
+	
 	/*public static List<File> walkAndFindReports (List<String>pathsToDirectories) {
 		List<File> reports = new ArrayList<>() ;
 		for (String pathToDirectory:pathsToDirectories) {

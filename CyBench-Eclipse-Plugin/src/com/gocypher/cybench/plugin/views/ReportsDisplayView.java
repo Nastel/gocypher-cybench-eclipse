@@ -146,13 +146,21 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 				&& !this.getViewSite().getSecondaryId().isEmpty()) {
 			
 				//System.out.println("Explorer:"+explorerView);
-				CyBenchExplorerView cybenchExplorerView = (CyBenchExplorerView)explorerView ;
+				//CyBenchExplorerView cybenchExplorerView = (CyBenchExplorerView)explorerView ;
 				
 				//String reportIdentifier = this.getViewSite().getSecondaryId() ;	
 				//ReportFileEntry entry = cybenchExplorerView.findEntryByIdentifier(reportIdentifier);
 				
+				String fullPathToPatialFile = GuiUtils.decodeBase64(this.getViewSite().getSecondaryId()) ;
+			
 				ReportFileEntry entry = new ReportFileEntry() ;
-				entry.setFullPathToFile(GuiUtils.decodeBase64(this.getViewSite().getSecondaryId()));
+				
+				if (fullPathToPatialFile.endsWith(Constants.REPORT_FILE_EXTENSION)) {
+					entry.setFullPathToFile(fullPathToPatialFile);
+				}
+				else {					
+					entry.setFullPathToFile(CybenchUtils.findPathToFileByPrefix(fullPathToPatialFile));
+				}
 				
 				reportUIModel = reportService.prepareReportDisplayModel(entry) ;
 				
