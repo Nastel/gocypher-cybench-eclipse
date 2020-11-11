@@ -10,6 +10,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.gocypher.cybench.plugin.model.ICybenchPartView;
 import com.gocypher.cybench.plugin.views.CyBenchExplorerView;
@@ -124,6 +126,15 @@ public class GuiUtils {
     	else {
     		System.err.println("Error: full path to report is null or empty, view can't be opened!");
     	}
+    }
+    
+    public static void logMessage (String message) {
+    	MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
+		cyBenchConsole.clearConsole();
+		cyBenchConsole.activate();
+		MessageConsoleStream out = cyBenchConsole.newMessageStream();
+		out.println(message);
+		
     }
 	 
 
