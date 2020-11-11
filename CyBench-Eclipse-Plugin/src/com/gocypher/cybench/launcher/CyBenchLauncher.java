@@ -86,6 +86,7 @@ public class CyBenchLauncher {
 					.warmupIterations(launcherConfiguration.getWarmUpIterations())
 					.warmupTime(TimeValue.seconds(launcherConfiguration.getWarmUpSeconds()))
 					.threads(launcherConfiguration.getThreads())
+					.measurementTime(TimeValue.seconds(launcherConfiguration.getMeasurmentSeconds()))
 					.shouldDoGC(true)
 					.detectJvmArgs()
 					.addProfiler(GCProfiler.class)
@@ -201,7 +202,8 @@ public class CyBenchLauncher {
 		launcherConfiguration.setShouldSendReportToCyBench(checkNullAndReturnBoolean("SHOULD_SEND_REPORT_CYBENCH"));
 		launcherConfiguration.setUserProperties(checkNullAndReturnString("CUSTOM_USER_PROPERTIES"));
 		   
-		   
+
+		launcherConfiguration.setMeasurmentSeconds(checkNullAndReturnInt("MEASURMENT_SECONDS"));
 		launcherConfiguration.setExecutionScore(checkNullAndReturnInt("DEXECUTION_SCORE"));
 	}
 	

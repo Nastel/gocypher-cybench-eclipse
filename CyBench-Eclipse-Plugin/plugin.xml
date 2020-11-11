@@ -5,7 +5,7 @@
 	<!-- Launcher configuration delegate -->
 	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
 	    <launchConfigurationType
-	        name="Cybench launch"
+	        name="CyBench"
 	        delegate="com.gocypher.cybench.plugin.handlers.LaunchRunConfiguration"
 	        modes="run"
 	        id="com.gocypher.cybench.plugin.launchConfigurationType">
@@ -19,7 +19,7 @@
 	        class="com.gocypher.cybench.plugin.handlers.LaunchShortcut"
 	        icon="icons/cybench_symbol_small.png"
 	        id="com.gocypher.cybench.plugin.shortcut"
-	        label="Cybench launcher"
+	        label="Run on CyBench"
 	        modes="run">
 	        <contextualLaunch>
 	            <enablement>

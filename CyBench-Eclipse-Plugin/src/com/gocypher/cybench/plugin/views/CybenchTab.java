@@ -54,6 +54,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
     private Spinner measurmentIterations;
     private Spinner warmupIterations;
     private Spinner warmupSeconds;
+    private Spinner measurmentSeconds;
     
     private Spinner expectedScore;
     
@@ -104,27 +105,34 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
 	        executionMeasurmentIterationCountLabel.setText("Measurment Iterations:");
 	        measurmentIterations = new Spinner(benchmarking, SWT.BORDER);
 	        
-	        /* Report execution number of measurement iterations */
+	        /* Report execution number of warm-up iterations */
 	        Label executionWarmupIterationCountLabel = new Label(benchmarking, SWT.NONE);
 	        executionWarmupIterationCountLabel.setText("Warmup Iterations:");
 	        warmupIterations = new Spinner(benchmarking, SWT.BORDER);
 	        
-	        /* Report execution number of measurement iterations */
+	        /* Report execution number of warm-up seconds */
 	        Label executionWarmupSecondsLabel = new Label(benchmarking, SWT.NONE);
-	        executionWarmupSecondsLabel.setText("Warmup time (seconds):");
+	        executionWarmupSecondsLabel.setText("Warmup time (s):");
 	        warmupSeconds = new Spinner(benchmarking, SWT.BORDER);
+	        
+	        /* Report execution number of measurement seconds */
+	        Label executionMeasurmentsSecondsLabel = new Label(benchmarking, SWT.NONE);
+	        executionMeasurmentsSecondsLabel.setText("Measurment time (s):");
+	        measurmentSeconds = new Spinner(benchmarking, SWT.BORDER);
 
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(executionForkCountLabel);
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(executionThreadsCountLabel);
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(executionMeasurmentIterationCountLabel);
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(executionWarmupIterationCountLabel);
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(executionWarmupSecondsLabel);
+	        GridDataFactory.swtDefaults().span(2,1).applyTo(executionMeasurmentsSecondsLabel);
 	        
 	        GridDataFactory.fillDefaults().grab(true, false).span(3,1).applyTo(forks);
 	        GridDataFactory.fillDefaults().grab(true, false).span(3,1).applyTo(threads);
 	        GridDataFactory.fillDefaults().grab(true, false).span(3,1).applyTo(measurmentIterations);
 	        GridDataFactory.fillDefaults().grab(true, false).span(3,1).applyTo(warmupIterations);
 	        GridDataFactory.fillDefaults().grab(true, false).span(3,1).applyTo(warmupSeconds);
+	        GridDataFactory.fillDefaults().grab(true, false).span(3,1).applyTo(measurmentSeconds);
 	        
 	        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(benchmarking);
 	        
@@ -277,6 +285,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
             int warmupIterationsDef  = configuration.getAttribute(LaunchConfiguration.WARMUP_ITERATION, 1);
             int measurmentIterationsDef = configuration.getAttribute(LaunchConfiguration.MEASURMENT_ITERATIONS, 5);
             int warmupSecondsDef = configuration.getAttribute(LaunchConfiguration.WARMUP_SECONDS, 10);
+            int measurmentSecondsDef = configuration.getAttribute(LaunchConfiguration.MEASURMENT_SECONDS, 10);
             
 //            boolean storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
             boolean sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
@@ -300,6 +309,8 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
             warmupIterations.addModifyListener(modifyListener);
             warmupSeconds.setValues(warmupSecondsDef, 1, 10000, 0, 1, 1);
             warmupSeconds.addModifyListener(modifyListener);
+            measurmentSeconds.setValues(measurmentSecondsDef, 1, 10000, 0, 1, 1);
+            measurmentSeconds.addModifyListener(modifyListener);
             expectedScore.setValues(-1, -1, 10000, 2, 1, 1);
             expectedScore.addModifyListener(modifyListener);
             
@@ -325,6 +336,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
         configuration.setAttribute(LaunchConfiguration.WARMUP_ITERATION, warmupIterations.getSelection());
         configuration.setAttribute(LaunchConfiguration.MEASURMENT_ITERATIONS, measurmentIterations.getSelection());
         configuration.setAttribute(LaunchConfiguration.WARMUP_SECONDS, warmupSeconds.getSelection());
+        configuration.setAttribute(LaunchConfiguration.MEASURMENT_SECONDS, measurmentSeconds.getSelection());
 
         configuration.setAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, userProperties.getText());
 //        configuration.setAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, shouldStoreReportToFileSystem.getSelection());
@@ -356,18 +368,20 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
     	try {
     		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
 	    	for(IProject proj : projects) {
-	    		String projectPackageFullPath = "";
-	    		String projectOutputPath = "";
-	    		if(proj.getLocation()!=null) {
-	    			projectPackageFullPath = proj.getLocation().toPortableString();
+	    		if(proj.isAccessible()) {
+		    		String projectPackageFullPath = "";
+		    		String projectOutputPath = "";
+		    		if(proj.getLocation()!=null) {
+		    			projectPackageFullPath = proj.getLocation().toPortableString();
+		    		}
+		    		if(addBuildPath) {
+			    		IJavaProject javaProject = JavaCore.create(proj);
+		    			if(javaProject.getOutputLocation()!=null) {
+		    				projectOutputPath = projectPackageFullPath.substring(0, projectPackageFullPath.lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString();
+		    			}
+		    		}
+	    			projectPaths.put(projectPackageFullPath, projectOutputPath);
 	    		}
-	    		if(addBuildPath) {
-		    		IJavaProject javaProject = JavaCore.create(proj);
-	    			if(javaProject.getOutputLocation()!=null) {
-	    				projectOutputPath = projectPackageFullPath.substring(0, projectPackageFullPath.lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString();
-	    			}
-	    		}
-    			projectPaths.put(projectPackageFullPath, projectOutputPath);
 //    		    System.out.println("CLASSPATH_FILE_NAME: "+ IJavaProject.CLASSPATH_FILE_NAME);
 //    			System.out.println("determineModulesOfProjectsWithNonEmptyClasspath: "+javaProject.determineModulesOfProjectsWithNonEmptyClasspath());
 //    			System.out.println("getAllPackageFragmentRoots: "+javaProject.getAllPackageFragmentRoots());

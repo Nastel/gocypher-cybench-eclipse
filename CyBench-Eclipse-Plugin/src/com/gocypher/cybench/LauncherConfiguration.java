@@ -11,6 +11,7 @@ public class LauncherConfiguration {
 	private int measurementIterations = 1 ;
 	private int warmUpIterations = 1 ;
 	private int warmUpSeconds = 5 ;
+	private int measurmentSeconds = 5 ;
 	private int threads = 1 ;
 	
 	private String userBenchmarkMetadata = "";
@@ -141,6 +142,17 @@ public class LauncherConfiguration {
 
 	public void setExecutionScore(double executionScore) {
 		this.executionScore = executionScore;
+	}
+
+
+	public int getMeasurmentSeconds() {
+		return measurmentSeconds;
+	}
+
+
+
+	public void setMeasurmentSeconds(int measurmentSeconds) {
+		this.measurmentSeconds = measurmentSeconds;
 	}
 	
 
