@@ -121,11 +121,9 @@ public class CyBenchLauncher {
             responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted);
             report.setReportURL(responseWithUrl);
         }
-        Double reportScore = 0.0;
-        for (RunResult item :results){
-            if (item.getPrimaryResult() != null) {
-            	reportScore = item.getPrimaryResult().getScore();
-            }
+        BigDecimal reportScore = report.getTotalScore();
+        if(reportScore == null) {
+        	reportScore = new BigDecimal(0);
         }
         String reportJSON = JSONUtils.marshalToPrettyJson(report);
         System.out.println(reportJSON);
