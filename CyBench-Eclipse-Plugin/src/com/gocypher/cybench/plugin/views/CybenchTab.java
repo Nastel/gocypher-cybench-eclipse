@@ -149,7 +149,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
  	        reportlaunchPathLabel.setText("Run Project:");
  	        launchPath.addSelectionListener(new SelectionAdapter() {
 	            public void widgetSelected(SelectionEvent e) {
-	            	reportsFolder.setText(launchPath.getText()+"/report");
+	            	reportsFolder.setText(launchPath.getText()+"/reports");
 	            }
 	
 	        });
@@ -265,7 +265,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
         	String reportFolderDef = "";
         	String buildPathDef = "";
             if(entry!= null) {
-            	reportFolderDef = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, entry.getKey()+"/report");
+            	reportFolderDef = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, entry.getKey()+"/reports");
             	launchPathDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_PATH, entry.getKey());
             	buildPathDef = configuration.getAttribute(LaunchConfiguration.BUILD_PATH, entry.getValue());
             }
