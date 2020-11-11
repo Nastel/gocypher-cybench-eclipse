@@ -268,7 +268,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
        
        userProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, "");
    	   excutionScoreBoundary = configuration.getAttribute(LaunchConfiguration.EXECUTION_SCORE, -1);
-   	   launchPath = configuration.getAttribute(LaunchConfiguration.LAUNCH_PATH, "");
+   	   launchPath = configuration.getAttribute(LaunchConfiguration.BUILD_PATH, "");
    	   
     }
 }

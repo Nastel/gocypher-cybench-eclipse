@@ -1,7 +1,9 @@
 package com.gocypher.cybench.plugin.views;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -42,6 +44,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
     private Text reportsFolder;
     private Button browse;
 
+    private String buildPath;
     private Combo launchPath;
     private Text reportName;
     private Combo reportUploadStatus;
@@ -60,16 +63,14 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
     private Button shouldSendReportToCyBench;
 
 
+	Map<String, String> paths =  new HashMap<>();
 
     @Override
     public void createControl(Composite parent) {
+    	paths = getProjectPaths(true);
         Composite comp = new Group(parent, SWT.BORDER);
         setControl(comp);
-
-	    List<String> jmhBenchmarkProjectsPaths = getProjectPaths(); 
-	    String[] itemsArray = new String[jmhBenchmarkProjectsPaths.size()];
-        itemsArray = jmhBenchmarkProjectsPaths.toArray(itemsArray);
-        
+    	String[] itemsArray =  paths.keySet().toArray(new String[ paths.keySet().size()]);
         GridLayoutFactory.swtDefaults().numColumns(10).applyTo(comp); 
         
         /* Benchmarking settings GROUP */
@@ -145,7 +146,13 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
  	        launchPath = new Combo(configuration, SWT.BORDER); 
  	        launchPath.setItems(itemsArray);
  	        launchPath.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
- 	        reportlaunchPathLabel.setText("Execution Absolute Path:");
+ 	        reportlaunchPathLabel.setText("Run Project:");
+ 	        launchPath.addSelectionListener(new SelectionAdapter() {
+	            public void widgetSelected(SelectionEvent e) {
+	            	reportsFolder.setText(launchPath.getText()+"/report");
+	            }
+	
+	        });
  	        
  	        /* Report status input field */
  	        Label benchmarkUploadStatusLabel = new Label(configuration, SWT.NONE);
@@ -253,15 +260,18 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
     @Override
     public void initializeFrom(ILaunchConfiguration configuration) {
         try {
-        	List<String> paths =  getProjectPaths();
+    	    Map.Entry<String,String> entry = paths.entrySet().iterator().next();
         	String launchPathDef = "";
-            String reportFolderDef = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, "./report");
+        	String reportFolderDef = "";
+        	String buildPathDef = "";
+            if(entry!= null) {
+            	reportFolderDef = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, entry.getKey()+"/report");
+            	launchPathDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_PATH, entry.getKey());
+            	buildPathDef = configuration.getAttribute(LaunchConfiguration.BUILD_PATH, entry.getValue());
+            }
             String reportNameDef = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "CyBench Report");
             String reportUploadStatusDef = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
-            if(paths.get(0)!= null) {
-            	launchPathDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_PATH, paths.get(0));
-            }
-           
+         
             int threadDef = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
             int forksDef  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
             int warmupIterationsDef  = configuration.getAttribute(LaunchConfiguration.WARMUP_ITERATION, 1);
@@ -321,29 +331,43 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
         configuration.setAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, shouldSendReportToCyBench.getSelection());
         
         configuration.setAttribute(LaunchConfiguration.EXECUTION_SCORE, expectedScore.getSelection());
+        
+        String buildPath = getBuildPath(launchPath.getText());
+    	configuration.setAttribute(LaunchConfiguration.BUILD_PATH,  buildPath);
     }
     
+    private String getBuildPath(String buildProjectPath) {
+		if(paths.get(buildProjectPath) == null) {
+			return buildProjectPath;
+		}else {
+			return paths.get(buildProjectPath);
+		}
+    }
 
     @Override
     public String getName() {
         return "CyBench properties";
     }
     
-    private List<String> getProjectPaths() {
-    	List<String> projectPaths = new ArrayList<String>();
+ 
+    
+    private Map<String, String> getProjectPaths(boolean addBuildPath) {
+    	Map<String, String> projectPaths = new HashMap<>();
     	try {
     		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
 	    	for(IProject proj : projects) {
 	    		String projectPackageFullPath = "";
-	    		if(proj.getRawLocation()!=null) {
+	    		String projectOutputPath = "";
+	    		if(proj.getLocation()!=null) {
 	    			projectPackageFullPath = proj.getLocation().toPortableString();
-	        		projectPackageFullPath = projectPackageFullPath.substring(0, projectPackageFullPath.lastIndexOf('/'));
 	    		}
-	    		IJavaProject javaProject = JavaCore.create(proj);
-    			if(javaProject.getOutputLocation()!=null) {
-    				projectPackageFullPath += javaProject.getOutputLocation().toPortableString();
-    			}
-    			projectPaths.add(projectPackageFullPath);
+	    		if(addBuildPath) {
+		    		IJavaProject javaProject = JavaCore.create(proj);
+	    			if(javaProject.getOutputLocation()!=null) {
+	    				projectOutputPath = projectPackageFullPath.substring(0, projectPackageFullPath.lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString();
+	    			}
+	    		}
+    			projectPaths.put(projectPackageFullPath, projectOutputPath);
 //    		    System.out.println("CLASSPATH_FILE_NAME: "+ IJavaProject.CLASSPATH_FILE_NAME);
 //    			System.out.println("determineModulesOfProjectsWithNonEmptyClasspath: "+javaProject.determineModulesOfProjectsWithNonEmptyClasspath());
 //    			System.out.println("getAllPackageFragmentRoots: "+javaProject.getAllPackageFragmentRoots());

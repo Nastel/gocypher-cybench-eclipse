@@ -19,5 +19,6 @@ public interface LaunchConfiguration {
 	
 
 	public static final String LAUNCH_PATH = "com.cybench.launchPathSet";
+	public static final String BUILD_PATH = "com.cybench.launchPathSet";
 	
 }

@@ -88,8 +88,8 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 		
 			String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
 			System.out.println("Location of bundle state:"+pathToPluginLocalStateDirectory) ;
-			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(pathToPluginLocalStateDirectory, true) ;
-			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(pathToPluginLocalStateDirectory, true) ;
+			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(pathToPluginLocalStateDirectory, true, "") ;
+			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(pathToPluginLocalStateDirectory, true, "") ;
 					
 			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
 			
