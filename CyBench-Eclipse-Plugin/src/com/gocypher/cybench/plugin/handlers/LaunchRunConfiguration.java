@@ -2,20 +2,11 @@ package com.gocypher.cybench.plugin.handlers;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.inject.Inject;
 
 import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -25,17 +16,11 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.e4.ui.di.UISynchronize;
-import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -43,15 +28,12 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.gocypher.cybench.LauncherConfiguration;
 import com.gocypher.cybench.core.utils.JSONUtils;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
-import com.gocypher.cybench.plugin.model.ICybenchPartView;
 import com.gocypher.cybench.plugin.model.LaunchConfiguration;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
-import com.gocypher.cybench.plugin.views.ReportsDisplayView;
 
 public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchConfigurationDelegate {
 	
@@ -64,7 +46,6 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private int warmupIterations;
 	private int measurmentIterations;
 	private int warmupSeconds;
-	private boolean storeReportInFile;
 	private boolean sendReportCybnech; 
 	private String userProperties;
 	private int excutionScoreBoundary ;
@@ -119,7 +100,6 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		try {
 	    	setRunConfigurationProperties(configuration);
 
-			String msg = "" ;
 			MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
 			cyBenchConsole.clearConsole();
 			cyBenchConsole.activate();
@@ -130,7 +110,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			out.println("-----------------------------------------------------------------------------------------");
 			
 //			System.out.println("Location of workspace:"+ResourcesPlugin.getWorkspace().getRoot().getRawLocationURI().toASCIIString() );
-			String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
+//			String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
 //			System.out.println("Location of bundle state:"+pathToPluginLocalStateDirectory) ;
 //			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(pathToPluginLocalStateDirectory, true, reportName) ;
 //			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(pathToPluginLocalStateDirectory, true, reportName);

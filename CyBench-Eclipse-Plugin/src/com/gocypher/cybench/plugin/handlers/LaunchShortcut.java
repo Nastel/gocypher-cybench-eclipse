@@ -3,14 +3,11 @@ package com.gocypher.cybench.plugin.handlers;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -18,8 +15,6 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.ILaunchShortcut;
-import org.eclipse.e4.ui.di.UISynchronize;
-import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
@@ -44,8 +39,10 @@ public class LaunchShortcut implements ILaunchShortcut {
 	@Override
 	public void launch(ISelection selection, String mode) {
 		try {
-			String selectedPath = "";
-		   System.out.println("Execution Mode: " + mode);
+		    String selectedPath = "";
+		    String selectedRaportPath = "";
+		    String reportsDirectory = "/reports";
+		    System.out.println("Execution Mode: " + mode);
 
 	    	System.out.println(System.getProperty("line.separator"));
 	    	 if (selection instanceof IStructuredSelection) {
@@ -54,25 +51,19 @@ public class LaunchShortcut implements ILaunchShortcut {
 	    		  if (element instanceof IProject) {
 	    	         IProject iproject = (IProject) element;
 	    			 String real_file_path = iproject.getLocation().toString();
-	    			 System.out.println("real_file_path: "+ real_file_path);
-		    		 System.out.println("Resource element file: "+ iproject);
-					 selectedPath = iproject.getLocation().toString();
+					 selectedPath = real_file_path;
+					 selectedRaportPath = real_file_path+reportsDirectory;
 	    		  }
 	    		  else if (element instanceof IResource) {
 	    	         IResource resElement = (IResource) element;
-	    			 System.out.println("Resource element:"+ (IResource) element);
-					 System.out.println("Full File Path: "+resElement.getFullPath().toString());
-					 System.out.println("Full File getLocation: "+resElement.getLocation().toString());
 					 selectedPath = resElement.getLocation().toString();
+					 selectedRaportPath = resElement.getLocation().toString()+reportsDirectory;
 	    		  } else if (element instanceof IAdaptable) {
 				     IAdaptable adaptable = (IAdaptable)element;
 				     Object adapter = adaptable.getAdapter(IResource.class);
-				     
 				     IResource res = (IResource) adapter;
-					 System.out.println("Resource adapter:"+ (IResource) adapter);
-					 System.out.println("Full File Path: "+res.getFullPath().toString());
-					 System.out.println("Full File getLocation: "+res.getLocation().toString());
 					 selectedPath = res.getLocation().toString();
+					 selectedRaportPath = res.getLocation().toString()+reportsDirectory;
 			      }
 
 		    	 for (Object elem : ss.toList()) {
@@ -85,7 +76,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 		    		    }
 		    		    
 		    			if(javaProject.getOutputLocation()!=null) {
-		    				selectedPath += javaProject.getOutputLocation().toPortableString();
+		    				selectedPath = selectedPath.substring(0, selectedPath.lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString();
 		    			}       
 		    		}
 			 }
@@ -102,17 +93,17 @@ public class LaunchShortcut implements ILaunchShortcut {
 			out.println("-----------------------------------------------------------------------------------------");
 			
 //			System.out.println("Location of workspace:"+ResourcesPlugin.getWorkspace().getRoot().getRawLocationURI().toASCIIString() );
-			String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
+//			String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
 //			System.out.println("Location of bundle state:"+pathToPluginLocalStateDirectory) ;
-			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(pathToPluginLocalStateDirectory, true, "report") ;
-			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(pathToPluginLocalStateDirectory, true, "report") ;
+			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(selectedRaportPath, true, "report") ;
+			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(selectedRaportPath, true, "report") ;
 	
 			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager() ;
 			ILaunchConfigurationType launchType = manager.getLaunchConfigurationType("org.eclipse.jdt.launching.localJavaApplication");
 			final ILaunchConfigurationWorkingCopy config = launchType.newInstance(null, "CyBench plugin");
 			    
-			setEnvironmentProperties(config);
-			
+			setEnvironmentProperties(config, selectedRaportPath);
+
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
 			String[] classpath = new String[] { selectedPath
 					,LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true)
@@ -130,7 +121,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 			        System.err.println(e.getMessage());
 			    }
 			}
-			System.out.println("Classpath:"+classpathMementos);
+//			System.out.println("Classpath:"+classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, pathToTempReportPlainFile+" "+pathToTempReportEncryptedFile);
@@ -194,9 +185,9 @@ public class LaunchShortcut implements ILaunchShortcut {
 		
 	}
 	
-    private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config) {
-		System.out.println(" -DREPORT_FOLDER=\""+"   folderNAME   "+"\"");
-		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, " -DREPORT_FOLDER=\""+"   folderNAME   "+"\"");
+    private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config, String property) {
+		System.out.println(" -DREPORT_FOLDER=\""+property+"\"");
+		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, " -DREPORT_FOLDER=\""+property+"\"");
     }
     
 	@Override
