@@ -59,7 +59,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
     
     private Text userProperties;
     
-    private Button shouldStoreReportToFileSystem;
+//    private Button shouldStoreReportToFileSystem;
     private Button shouldSendReportToCyBench;
 
 
@@ -187,10 +187,10 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
  	        userProperties = new Text(configuration, SWT.BORDER);
  	        
  	        /* User save to file send t CyBench choice buttons */
- 	        Label storeReportsToFileSystemLabel = new Label(configuration, SWT.NONE);
- 	        storeReportsToFileSystemLabel.setText("Store Report In File System:");
- 	        shouldStoreReportToFileSystem = new Button(configuration, SWT.CHECK);
- 	        shouldStoreReportToFileSystem.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 4, 1));
+// 	        Label storeReportsToFileSystemLabel = new Label(configuration, SWT.NONE);
+// 	        storeReportsToFileSystemLabel.setText("Store Report In File System:");
+// 	        shouldStoreReportToFileSystem = new Button(configuration, SWT.CHECK);
+// 	        shouldStoreReportToFileSystem.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 4, 1));
  	        
  	        Label sendReportsToCybenchLabel = new Label(configuration, SWT.NONE);
  	        sendReportsToCybenchLabel.setText("Send Report To CyBench:");
@@ -278,7 +278,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
             int measurmentIterationsDef = configuration.getAttribute(LaunchConfiguration.MEASURMENT_ITERATIONS, 5);
             int warmupSecondsDef = configuration.getAttribute(LaunchConfiguration.WARMUP_SECONDS, 10);
             
-            boolean storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
+//            boolean storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
             boolean sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
             
             reportsFolder.setText(reportFolderDef);
@@ -303,8 +303,8 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
             expectedScore.setValues(-1, -1, 10000, 2, 1, 1);
             expectedScore.addModifyListener(modifyListener);
             
-            shouldStoreReportToFileSystem.setSelection(storeReportInFile);
-            shouldStoreReportToFileSystem.addSelectionListener(selectionListener);
+//            shouldStoreReportToFileSystem.setSelection(storeReportInFile);
+//            shouldStoreReportToFileSystem.addSelectionListener(selectionListener);
             shouldSendReportToCyBench.setSelection(sendReportCybnech);
             shouldSendReportToCyBench.addSelectionListener(selectionListener);
             
@@ -327,7 +327,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
         configuration.setAttribute(LaunchConfiguration.WARMUP_SECONDS, warmupSeconds.getSelection());
 
         configuration.setAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, userProperties.getText());
-        configuration.setAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, shouldStoreReportToFileSystem.getSelection());
+//        configuration.setAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, shouldStoreReportToFileSystem.getSelection());
         configuration.setAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, shouldSendReportToCyBench.getSelection());
         
         configuration.setAttribute(LaunchConfiguration.EXECUTION_SCORE, expectedScore.getSelection());

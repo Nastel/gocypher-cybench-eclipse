@@ -205,7 +205,6 @@ public class CyBenchLauncher {
 		   
 		   
 		launcherConfiguration.setExecutionScore(checkNullAndReturnInt("DEXECUTION_SCORE"));
-		launcherConfiguration.setShouldSaveReportToFile(checkNullAndReturnBoolean("DSHOULD_SAVE_REPOT_TO_FILE"));
 	}
 	
 	private static String checkNullAndReturnString(String propertyName)  {

@@ -234,7 +234,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DWARMUP_ITERATION="+warmupIterations+
 				" -DMEASURMENT_ITERATIONS="+measurmentIterations+
 				" -DWARMUP_SECONDS="+warmupSeconds+
-				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
+//				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
 				" -DEXECUTION_SCORE="+excutionScoreBoundary+
 				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\"");
@@ -246,7 +246,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DWARMUP_ITERATION="+warmupIterations+
 				" -DMEASURMENT_ITERATIONS="+measurmentIterations+
 				" -DWARMUP_SECONDS="+warmupSeconds+
-				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
+//				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
 				" -DEXECUTION_SCORE="+excutionScoreBoundary+
 				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\"");
@@ -263,7 +263,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
        measurmentIterations = configuration.getAttribute(LaunchConfiguration.MEASURMENT_ITERATIONS, 5);
        warmupSeconds = configuration.getAttribute(LaunchConfiguration.WARMUP_SECONDS, 10);
        
-       storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
+//       storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
        sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
        
        userProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, "");
