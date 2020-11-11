@@ -60,7 +60,7 @@
          point="org.eclipse.ui.commands">
       <category
             id="FirstPlugin.commands.category"
-            name="CyBench Tools">
+            name="CyBench">
       </category>
       <command
             categoryId="FirstPlugin.commands.category"
