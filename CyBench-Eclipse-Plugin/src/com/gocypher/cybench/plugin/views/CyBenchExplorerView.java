@@ -2,6 +2,8 @@ package com.gocypher.cybench.plugin.views;
 
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.part.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -20,6 +22,7 @@ import com.gocypher.cybench.plugin.views.ReportsDisplayView.ViewLabelProvider;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
@@ -34,9 +37,13 @@ import org.eclipse.jface.resource.LocalResourceManager;
 import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.ui.*;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 
 import java.io.File;
 import java.net.URL;
@@ -169,33 +176,100 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 
 		// Create the help context id for the viewer's control
 		
-		projectsViewer = new TreeViewer (parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER) ;
+		projectsViewer = new TreeViewer (parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER|  SWT.FULL_SELECTION) ;
 		projectsViewer.setContentProvider(new TreeViewContentProvider());
-		projectsViewer.setLabelProvider(new DelegatingStyledCellLabelProvider(
-                new TreeViewLabelProvider(createImageDescriptor())));
+		//projectsViewer.setLabelProvider(new DelegatingStyledCellLabelProvider(
+        //        new TreeViewLabelProvider(createImageDescriptor())));
 		projectsViewer.setAutoExpandLevel(2);
+		projectsViewer.getTree().setHeaderVisible(true);
 		
-		/*ReportFileEntry folder1 = new ReportFileEntry() ;
-		folder1.setName("Folder1");
 		
-		Node<ReportFileEntry> n1 = new Node<> (folder1) ;
-		
-		ReportFileEntry rep1 = new ReportFileEntry() ;
-		rep1.setName("report1.json");
-				
-		n1.addChild(new Node<ReportFileEntry>(rep1));
-		
-		ReportFileEntry folder2 = new ReportFileEntry() ;
-		folder2.setName("Folder2");
-		
-		Node<ReportFileEntry> n2 = new Node<ReportFileEntry> (folder2) ;
-		
-		List<Node<ReportFileEntry>>nodes = new ArrayList<>() ;
-		nodes.add(n1) ;
-		nodes.add(n2) ;
+		/*projectsViewer.getTree().addListener(SWT.Resize, new Listener() {
+
+	          @Override
+	          public void handleEvent(Event event) {
+
+	        	 System.out.println("Resize:"+event);
+	        	 Tree table = (Tree)event.widget;
+	        	 table.redraw();
+	        	 table.update();	            
+	          }
+	        });
 		*/
+		/*TreeViewerColumn fakeColumn = new TreeViewerColumn(projectsViewer, SWT.NONE);
+		fakeColumn.getColumn().setWidth(20);
+		fakeColumn.setLabelProvider(new CellLabelProvider() {
+			
+			@Override
+			public void update(ViewerCell arg0) {
+				arg0.setText("");				
+			}
+		});
+		
+		fakeColumn.getColumn().dispose();
+		*/
+		
+		
+		
+		
+		TreeViewerColumn mainColumn = new TreeViewerColumn(projectsViewer, SWT.NONE);
+        mainColumn.getColumn().setText("Name");
+       // mainColumn.getColumn().setResizable(false);
+        //mainColumn.getColumn().setWidth(200);
+       
+        mainColumn.setLabelProvider(
+                new DelegatingStyledCellLabelProvider(
+                        new TreeViewMainColumnLabelProvider(createImageDescriptor())));
+		
+        TreeViewerColumn scoreColumn = new TreeViewerColumn(projectsViewer, SWT.NONE);
+        scoreColumn.getColumn().setText("Score");
+        //modifiedColumn.getColumn().setWidth(120);
+        scoreColumn.getColumn().setAlignment(SWT.RIGHT);
+        scoreColumn
+                .setLabelProvider(new DelegatingStyledCellLabelProvider(
+                        new ReportScoreLabelProvider()));
+		
+        TreeViewerColumn modifiedColumn = new TreeViewerColumn(projectsViewer, SWT.NONE);
+        modifiedColumn.getColumn().setText("Timestamp");
+        //modifiedColumn.getColumn().setWidth(120);
+        modifiedColumn.getColumn().setAlignment(SWT.CENTER);
+        modifiedColumn
+                .setLabelProvider(new DelegatingStyledCellLabelProvider(
+                        new ReportTimestampLabelProvider()));
+        
+        
+       
+        
 		projectsViewer.setInput(treeOfReports);
 		
+		//fakeColumn.getColumn().pack();
+		mainColumn.getColumn().pack();
+		modifiedColumn.getColumn().pack();
+		scoreColumn.getColumn().pack();
+		
+		
+		
+		/*projectsViewer.getControl().addControlListener(new ControlListener() {
+
+	        @Override
+	        public void controlResized(ControlEvent arg0) {
+	            Rectangle rect = projectsViewer.getTree().getClientArea();
+	            if(rect.width>0){
+	                int extraSpace=rect.width/3;
+	                mainColumn.getColumn().setWidth(extraSpace);
+	                modifiedColumn.getColumn().setWidth(extraSpace);
+	                scoreColumn.getColumn().setWidth(extraSpace);
+	                //col4.getColumn().setWidth(extraSpace);
+	            }
+	        }
+
+	        @Override
+	        public void controlMoved(ControlEvent arg0) {
+	            // TODO Auto-generated method stub
+
+	        }
+	    });
+	    */
 		
 		workbench.getHelpSystem().setHelp(projectsViewer.getControl(), "CyBenchLauncherPlugin.viewer");
 		getSite().setSelectionProvider(projectsViewer);
@@ -330,7 +404,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 		
 	}
 	
-	class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
+	/*class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
 		@Override
 		public String getColumnText(Object obj, int index) {
 			return getText(obj);
@@ -344,6 +418,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 			return workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);
 		}
 	}
+	*/
 	class TreeViewContentProvider implements ITreeContentProvider {
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
         }
@@ -379,32 +454,37 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
             return false;
         }
 	}
-	class TreeViewLabelProvider extends LabelProvider implements IStyledLabelProvider {
+	class TreeViewMainColumnLabelProvider extends LabelProvider implements IStyledLabelProvider {
 		private ImageDescriptor directoryImage;
         private ResourceManager resourceManager;
 
-        public TreeViewLabelProvider(ImageDescriptor directoryImage) {
+        public TreeViewMainColumnLabelProvider(ImageDescriptor directoryImage) {
             this.directoryImage = directoryImage;
         }
 
         @Override
         public StyledString getStyledText(Object element) {
+        	if (element instanceof Node) {
+        		Node<ReportFileEntry> node = (Node<ReportFileEntry>) element;
+            	if (node.getData() != null && node.getData().getName() != null) {
+            		return new StyledString(node.getData().getName());
+            	}
+	        	
+	            /*if(element instanceof Node) {
+	                Node node = (Node) element;
+	                StyledString styledString = new StyledString(getNodeName(node));
+	                String[] files = file.list();
+	                if (files != null) {
+	                    styledString.append(" ( " + files.length + " ) ",
+	                            StyledString.COUNTER_STYLER);
+	                }
+	                return styledString;
+	            }
+	            */
+	           
+        	}
+        	return new StyledString("");
         	
-        	Node node = (Node) element;
-        	StyledString styledString = new StyledString(getNodeName(node));
-        	
-            /*if(element instanceof Node) {
-                Node node = (Node) element;
-                StyledString styledString = new StyledString(getNodeName(node));
-                String[] files = file.list();
-                if (files != null) {
-                    styledString.append(" ( " + files.length + " ) ",
-                            StyledString.COUNTER_STYLER);
-                }
-                return styledString;
-            }
-            */
-            return styledString;
         }
 
         @Override
@@ -420,27 +500,40 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
             return workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);
         }
 
-        @Override
-        public void dispose() {
-            // garbage collect system resources
-            if(resourceManager != null) {
-                resourceManager.dispose();
-                resourceManager = null;
-            }
-        }
-
-        protected ResourceManager getResourceManager() {
-            if(resourceManager == null) {
-                resourceManager = new LocalResourceManager(JFaceResources.getResources());
-            }
-            return resourceManager;
-        }
-
-        private String getNodeName(Node node) {
-            String name = node.toString();
-            return name;
-        }
 	}
+	class ReportTimestampLabelProvider extends LabelProvider implements IStyledLabelProvider {
+        public ReportTimestampLabelProvider() {
+           
+        }
+        @Override
+        public StyledString getStyledText(Object element) {
+            if (element instanceof Node) {
+            	Node<ReportFileEntry> node = (Node<ReportFileEntry>) element;
+            	if (node.getData() != null && node.getData().getTimeStampStr() != null) {
+            		return new StyledString(node.getData().getTimeStampStr());
+            	}
+                       
+            }
+            return new StyledString("");
+        }
+    }
+	class ReportScoreLabelProvider extends LabelProvider implements IStyledLabelProvider {
+        public ReportScoreLabelProvider() {
+           
+        }
+        @Override
+        public StyledString getStyledText(Object element) {
+            if (element instanceof Node) {
+            	Node<ReportFileEntry> node = (Node<ReportFileEntry>) element;
+            	if (node.getData() != null && node.getData().getScoreStr() != null) {
+            		return new StyledString(node.getData().getScoreStr());
+            	}
+                       
+            }
+            return new StyledString("");
+        }
+    }
+	
 	private ImageDescriptor createImageDescriptor() {
         Bundle bundle = FrameworkUtil.getBundle(ViewLabelProvider.class);
         URL url = FileLocator.find(bundle, new Path("icons/sample.png"), null);

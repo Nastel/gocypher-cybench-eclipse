@@ -24,7 +24,7 @@ public class Constants {
 	public static final String REPORT_UPLOAD_STATUS = "reportUploadStatus";
 	public static final String CUSTOM_BENCHMARK_METADATA = "customBenchmarkMetadata";
 	
-	public static final String REPORT_FILE_EXTENSION = ".json" ;
+	public static final String REPORT_FILE_EXTENSION = ".cybench" ;
 
 
 	public static final Map<String,String> BENCHMARKS_SCORES_COMPUTATIONS_MAPPING = new HashMap<>() ;
