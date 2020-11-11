@@ -2,6 +2,7 @@ package com.gocypher.cybench.plugin.views;
 
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.part.*;
@@ -21,8 +22,12 @@ import com.gocypher.cybench.plugin.views.ReportsDisplayView.ViewLabelProvider;
 
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.StyledString.Styler;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
@@ -31,11 +36,13 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
 import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.ui.*;
+import org.eclipse.ui.dialogs.StyledStringHighlighter;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Tree;
@@ -94,11 +101,22 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	private Action refreshAction;
 	//private Action action2;
 	private Action openSelectedReportAction;
+	private Styler scoreStyler ;
 	
 	@PostConstruct
 	public void init ( ) {
 		//System.out.println("--->Explorer Init called:"+selectionService);
 		this.loadData();
+		
+		this.scoreStyler = new Styler() {
+			
+			@Override
+			public void applyStyles(TextStyle textStyle) {
+				FontDescriptor boldDescriptor = FontDescriptor.createFrom(new FontData("Arial",8,SWT.BOLD));
+		        Font boldFont = boldDescriptor.createFont(Display.getCurrent());		       
+		        textStyle.font = boldFont;		
+			}
+		};
 	}
 	
 	private void loadData () {
@@ -227,7 +245,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
         scoreColumn.getColumn().setAlignment(SWT.RIGHT);
         scoreColumn
                 .setLabelProvider(new DelegatingStyledCellLabelProvider(
-                        new ReportScoreLabelProvider()));
+                        new ReportScoreLabelProvider(this.scoreStyler)));
 		
         TreeViewerColumn modifiedColumn = new TreeViewerColumn(projectsViewer, SWT.NONE);
         modifiedColumn.getColumn().setText("Timestamp");
@@ -510,7 +528,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
             if (element instanceof Node) {
             	Node<ReportFileEntry> node = (Node<ReportFileEntry>) element;
             	if (node.getData() != null && node.getData().getTimeStampStr() != null) {
-            		return new StyledString(node.getData().getTimeStampStr());
+            		return new StyledString(node.getData().getTimeStampStr(),StyledString.DECORATIONS_STYLER);
             	}
                        
             }
@@ -518,15 +536,21 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
         }
     }
 	class ReportScoreLabelProvider extends LabelProvider implements IStyledLabelProvider {
-        public ReportScoreLabelProvider() {
-           
+		private Styler styler ;
+        public ReportScoreLabelProvider(Styler styler ) {
+           this.styler = styler;
         }
         @Override
         public StyledString getStyledText(Object element) {
             if (element instanceof Node) {
             	Node<ReportFileEntry> node = (Node<ReportFileEntry>) element;
             	if (node.getData() != null && node.getData().getScoreStr() != null) {
-            		return new StyledString(node.getData().getScoreStr());
+            		            		
+            		if (styler != null) {
+            			return new StyledString(node.getData().getScoreStr(), styler);
+            		}
+            		return new StyledString(node.getData().getScoreStr()) ; 
+            	
             	}
                        
             }

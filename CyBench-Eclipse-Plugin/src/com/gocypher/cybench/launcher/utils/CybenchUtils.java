@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class CybenchUtils {
 	
-	private static SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss") ;
+	private static SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss") ;
 	
 	
 	
