@@ -95,6 +95,8 @@ public class ReportHandlerService {
 		if (totalScore != null) {
 			model.addToListOfOverview(GuiUtils.getKeyName("totalScore"), GuiUtils.convertNumToStringByLength(totalScore.toString()) ); 
 		}
+		
+		model.addToListOfOverview(GuiUtils.getKeyName("reportURL"), (String)reportProperties.get("reportURL"));
 		model.addToListOfOverview(GuiUtils.getKeyName("uploadStatus"), (String)reportProperties.get("uploadStatus") ); 
 		
 		if (benchmarkSettings != null) {

@@ -393,8 +393,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		final Table table = overviewAttributesViewer.getTable();
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
-        table.setHeaderBackground(colorGray);
-        
+        table.setHeaderBackground(colorGray);       
         
         overviewAttributesViewer.setContentProvider(new ArrayContentProvider());
 		
