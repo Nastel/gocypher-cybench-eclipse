@@ -4,6 +4,7 @@ package com.gocypher.cybench.plugin.views;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.part.*;
 
 import com.gocypher.cybench.core.utils.JSONUtils;
@@ -45,6 +46,7 @@ import org.eclipse.swt.custom.SashForm;
 
 import java.awt.Point;
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -87,20 +89,16 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	private TableViewer reportsListViewer;
 	private TableViewer jvmAttributesViewer;
 	private TableViewer hwAttributesViewer;
-	
-	private Text reportTextArea ;
-	
+	private TableViewer overviewAttributesViewer;
 	
 	private Action refreshAction;
-	private Action action2;
+	private Action openReportLinkAction;
+	
 	private Action doubleClickAction;
-	
-	//private List<ReportFileEntry> listOfFiles = new ArrayList<>();
-	private String reportRawData = "" ;
-	
-	private ReportFileEntry selectedReport ;
-	
+		
 	private TableViewer reportDetailsViewer ;
+	
+	
 	private ReportUIModel reportUIModel = new ReportUIModel();
 	
 	private static Color colorGray= Display.getCurrent().getSystemColor(
@@ -229,9 +227,9 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		reportsListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		reportsListViewer.setInput(this.reportUIModel.getListOfBenchmarks());
 		reportsListViewer.setLabelProvider(new ViewLabelProvider());
-		if (this.reportUIModel.getListOfBenchmarks().size() > 0) {
+		/*if (this.reportUIModel.getListOfBenchmarks().size() > 0) {
 			reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
-		}
+		}*/
 		
 		workbench.getHelpSystem().setHelp(reportsListViewer.getControl(), "CyBenchLauncherPlugin.viewer");
 		getSite().setSelectionProvider(reportsListViewer);
@@ -245,7 +243,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		Group rightGroup = new Group(sash, SWT.NONE);
 		rightGroup.setText( "Details");
 		rightGroup.setLayout(new FillLayout());
-		
+	
 		reportTabs = new CTabFolder(rightGroup, SWT.BOTTOM);
 		GridData data = new GridData(SWT.FILL,
                 SWT.FILL, true, true,
@@ -253,22 +251,25 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		reportTabs.setLayoutData(data);
         
   
-        CTabItem benchmarkDetailsTab = new CTabItem(reportTabs, SWT.NONE);       
+		CTabItem summaryTab = new CTabItem(reportTabs, SWT.NONE);       
         reportTabs.setSelection(0);
+        summaryTab.setText("Summary");
+        this.createSummaryDetailsViewer(reportTabs);
+        summaryTab.setControl(overviewAttributesViewer.getControl());
+        
+		
+        CTabItem benchmarkDetailsTab = new CTabItem(reportTabs, SWT.NONE);               
         benchmarkDetailsTab.setText("Benchmark Details");
-       		
 		this.createReportDetailsViewer(reportTabs);
 		benchmarkDetailsTab.setControl(reportDetailsViewer.getControl());
 		
 		CTabItem jvmPropertiesTab = new CTabItem(reportTabs, SWT.NONE);       		
 		jvmPropertiesTab.setText("JVM Properties");
-		
 		this.createJVMAttributesViewer(reportTabs);
 		jvmPropertiesTab.setControl(jvmAttributesViewer.getControl());
 		
 		CTabItem hwPropertiesTab = new CTabItem(reportTabs, SWT.NONE);       		
 		hwPropertiesTab.setText("HW Properties");
-		
 		this.createHWAttributesViewer(reportTabs);
 		hwPropertiesTab.setControl(hwAttributesViewer.getControl());
 		
@@ -374,19 +375,19 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	private void fillLocalPullDown(IMenuManager manager) {
 		manager.add(refreshAction);
 		manager.add(new Separator());
-		manager.add(action2);
+		manager.add(openReportLinkAction);
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
 		manager.add(refreshAction);
-		manager.add(action2);
+		manager.add(openReportLinkAction);
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(refreshAction);
-		manager.add(action2);
+		manager.add(openReportLinkAction);
 	}
 
 	private void makeActions() {
@@ -401,15 +402,24 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		refreshAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 			getImageDescriptor(ISharedImages.IMG_ELCL_SYNCED));
 		
-		action2 = new Action() {
+		openReportLinkAction = new Action() {
 			public void run() {
-				showMessage("Action 2 executed");
+				//showMessage("Navigate executed:" + reportUIModel.getBaseProperties().get("reportURL"));
+				if (reportUIModel.getReportExternalUrl() != null) {
+					try {						
+					    PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(reportUIModel.getReportExternalUrl()));
+					} catch (Exception e) {
+					    e.printStackTrace();
+					}
+				}
+				
 			}
 		};
-		action2.setText("Action 2");
-		action2.setToolTipText("Action 2 tooltip");
-		action2.setImageDescriptor(workbench.getSharedImages().
-				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+		openReportLinkAction.setText("Open Report in CyBench Web");
+		openReportLinkAction.setToolTipText("Open Report in CyBench WebSite");
+		openReportLinkAction.setImageDescriptor(workbench.getSharedImages().
+				getImageDescriptor(ISharedImages.IMG_DEF_VIEW));
+				
 		doubleClickAction = new Action() {
 			public void run() {
 				IStructuredSelection selection = reportsListViewer.getStructuredSelection();
@@ -425,7 +435,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 						reportDetailsViewer.setInput(reportUIModel.getBenchmarksAttributes().get(selEntry.getName()));
 						reportDetailsViewer.refresh();
 					}
-					reportTabs.setSelection(0);
+					reportTabs.setSelection(1);
 						
 				}
 				
@@ -473,15 +483,10 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	public void refreshView () {
 		loadData();
 		reportsListViewer.setInput(this.reportUIModel.getListOfBenchmarks());
-		reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
+		//reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
 		reportsListViewer.refresh();
 		setDataForSecondaryDisplayElements();
 		
-			
-		/*reportTextArea.setText(reportRawData);
-		reportTextArea.redraw();
-		reportTextArea.update();
-		*/
 	}
 	
 	private void setDataForSecondaryDisplayElements () {
@@ -490,6 +495,9 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 			NameValueEntry selEntry = this.reportUIModel.getListOfBenchmarks().get(0) ;
 			if (reportUIModel.getBenchmarksAttributes().get(selEntry.getName()) != null){
 			
+				overviewAttributesViewer.setInput(reportUIModel.getListOfOverviewProperties());
+				overviewAttributesViewer.refresh();
+				
 				reportDetailsViewer.setInput(reportUIModel.getBenchmarksAttributes().get(selEntry.getName()));
 				reportDetailsViewer.refresh();
 				
@@ -500,6 +508,46 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 				hwAttributesViewer.refresh();
 			}
 		}
+	}
+	private void createSummaryDetailsViewer (Composite parent) {
+		this.overviewAttributesViewer =  new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION  );
+		
+		createColumns(parent, overviewAttributesViewer);
+		
+		final Table table = overviewAttributesViewer.getTable();
+        table.setHeaderVisible(true);
+        table.setLinesVisible(true);
+        table.setHeaderBackground(colorGray);
+        
+        
+        overviewAttributesViewer.setContentProvider(new ArrayContentProvider());
+		
+        
+     // Layout the viewer
+        GridData gridData = new GridData();
+        gridData.verticalAlignment = GridData.FILL;
+        gridData.horizontalSpan = 2;
+        gridData.grabExcessHorizontalSpace = true;
+        gridData.grabExcessVerticalSpace = true;
+        gridData.horizontalAlignment = GridData.FILL;
+        overviewAttributesViewer.getControl().setLayoutData(gridData);
+		
+		/*GridLayout layout = new GridLayout();
+		layout.numColumns = 1;
+		summaryDetailsViewer.setLayout(layout);
+		GridData rightGroupData = new GridData(GridData.FILL_BOTH);
+		rightGroupData.horizontalSpan = 2;
+		summaryDetailsViewer.setLayoutData(rightGroupData);
+		    
+		
+		Label label = new Label (summaryDetailsViewer,SWT.LEFT) ;
+		label.setText("Report Name - My First CyBench report");
+		Label label2 = new Label (summaryDetailsViewer,SWT.LEFT) ;
+		label2.setText("Total Score - 1,200.99");
+		
+		Label label3 = new Label (summaryDetailsViewer,SWT.LEFT) ;
+		label3.setText("Link on CyBench Web - https://www.gocypher.com/cybench");
+		*/
 	}
 	private void createReportDetailsViewer (Composite parent) {
 		reportDetailsViewer = new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION  );

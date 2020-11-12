@@ -15,6 +15,8 @@ public class ReportUIModel {
 	
 	private List<NameValueEntry> listOfHwProperties ;
 	private List<NameValueEntry> listOfJVMProperties ;
+	private List<NameValueEntry> listOfOverviewProperties ;
+	
 	
 	public ReportUIModel() {
 		this.baseProperties = new HashMap<>() ;
@@ -22,10 +24,16 @@ public class ReportUIModel {
 		this.benchmarksAttributes = new HashMap<>() ;
 		this.listOfHwProperties = new ArrayList<>() ;
 		this.listOfJVMProperties = new ArrayList<>() ;
+		this.listOfOverviewProperties = new ArrayList<>() ;
+		
+		
 	}
 	
 	public void addBaseProperty (String name, String value) {
 		this.baseProperties.put(name, new NameValueEntry(name,value)) ;
+	}
+	public void addToListOfOverview (String name, String value) {
+		this.listOfOverviewProperties.add (new NameValueEntry(name,value)) ;
 	}
 	
 	public void addToListOfBenchmarks (String name, String value) {
@@ -52,6 +60,12 @@ public class ReportUIModel {
 		}
 		return title ;
 		
+	}
+	public String getReportExternalUrl () {
+		if (this.baseProperties.get("reportURL") != null) {
+			return this.baseProperties.get("reportURL").getValue() ;
+		}
+		return null ;
 	}
 	public Map<String, NameValueEntry> getBaseProperties() {
 		return baseProperties;
@@ -91,6 +105,14 @@ public class ReportUIModel {
 
 	public void setListOfJVMProperties(List<NameValueEntry> listOfJVMProperties) {
 		this.listOfJVMProperties = listOfJVMProperties;
+	}
+
+	public List<NameValueEntry> getListOfOverviewProperties() {
+		return listOfOverviewProperties;
+	}
+
+	public void setListOfOverviewProperties(List<NameValueEntry> listOfOverviewProperties) {
+		this.listOfOverviewProperties = listOfOverviewProperties;
 	}
 	
 		
