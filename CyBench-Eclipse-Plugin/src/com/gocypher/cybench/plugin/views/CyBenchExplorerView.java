@@ -418,6 +418,10 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	public void refreshView() {
 		this.loadData();
 		this.projectsViewer.setInput(this.treeOfReports);
+		
+		for (TreeColumn col:this.projectsViewer.getTree().getColumns()) {
+			col.pack();
+		}
 		this.projectsViewer.refresh();
 		
 	}
