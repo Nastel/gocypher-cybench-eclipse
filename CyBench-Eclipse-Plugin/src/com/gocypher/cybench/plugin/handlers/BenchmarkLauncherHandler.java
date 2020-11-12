@@ -56,9 +56,9 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 			launchPath = "C:/streams/tests/cybench-eclipse-backup-2020-11-05/cybench-eclipse-backup-2020-11-05/demo-jmh-tests/target/classes";
 			System.out.println("Sync service:"+sync+";"+selectionService);
 			String msg = "" ;
-			MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
-			cyBenchConsole.clearConsole();
-			cyBenchConsole.activate();
+			//MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
+			//cyBenchConsole.clearConsole();
+			//cyBenchConsole.activate();
 			/*MessageConsoleStream out = cyBenchConsole.newMessageStream();
 				
 			out.println("-----------------------------------------------------------------------------------------");

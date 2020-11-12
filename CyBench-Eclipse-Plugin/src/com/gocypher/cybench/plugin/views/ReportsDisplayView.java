@@ -109,8 +109,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	
 	private ReportUIModel reportUIModel = new ReportUIModel();
 	
-	private static Color colorGray= Display.getCurrent().getSystemColor(
-            SWT.COLOR_GRAY);
+	private static Color colorGray= new Color (Display.getCurrent(),232,232,232) ;//Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 	
 	private Styler valueStyler ;
 	private Styler keyStyler ;
@@ -162,26 +161,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 				this.setPartName(reportUIModel.getReportTitle());
 		}
 		
-		
-		//this.listOfFiles.clear();
-		/*List<File>reportsFiles = CybenchUtils.listFilesInDirectory(pathToPluginLocalStateDirectory) ;
-		
-		for (File file:reportsFiles) {
-			if (file.getName().endsWith(Constants.REPORT_FILE_EXTENSION)) {
-				ReportFileEntry entry = new ReportFileEntry() ;
-				entry.create(file);
-				listOfFiles.add(entry) ;
-			}
-		}
-		Collections.sort(listOfFiles, new ReportFileEntryComparator ());
-		if (listOfFiles.size() > 0) {
-			this.reportRawData =  CybenchUtils.loadFile(listOfFiles.get(0).getFullPathToFile()) ;	
-			this.extractReportProperties(this.reportRawData, NameValueModelProvider.INSTANCE.getEntries());
-		}
-		*/
-		
-		
-		//System.out.println("Reports:"+listOfFiles);
+				
 	}
 	class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
 		@Override
@@ -273,80 +253,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		
 		setDataForSecondaryDisplayElements() ;
 		
-		/*reportTextArea = new Text (rightGroup, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL ) ;
-		reportTextArea.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
-                | GridData.HORIZONTAL_ALIGN_FILL  | GridData.VERTICAL_ALIGN_FILL));
-		reportTextArea.setEditable(false);
-		reportTextArea.setText(this.reportRawData);
-		*/
 		
-		/*
-		Table table = new Table(rightGroup, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
-        table.setLinesVisible(true);
-        table.setHeaderVisible(true);
-        GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
-        data.heightHint = 200;
-        table.setLayoutData(data);
-
-        String[] titles = { "First Name", "Last Name", "Age" };
-        for (int i = 0; i < titles.length; i++) {
-            TableColumn column = new TableColumn(table, SWT.NONE);
-            column.setText(titles[i]);
-            table.getColumn(i).pack();
-        }
-
-        for (int i = 0 ; i<= 50 ; i++){
-            TableItem item = new TableItem(table, SWT.NONE);
-            item.setText (0, "Person " +i );
-            item.setText (1, "LastName " +i );
-            item.setText (2, String.valueOf(i));
-        }
-
-        for (int i=0; i<titles.length; i++) {
-            table.getColumn (i).pack ();
-        }
-        */
-		/*CTabFolder folder = new CTabFolder(rightGroup, SWT.LEFT);
-		GridData data = new GridData(SWT.FILL,
-                SWT.FILL, true, true,
-                2, 1);
-        folder.setLayoutData(data);
-        
-        
-        
-        CTabItem cTabItem1 = new CTabItem(folder, SWT.NONE);
-        
-        folder.setSelection(0);
-        
-        cTabItem1.setText("Raw report");
-        
-        
-		
-		
-		cTabItem1.setControl(reportTextArea);
-		
-		
-		CTabItem cTabItem2 = new CTabItem(folder, SWT.NONE);
-		cTabItem2.setText("Report");
-		
-		TableViewer localViewer = new TableViewer(folder, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER );
-		
-		localViewer.setContentProvider(ArrayContentProvider.getInstance());
-		localViewer.setInput(this.listOfFiles);
-		localViewer.setLabelProvider(new ViewLabelProvider());
-		
-		cTabItem2.setControl(localViewer.getControl());
-		*/
-		
-		/*GridData areaData = new GridData();
-	    areaData.grabExcessHorizontalSpace = true;
-	    areaData.grabExcessVerticalSpace = true;
-	    areaData.horizontalAlignment = GridData.FILL;
-	    areaData.verticalAlignment = GridData.FILL;
-	    //areaData.widthHint = 200;
-	    areaData.heightHint = 80;
-	    reportTextArea.setLayoutData(areaData);
-	    */
 		
 	}
 	
@@ -414,8 +321,8 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		};
 		openReportLinkAction.setText("Open in CyBench Web");
 		openReportLinkAction.setToolTipText("Open Report in CyBench WebSite.");
-		openReportLinkAction.setImageDescriptor(workbench.getSharedImages().
-				getImageDescriptor(ISharedImages.IMG_DEF_VIEW));
+		openReportLinkAction.setImageDescriptor(GuiUtils.getCustomImage("icons/chrome.png"));
+		
 				
 		doubleClickAction = new Action() {
 			public void run() {

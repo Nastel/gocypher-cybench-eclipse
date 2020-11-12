@@ -1,18 +1,25 @@
 package com.gocypher.cybench.plugin.utils;
 
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Base64;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.osgi.framework.FrameworkUtil;
 
+import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.ICybenchPartView;
 import com.gocypher.cybench.plugin.views.CyBenchExplorerView;
 import com.gocypher.cybench.plugin.views.ReportsDisplayView;
@@ -136,6 +143,10 @@ public class GuiUtils {
 		out.println(message);
 		
     }
-	 
+	
+    public static ImageDescriptor getCustomImage (String pathToImage) {
+    	URL url = FileLocator.find(Platform.getBundle(Activator.PLUGIN_ID), new Path(pathToImage), null);
+    	return ImageDescriptor.createFromURL(url);
+    }
 
 }

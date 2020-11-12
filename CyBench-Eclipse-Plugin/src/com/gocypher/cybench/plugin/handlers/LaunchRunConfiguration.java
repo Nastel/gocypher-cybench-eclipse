@@ -102,9 +102,9 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		try {
 	    	setRunConfigurationProperties(configuration);
 
-			MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
-			cyBenchConsole.clearConsole();
-			cyBenchConsole.activate();
+			//MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
+			//cyBenchConsole.clearConsole();
+			//cyBenchConsole.activate();
 			/*MessageConsoleStream out = cyBenchConsole.newMessageStream();
 				
 			out.println("-----------------------------------------------------------------------------------------");
