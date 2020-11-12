@@ -479,6 +479,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		createColumns(parent, hwAttributesViewer);
 		
 		final Table table = hwAttributesViewer.getTable();
+		
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
         table.setHeaderBackground(colorGray);
@@ -497,7 +498,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	}
 	private void createColumns(final Composite parent, final TableViewer viewer) {
 		String[] titles = { "Attribute Name", "Attribute Value"};
-        int[] bounds = { 400, 400 };
+        int[] bounds = { 400, 500 };
         
         // First column is for the first name
         TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0, viewer);
@@ -510,7 +511,8 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
         });
 
         // Second column is for the last name
-        col = createTableViewerColumn(titles[1], bounds[1], 1,viewer);       
+        col = createTableViewerColumn(titles[1], bounds[1], 1,viewer);
+        col.getColumn().setAlignment(SWT.RIGHT);
         col.setLabelProvider(new DelegatingStyledCellLabelProvider(
                 new ValueLabelProvider()));
 	}
