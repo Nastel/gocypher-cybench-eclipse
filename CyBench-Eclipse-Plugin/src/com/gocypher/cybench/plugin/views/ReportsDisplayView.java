@@ -14,15 +14,22 @@ import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.ICybenchPartView;
 import com.gocypher.cybench.plugin.model.NameValueEntry;
 import com.gocypher.cybench.plugin.model.NameValueModelProvider;
+import com.gocypher.cybench.plugin.model.Node;
 import com.gocypher.cybench.plugin.model.ReportFileEntry;
 import com.gocypher.cybench.plugin.model.ReportFileEntryComparator;
 import com.gocypher.cybench.plugin.model.ReportHandlerService;
 import com.gocypher.cybench.plugin.model.ReportUIModel;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
+import com.gocypher.cybench.plugin.views.CyBenchExplorerView.ReportTimestampLabelProvider;
 
 import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -33,6 +40,7 @@ import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.e4.ui.workbench.modeling.ISelectionListener;
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.ui.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
@@ -103,33 +111,22 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	
 	private static Color colorGray= Display.getCurrent().getSystemColor(
             SWT.COLOR_GRAY);
+	
+	private Styler valueStyler ;
+	private Styler keyStyler ;
 	 
 	
 	@PostConstruct
 	public void init ( ) {
-		//System.out.println("--->Init called:"+reportService);
-		//System.out.println("Titles:"+CybenchUtils.titles);
-		//System.out.println("Part properties:"+this.getViewSite().getSecondaryId());
-		
-		
-		
-		/*this.selectionService.addSelectionListener(new ISelectionListener() {
+		this.valueStyler = new Styler() {
 			
 			@Override
-			public void selectionChanged(MPart sourcePart, Object selection) {
-				if (selection instanceof ReportFileEntry) {
-					System.out.println("Selection service:"+sourcePart.getElementId() +";"+selection);
-					//selectedReport = (ReportFileEntry)selection ;
-					//reportUIModel = reportService.prepareReportDisplayModel(selectedReport) ;
-					//refreshView();
-					
-					
-				}
-				
+			public void applyStyles(TextStyle textStyle) {
+				FontDescriptor boldDescriptor = FontDescriptor.createFrom(new FontData("Arial",8,SWT.BOLD));
+		        Font boldFont = boldDescriptor.createFont(Display.getCurrent());		       
+		        textStyle.font = boldFont;		
 			}
-		});
-		*/
-		//this.reportService.prepareReportDisplayModel();
+		};
 		this.loadData();
 		
 	}
@@ -398,7 +395,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 			}
 		};
 		refreshAction.setText("Refresh");
-		refreshAction.setToolTipText("Refresh list of report files");
+		refreshAction.setToolTipText("Reload report from the file system.");
 		refreshAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 			getImageDescriptor(ISharedImages.IMG_ELCL_SYNCED));
 		
@@ -415,8 +412,8 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 				
 			}
 		};
-		openReportLinkAction.setText("Open Report in CyBench Web");
-		openReportLinkAction.setToolTipText("Open Report in CyBench WebSite");
+		openReportLinkAction.setText("Open in CyBench Web");
+		openReportLinkAction.setToolTipText("Open Report in CyBench WebSite.");
 		openReportLinkAction.setImageDescriptor(workbench.getSharedImages().
 				getImageDescriptor(ISharedImages.IMG_DEF_VIEW));
 				
@@ -428,34 +425,12 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 				if (obj instanceof NameValueEntry) {
 					NameValueEntry selEntry = (NameValueEntry)obj ;
 					if (reportUIModel.getBenchmarksAttributes().get(selEntry.getName()) != null){
-											
-						//ameValueModelProvider.INSTANCE.getEntries().clear();
-						//NameValueModelProvider.INSTANCE.getEntries().addAll(reportUIModel.getBenchmarksAttributes().get(selEntry.getName()) ) ;
-						//reportDetailsViewer.setInput(NameValueModelProvider.INSTANCE.getEntries());
+																
 						reportDetailsViewer.setInput(reportUIModel.getBenchmarksAttributes().get(selEntry.getName()));
 						reportDetailsViewer.refresh();
 					}
-					reportTabs.setSelection(1);
-						
-				}
-				
-				if (obj instanceof ReportFileEntry) {
-					ReportFileEntry file = (ReportFileEntry)obj ;
-					//reportRawData = CybenchUtils.loadFile(file.getFullPathToFile()) ;
-					
-					//extractReportProperties(reportRawData, NameValueModelProvider.INSTANCE.getEntries());
-					//reportDetailsViewer.setInput(NameValueModelProvider.INSTANCE.getEntries());
-					//reportDetailsViewer.refresh();
-					
-					//System.out.println("Report Raw data:"+reportRawData);
-					/*reportTextArea.setText(reportRawData);
-					reportTextArea.redraw();
-					reportTextArea.update();
-					*/
-				}
-				
-				//showMessage("Double-click detected on "+obj.getClass());
-				
+					reportTabs.setSelection(1);				
+				}			
 			}
 		};
 	}
@@ -467,13 +442,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 			}
 		});
 	}
-	private void showMessage(String message) {
-		MessageDialog.openInformation(
-				reportsListViewer.getControl().getShell(),
-			"Cybench Reports",
-			message);
-	}
-
+	
 	@Override
 	public void setFocus() {
 		reportsListViewer.getControl().setFocus();
@@ -634,14 +603,9 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
         });
 
         // Second column is for the last name
-        col = createTableViewerColumn(titles[1], bounds[1], 1,viewer);
-        col.setLabelProvider(new ColumnLabelProvider() {
-            @Override
-            public String getText(Object element) {
-            	NameValueEntry p = (NameValueEntry) element;
-                return p.getValue();
-            }
-        });
+        col = createTableViewerColumn(titles[1], bounds[1], 1,viewer);       
+        col.setLabelProvider(new DelegatingStyledCellLabelProvider(
+                new ValueLabelProvider()));
 	}
 	private TableViewerColumn createTableViewerColumn(String title, int bound, final int colNumber,final TableViewer viewer) {
         final TableViewerColumn viewerColumn = new TableViewerColumn(viewer,
@@ -653,6 +617,22 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
         column.setMoveable(true);
         
         return viewerColumn;
+    }
+	class ValueLabelProvider extends LabelProvider implements IStyledLabelProvider {
+        public ValueLabelProvider() {
+           
+        }
+        @Override
+        public StyledString getStyledText(Object element) {
+            if (element instanceof NameValueEntry) {
+            	NameValueEntry p = (NameValueEntry) element;
+            	if (p.getValue() != null) {
+            		return new StyledString(p.getValue(),valueStyler);
+            	}
+                       
+            }
+            return new StyledString("");
+        }
     }
 	
 }
