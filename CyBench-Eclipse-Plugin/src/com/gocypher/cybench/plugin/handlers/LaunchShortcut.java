@@ -83,7 +83,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 			System.out.println("selectedPath: "+selectedPath);
 	    	System.out.println(System.getProperty("line.separator"));
 	    	
-			MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
+			/*MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
 			cyBenchConsole.clearConsole();
 			cyBenchConsole.activate();
 			MessageConsoleStream out = cyBenchConsole.newMessageStream();
@@ -91,7 +91,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 			out.println("-----------------------------------------------------------------------------------------");
 			out.println("                                 Starting CyBench benchmarks                             ");
 			out.println("-----------------------------------------------------------------------------------------");
-			
+			*/
 //			System.out.println("Location of workspace:"+ResourcesPlugin.getWorkspace().getRoot().getRawLocationURI().toASCIIString() );
 //			String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
 //			System.out.println("Location of bundle state:"+pathToPluginLocalStateDirectory) ;
@@ -135,7 +135,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 					try {
 					    ILaunch launchedBenchmarks = config.launch(ILaunchManager.RUN_MODE, null);
 					  
-					    out.println("Waiting for CyBench to finish...");
+					    //out.println("Waiting for CyBench to finish...");
 					    
 					    while (!launchedBenchmarks.isTerminated()) {
 					    	try {
@@ -144,7 +144,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 					    		
 					    	}
 					    }
-					    out.println("Finished CyBench tests:"+launchedBenchmarks.isTerminated());
+					    /*out.println("Finished CyBench tests:"+launchedBenchmarks.isTerminated());
 						String results = CybenchUtils.loadFile(pathToTempReportPlainFile) ;
 						if (results != null && !results.isEmpty()) {
 								out.println("Results from tests:"+JSONUtils.parseJsonIntoMap(results));
@@ -152,7 +152,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 						out.println("-----------------------------------------------------------------------------------------");
 						out.println("                                 Finished CyBench benchmarks                             ");
 						out.println("-----------------------------------------------------------------------------------------");
-						
+						*/
 						
 						GuiUtils.refreshCybenchExplorer();
 						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);					

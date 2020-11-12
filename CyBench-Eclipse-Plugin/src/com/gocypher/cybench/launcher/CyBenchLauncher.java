@@ -43,7 +43,9 @@ public class CyBenchLauncher {
 	public static Map<String,String> resultsMap = new HashMap<>() ;
 	
 	public static void main(String[] args) throws Exception{
-		System.out.println("CyBench launcher started.");
+		System.out.println("-----------------------------------------------------------------------------------------");
+		System.out.println("                                 Starting CyBench benchmarks                             ");
+		System.out.println("-----------------------------------------------------------------------------------------");
 //		System.out.println("Launcher classpath:"+System.getProperty("java.class.path"));
 		long start = System.currentTimeMillis();
 		LauncherConfiguration launcherConfiguration = new LauncherConfiguration () ;
@@ -137,7 +139,9 @@ public class CyBenchLauncher {
         CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cybench", reportJSON);
         CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cyb", reportEncrypted);
         
-		//System.out.println("Result:"+ComputationUtils.log10(new BigDecimal(1000)));
+        System.out.println("-----------------------------------------------------------------------------------------");
+        System.out.println("                                 Finished CyBench benchmarks                             ");
+        System.out.println("-----------------------------------------------------------------------------------------");
 	}
 	private static void checkAndConfigureCustomProperties (SecurityBuilder securityBuilder
             ,Map<String,Object>benchmarkSettings

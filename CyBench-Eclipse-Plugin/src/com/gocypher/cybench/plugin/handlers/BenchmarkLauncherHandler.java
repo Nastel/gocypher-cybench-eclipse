@@ -59,12 +59,12 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 			MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
 			cyBenchConsole.clearConsole();
 			cyBenchConsole.activate();
-			MessageConsoleStream out = cyBenchConsole.newMessageStream();
+			/*MessageConsoleStream out = cyBenchConsole.newMessageStream();
 				
 			out.println("-----------------------------------------------------------------------------------------");
 			out.println("                                 Starting CyBench benchmarks                             ");
 			out.println("-----------------------------------------------------------------------------------------");
-			
+			*/
 			List<String> programArguments = new ArrayList<>() ;
 			
 			String bundlePaths = ""
@@ -157,7 +157,7 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 						//IProgressMonitor monitor =  //PlatformUI.getWorkbench().getProgressService() ;
 					    ILaunch launchedBenchmarks = config.launch(ILaunchManager.RUN_MODE, null);
 					  
-					    out.println("Waiting for CyBench to finish...");
+					    //out.println("Waiting for CyBench to finish...");
 					    
 					    while (!launchedBenchmarks.isTerminated()) {
 					    	//out.println("Waiting for CyBench to finish:"+launchedBenchmarks.isTerminated());
@@ -167,18 +167,19 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 					    		
 					    	}
 					    }
-					    out.println("Finished CyBench tests:"+launchedBenchmarks.isTerminated());
+					    //out.println("Finished CyBench tests:"+launchedBenchmarks.isTerminated());
 					    
 						String results = CybenchUtils.loadFile(pathToTempReportPlainFile) ;
 						if (results != null && !results.isEmpty()) {
-								out.println("Results from tests:"+JSONUtils.parseJsonIntoMap(results));
+								//out.println("Results from tests:"+JSONUtils.parseJsonIntoMap(results));
 						}
 						//this.showMsgBox("Results from tests:"+results, event);				
 						
 						
-						out.println("-----------------------------------------------------------------------------------------");
+						/*out.println("-----------------------------------------------------------------------------------------");
 						out.println("                                 Finished CyBench benchmarks                             ");
 						out.println("-----------------------------------------------------------------------------------------");
+						*/
 						//cyBenchConsole.activate();
 											
 						Display.getDefault().asyncExec(new Runnable() {
