@@ -19,6 +19,7 @@ public class LauncherConfiguration {
 	private String reportUploadStatus = "public";
 	
 	private boolean shouldSendReportToCyBench = false;
+	private boolean includeHardware = true;
 	
 	private double executionScore = -1.0d;
 	
@@ -153,6 +154,18 @@ public class LauncherConfiguration {
 
 	public void setMeasurmentSeconds(int measurmentSeconds) {
 		this.measurmentSeconds = measurmentSeconds;
+	}
+
+
+
+	public boolean isIncludeHardware() {
+		return includeHardware;
+	}
+
+
+
+	public void setIncludeHardware(boolean includeHardware) {
+		this.includeHardware = includeHardware;
 	}
 	
 

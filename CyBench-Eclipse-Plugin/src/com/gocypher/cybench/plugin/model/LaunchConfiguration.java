@@ -15,6 +15,7 @@ public interface LaunchConfiguration {
 
 	public static final String EXECUTION_SCORE = "com.cybench.executionScore";
 	public static final String SHOULD_SEND_REPORT_CYBENCH = "com.cybench.shouldSendReportToCyBench";
+	public static final String INCLUDE_HARDWARE_PROPERTIES = "com.cybench.includeHardwareProperties";
 	public static final String SHOULD_SAVE_REPOT_TO_FILE = "com.cybench.ShouldSaveReportToFile";
 	public static final String CUSTOM_USER_PROPERTIES = "com.cybench.customUserProperties";
 	

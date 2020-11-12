@@ -62,6 +62,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
     
 //    private Button shouldStoreReportToFileSystem;
     private Button shouldSendReportToCyBench;
+    private Button shouldDoHardwareSnapshot;
 
 
 	Map<String, String> paths =  new HashMap<>();
@@ -204,8 +205,33 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
  	        sendReportsToCybenchLabel.setText("Send Report To CyBench:");
  	        shouldSendReportToCyBench = new Button(configuration, SWT.CHECK);
  	        shouldSendReportToCyBench.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 4, 1)); 
- 	        
 
+ 	       
+
+ 	        Label doHardwarePropertiesSnapshotLabel = new Label(configuration, SWT.NONE);
+ 	        doHardwarePropertiesSnapshotLabel.setText("Include Hardware Propeties");
+ 	        shouldDoHardwareSnapshot = new Button(configuration, SWT.CHECK);
+ 	        shouldDoHardwareSnapshot.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 4, 1)); 
+    		shouldDoHardwareSnapshot.setEnabled(false);
+//    		shouldDoHardwareSnapshot.setVisible(false);
+//    		doHardwarePropertiesSnapshotLabel.setVisible(false);
+ 	        
+ 	        shouldSendReportToCyBench.addSelectionListener(new SelectionAdapter() {
+	            public void widgetSelected(SelectionEvent e) {
+	            	if(shouldSendReportToCyBench.getSelection()) {
+	            		shouldDoHardwareSnapshot.setSelection(true);
+	            		shouldDoHardwareSnapshot.setEnabled(false);
+//	            		shouldDoHardwareSnapshot.setVisible(false);
+//	            		doHardwarePropertiesSnapshotLabel.setVisible(false);
+	            	}else {
+	            		shouldDoHardwareSnapshot.setEnabled(true);
+//	            		shouldDoHardwareSnapshot.setVisible(true);
+//	            		doHardwarePropertiesSnapshotLabel.setVisible(true);
+	            	}
+	            }
+	
+	        });
+	        
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(reportFolderLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(reportNameLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(reportlaunchPathLabel);
@@ -289,6 +315,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
             
 //            boolean storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
             boolean sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
+            boolean includehardwarePropeties = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
             
             reportsFolder.setText(reportFolderDef);
             reportsFolder.addModifyListener(modifyListener);
@@ -319,6 +346,9 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
             shouldSendReportToCyBench.setSelection(sendReportCybnech);
             shouldSendReportToCyBench.addSelectionListener(selectionListener);
             
+            shouldDoHardwareSnapshot.setSelection(includehardwarePropeties);
+            shouldDoHardwareSnapshot.addSelectionListener(selectionListener);
+            
         } catch (CoreException e) {
         	System.out.println("There was a problem on the run configuration initialization: "+ e);
         }
@@ -341,6 +371,7 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
         configuration.setAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, userProperties.getText());
 //        configuration.setAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, shouldStoreReportToFileSystem.getSelection());
         configuration.setAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, shouldSendReportToCyBench.getSelection());
+        configuration.setAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, shouldDoHardwareSnapshot.getSelection());
         
         configuration.setAttribute(LaunchConfiguration.EXECUTION_SCORE, expectedScore.getSelection());
         
@@ -382,16 +413,6 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
 		    		}
 	    			projectPaths.put(projectPackageFullPath, projectOutputPath);
 	    		}
-//    		    System.out.println("CLASSPATH_FILE_NAME: "+ IJavaProject.CLASSPATH_FILE_NAME);
-//    			System.out.println("determineModulesOfProjectsWithNonEmptyClasspath: "+javaProject.determineModulesOfProjectsWithNonEmptyClasspath());
-//    			System.out.println("getAllPackageFragmentRoots: "+javaProject.getAllPackageFragmentRoots());
-//    			System.out.println("getClasspathEntryFor: "+javaProject.getClasspathEntryFor(proj.getLocation()));
-//    			System.out.println("getModuleDescription: "+javaProject.getModuleDescription());
-//    			System.out.println("OUTPUT_LOCATION: "+javaProject.getOutputLocation().toPortableString());
-//    			System.out.println("getPackageFragmentRoots: "+javaProject.getPackageFragmentRoots());
-//    			System.out.println("getRawClasspath: "+javaProject.getRawClasspath());
-//    			System.out.println("readOutputLocation: "+javaProject.readOutputLocation());;
-//    			System.out.println("readRawClasspath(): "+javaProject.readRawClasspath());
 	    	}
 		} catch (JavaModelException e) {
 			e.printStackTrace();

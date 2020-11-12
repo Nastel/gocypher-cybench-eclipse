@@ -48,6 +48,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private int warmupSeconds;
 	private int mesurmentSeconds;
 	private boolean sendReportCybnech; 
+	private boolean includeHardware;
 	private String userProperties;
 	private int excutionScoreBoundary ;
     
@@ -218,6 +219,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DMEASURMENT_SECONDS="+mesurmentSeconds+
 //				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
+				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
 				" -DEXECUTION_SCORE="+excutionScoreBoundary+
 				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\"");
 		
@@ -231,6 +233,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DMEASURMENT_SECONDS="+mesurmentSeconds+
 //				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
+				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
 				" -DEXECUTION_SCORE="+excutionScoreBoundary+
 				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\"");
 		
@@ -249,6 +252,8 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
        
 //       storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
        sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
+       includeHardware = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
+       
        
        userProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, "");
    	   excutionScoreBoundary = configuration.getAttribute(LaunchConfiguration.EXECUTION_SCORE, -1);

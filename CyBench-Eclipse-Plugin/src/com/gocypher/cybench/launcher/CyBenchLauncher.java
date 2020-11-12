@@ -59,11 +59,14 @@ public class CyBenchLauncher {
 		//FIXME implement loading of custom benchmark meta data
 
     	System.out.println(System.getProperty("line.separator"));
-		
-		System.out.println("Collecting hardware, software information...");
-        HardwareProperties hwProperties = CollectSystemInformation.getEnvironmentProperties();
-        System.out.println("Collecting JVM properties...");
-        JVMProperties jvmProperties = CollectSystemInformation.getJavaVirtualMachineProperties();
+    	HardwareProperties hwProperties = new HardwareProperties();
+    	JVMProperties jvmProperties = new JVMProperties();
+		if(launcherConfiguration.isIncludeHardware()) {
+			System.out.println("Collecting hardware, software information...");
+	        hwProperties = CollectSystemInformation.getEnvironmentProperties();
+	        System.out.println("Collecting JVM properties...");
+	        jvmProperties = CollectSystemInformation.getJavaVirtualMachineProperties();
+		}
 		
         SecurityBuilder securityBuilder = new SecurityBuilder();        
         Map<String, Object> benchmarkSettings = new HashMap<>();
@@ -101,9 +104,10 @@ public class CyBenchLauncher {
 		BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results, customBenchmarksMetadata);
 
 		report.updateUploadStatus(launcherConfiguration.getReportUploadStatus());
-
-        report.getEnvironmentSettings().put("environment", hwProperties);
-        report.getEnvironmentSettings().put("jvmEnvironment", jvmProperties);
+		if(launcherConfiguration.isIncludeHardware()) {
+	        report.getEnvironmentSettings().put("environment", hwProperties);
+	        report.getEnvironmentSettings().put("jvmEnvironment", jvmProperties);
+		}
         report.getEnvironmentSettings().put("unclassifiedProperties", CollectSystemInformation.getUnclassifiedProperties());
         report.getEnvironmentSettings().put("userDefinedProperties", customUserDefinedProperties(launcherConfiguration.getUserProperties()));
         report.setBenchmarkSettings(benchmarkSettings);
@@ -199,6 +203,7 @@ public class CyBenchLauncher {
 		launcherConfiguration.setMeasurementIterations(checkNullAndReturnInt("MEASURMENT_ITERATIONS"));
 		launcherConfiguration.setWarmUpSeconds(checkNullAndReturnInt("WARMUP_SECONDS"));
 
+		launcherConfiguration.setIncludeHardware(checkNullAndReturnBoolean("INCLUDE_HARDWARE_PROPERTIES"));
 		launcherConfiguration.setShouldSendReportToCyBench(checkNullAndReturnBoolean("SHOULD_SEND_REPORT_CYBENCH"));
 		launcherConfiguration.setUserProperties(checkNullAndReturnString("CUSTOM_USER_PROPERTIES"));
 		   
