@@ -51,7 +51,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 	    		  if (element instanceof IProject) {
 	    	         IProject iproject = (IProject) element;
 	    			 String real_file_path = iproject.getLocation().toString();
-					 selectedPath = real_file_path;
+	    			 selectedPath= real_file_path;
 					 selectedRaportPath = real_file_path+reportsDirectory;
 	    		  }
 	    		  else if (element instanceof IResource) {
@@ -154,8 +154,8 @@ public class LaunchShortcut implements ILaunchShortcut {
 						out.println("-----------------------------------------------------------------------------------------");
 						*/
 
+						GuiUtils.refreshCybenchExplorer();				
 						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);	
-//						GuiUtils.refreshCybenchExplorer();				
 						
 						/*Display.getDefault().asyncExec(new Runnable() {
 						    public void run() {
