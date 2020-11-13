@@ -183,8 +183,8 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 						out.println("-----------------------------------------------------------------------------------------");
 						*/
 
-						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);		
 						GuiUtils.refreshCybenchExplorer();			
+						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);		
 						
 						/*Display.getDefault().asyncExec(new Runnable() {
 						    public void run() {

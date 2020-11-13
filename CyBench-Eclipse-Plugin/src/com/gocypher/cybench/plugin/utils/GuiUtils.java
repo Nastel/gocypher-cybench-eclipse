@@ -118,9 +118,7 @@ public class GuiUtils {
 			    public void run() {
 			    	try {
 			    		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			    		
 			    		String reportIdentifier = encodeBase64(fullPathToReport) ;
-			    		System.out.println("Will open part for reports: "+ fullPathToReport);
 			    		page.showView(ReportsDisplayView.ID,reportIdentifier , IWorkbenchPage.VIEW_ACTIVATE);			
 		    		
 	//			    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportsDisplayView.ID) ; 
