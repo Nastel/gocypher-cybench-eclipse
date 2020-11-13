@@ -3,8 +3,10 @@ package com.gocypher.cybench.launcher;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 
 import org.openjdk.jmh.generators.annotations.APGeneratorDestinaton;
 import org.openjdk.jmh.generators.annotations.APGeneratorSource;
@@ -84,6 +86,15 @@ public class CyBenchLauncher {
         
 		
 		OptionsBuilder optBuild = new OptionsBuilder();
+
+		if(launcherConfiguration.getClassCalled().size() > 0) {
+			for(String classname : launcherConfiguration.getClassCalled()) {
+				System.out.println("Classes sellected to run: "+ classname);
+				//"test.MyBenchmark"
+				optBuild.include(classname);
+			}
+		}
+		
 		Options opt = optBuild
 					.forks(launcherConfiguration.getForks())
 					//.include(DemoBenchmarks.class.getName())
@@ -101,6 +112,7 @@ public class CyBenchLauncher {
 					.build();
 	
 		Runner runner = new Runner(opt);
+	
 		Collection<RunResult> results = runner.run() ;
 		
 		BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results, customBenchmarksMetadata);
@@ -192,8 +204,6 @@ public class CyBenchLauncher {
                 }
             }
         }
-
-
         return customUserProperties;
     }
 	
@@ -214,6 +224,7 @@ public class CyBenchLauncher {
 		launcherConfiguration.setUserProperties(checkNullAndReturnString("CUSTOM_USER_PROPERTIES"));
 		   
 
+		launcherConfiguration.setClassCalled(checkNullAndReturnSet("REPORT_CLASSES"));
 		launcherConfiguration.setMeasurmentSeconds(checkNullAndReturnInt("MEASURMENT_SECONDS"));
 		launcherConfiguration.setExecutionScore(checkNullAndReturnInt("DEXECUTION_SCORE"));
 	}
@@ -237,5 +248,15 @@ public class CyBenchLauncher {
 			return Boolean.parseBoolean(System.getProperty(propertyName));
 		}
 		return false;
+	}
+	
+	private static Set<String> checkNullAndReturnSet(String propertyName)  {
+		System.out.println("Classes selected "+System.getProperty(propertyName));
+		Set<String>  classesToInclude= new HashSet<String>();
+		if(System.getProperty(propertyName)!= null) {
+			classesToInclude.addAll(Arrays.asList(System.getProperty(propertyName).split(",")));
+			return classesToInclude;
+		}
+		return classesToInclude;
 	}
 }

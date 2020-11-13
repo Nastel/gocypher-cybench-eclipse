@@ -1,8 +1,13 @@
 package com.gocypher.cybench.plugin.handlers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -23,12 +28,9 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
-
-import com.gocypher.cybench.core.utils.JSONUtils;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
+import com.gocypher.cybench.plugin.model.RunSelectionEntry;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
 
@@ -39,73 +41,26 @@ public class LaunchShortcut implements ILaunchShortcut {
 	@Override
 	public void launch(ISelection selection, String mode) {
 		try {
-		    String selectedPath = "";
-		    String selectedRaportPath = "";
-		    String reportsDirectory = "/reports";
+			RunSelectionEntry selectionEntry = fillRunselectionData(selection);
 		    System.out.println("Execution Mode: " + mode);
-
 	    	System.out.println(System.getProperty("line.separator"));
-	    	 if (selection instanceof IStructuredSelection) {
-	    		 IStructuredSelection ss = (IStructuredSelection) selection;
-	    		 Object element = ss.getFirstElement();
-	    		  if (element instanceof IProject) {
-	    	         IProject iproject = (IProject) element;
-	    			 String real_file_path = iproject.getLocation().toString();
-	    			 selectedPath= real_file_path;
-					 selectedRaportPath = real_file_path+reportsDirectory;
-	    		  }
-	    		  else if (element instanceof IResource) {
-	    	         IResource resElement = (IResource) element;
-					 selectedPath = resElement.getLocation().toString();
-					 selectedRaportPath = resElement.getLocation().toString()+reportsDirectory;
-	    		  } else if (element instanceof IAdaptable) {
-				     IAdaptable adaptable = (IAdaptable)element;
-				     Object adapter = adaptable.getAdapter(IResource.class);
-				     IResource res = (IResource) adapter;
-					 selectedPath = res.getLocation().toString();
-					 selectedRaportPath = res.getLocation().toString()+reportsDirectory;
-			      }
-
-		    	 for (Object elem : ss.toList()) {
-		    		    IJavaProject javaProject = null;
-
-		    		    if (elem instanceof IJavaProject) {
-		    		    	javaProject = (IJavaProject)elem;
-		    		    } else if (elem instanceof IProject) {
-		    		    	javaProject = (IJavaProject)JavaCore.create((IProject)elem);
-		    		    }
-		    		    
-		    			if(javaProject.getOutputLocation()!=null) {
-		    				selectedPath = selectedPath.substring(0, selectedPath.lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString();
-		    			}       
-		    		}
-			 }
-			System.out.println("selectedPath: "+selectedPath);
+			System.out.println("project path: "+selectionEntry.getProjectPath());
+			System.out.println("output path: "+selectionEntry.getOutputPath());
+			System.out.println("classes paths: "+selectionEntry.getClassPaths());
+			System.out.println("project reports path: "+selectionEntry.getProjectReportsPath());
 	    	System.out.println(System.getProperty("line.separator"));
 	    	
-			/*MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
-			cyBenchConsole.clearConsole();
-			cyBenchConsole.activate();
-			MessageConsoleStream out = cyBenchConsole.newMessageStream();
-				
-			out.println("-----------------------------------------------------------------------------------------");
-			out.println("                                 Starting CyBench benchmarks                             ");
-			out.println("-----------------------------------------------------------------------------------------");
-			*/
-//			System.out.println("Location of workspace:"+ResourcesPlugin.getWorkspace().getRoot().getRawLocationURI().toASCIIString() );
-//			String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
-//			System.out.println("Location of bundle state:"+pathToPluginLocalStateDirectory) ;
-			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(selectedRaportPath, true, "report") ;
-			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(selectedRaportPath, true, "report") ;
+			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(selectionEntry.getProjectReportsPath(), true, "report") ;
+			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(selectionEntry.getProjectReportsPath(), true, "report") ;
 	
 			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager() ;
 			ILaunchConfigurationType launchType = manager.getLaunchConfigurationType("org.eclipse.jdt.launching.localJavaApplication");
 			final ILaunchConfigurationWorkingCopy config = launchType.newInstance(null, "CyBench plugin");
 			    
-			setEnvironmentProperties(config, selectedRaportPath);
+			setEnvironmentProperties(config, selectionEntry);
 
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
-			String[] classpath = new String[] { selectedPath
+			String[] classpath = new String[] { selectionEntry.getOutputPath()
 					,LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true)
 					,LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) 
 					};
@@ -121,7 +76,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 			        System.err.println(e.getMessage());
 			    }
 			}
-//			System.out.println("Classpath:"+classpathMementos);
+			
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
@@ -185,9 +140,83 @@ public class LaunchShortcut implements ILaunchShortcut {
 		
 	}
 	
-    private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config, String property) {
-		System.out.println(" -DREPORT_FOLDER=\""+property+"\"");
-		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, " -DREPORT_FOLDER=\""+property+"\"");
+	private RunSelectionEntry fillRunselectionData(ISelection selection) {
+	    String reportsDirectory = "/reports";
+		RunSelectionEntry selectionEntry = new RunSelectionEntry();
+		try {
+		 if (selection instanceof IStructuredSelection) {
+	    		IStructuredSelection ss = (IStructuredSelection) selection;
+		    	for (Object elem : ss.toList()) {
+		    		String selectedPath = "";
+		    		System.out.println("elem: "+elem.toString());
+	    			IJavaProject javaProject = null;
+ 				if (elem instanceof IProject) {
+	    				javaProject = (IJavaProject)JavaCore.create((IProject)elem);
+	    				IProject iproject = (IProject) elem;
+	    				selectionEntry.setProjectPath(iproject.getLocation().toString());
+	    				System.out.println("selectedPath IProject: "+selectionEntry.getProjectPath());
+	    			}
+	    			else if (elem instanceof IFolder) {
+	    				IAdaptable adaptable = (IAdaptable) elem;
+	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
+	    		        IProject project = res.getProject();
+	    		        selectedPath = res.getLocation().toString();
+	    		        
+	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
+	    				
+	    				javaProject = (IJavaProject)JavaCore.create((IProject)project);
+	    				System.out.println("selectedPath IFolder: "+selectionEntry.getProjectPath());
+	    				
+	    			}
+	    			else if (elem instanceof IFile) {
+	    				IAdaptable adaptable = (IAdaptable) elem;
+	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
+	    		        IProject project = res.getProject();
+	    		        selectedPath = res.getLocation().toString();
+	    		        selectionEntry.addClassPaths(res.getFullPath().toPortableString().replace(".java", ""));
+	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
+	    				
+	    				javaProject = (IJavaProject)JavaCore.create((IProject)project);
+	    				System.out.println("selectedPath IFile: "+selectionEntry.getProjectPath());
+	    			}
+	    			else if (elem instanceof IAdaptable) {
+	    				IAdaptable adaptable = (IAdaptable) elem;
+	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
+	    		        IProject project = res.getProject();
+	    		        selectedPath = res.getLocation().toString();
+	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
+	    				javaProject = (IJavaProject)JavaCore.create((IProject)project);
+	    			} else {
+	    				System.err.println("The run selection was not recognized: "+ selection);
+	    			}
+
+	    			if(javaProject!=null && javaProject.getOutputLocation()!=null) {
+	    				selectionEntry.setOutputPath(selectionEntry.getProjectPath().substring(0, selectionEntry.getProjectPath().lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString());
+	    			}  
+ 				selectionEntry.setProjectReportsPath(selectionEntry.getProjectPath()+reportsDirectory);
+		    	}
+		    }
+		}catch(Exception e){
+			System.err.println("Probjem on Selected paths collection: "+e.getMessage());
+		}
+		return selectionEntry;
+	}
+	
+    private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config, RunSelectionEntry selection) {
+		System.out.println(
+				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\""
+				+ "-DREPORT_CLASSES=\""+selection.getClassPaths().toString()+"\"");
+		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, 
+				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\" "
+				+ "-DREPORT_CLASSES=\""+setToString(selection.getClassPaths())+"\"");
+    }
+    
+    private String setToString(Set<String> setData) {
+    	String result ="";
+    	for(String data : setData) {
+    		result += data + ",";
+    	}
+    	return result;
     }
     
 	@Override

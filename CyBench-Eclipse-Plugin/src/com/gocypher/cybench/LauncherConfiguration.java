@@ -1,5 +1,8 @@
 package com.gocypher.cybench;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 public class LauncherConfiguration {
 	
 	private String reportName = "CyBench Report" ;
@@ -20,6 +23,7 @@ public class LauncherConfiguration {
 	
 	private boolean shouldSendReportToCyBench = false;
 	private boolean includeHardware = true;
+	private Set<String> classCalled = new LinkedHashSet<String>();
 	
 	private double executionScore = -1.0d;
 	
@@ -166,6 +170,18 @@ public class LauncherConfiguration {
 
 	public void setIncludeHardware(boolean includeHardware) {
 		this.includeHardware = includeHardware;
+	}
+
+
+
+	public Set<String> getClassCalled() {
+		return classCalled;
+	}
+
+
+
+	public void setClassCalled(Set<String> classCalled) {
+		this.classCalled = classCalled;
 	}
 	
 
