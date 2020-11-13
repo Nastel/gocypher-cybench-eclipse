@@ -38,7 +38,7 @@
 	<extension
 	    point="org.eclipse.debug.ui.launchConfigurationTabGroups">
 	    <launchConfigurationTabGroup
-	        class="com.gocypher.cybench.plugin.views.TabGroup"
+	        class="com.gocypher.cybench.plugin.views.CybenchTabGroupView"
 	        id="com.gocypher.cybench.plugin.launchConfigurationTabGroup"
 	        type="com.gocypher.cybench.plugin.launchConfigurationType">
 	    </launchConfigurationTabGroup>

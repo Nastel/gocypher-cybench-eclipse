@@ -1,15 +1,16 @@
 package com.gocypher.cybench.launcher;
 
-import java.io.File;
-import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
+import org.openjdk.jmh.generators.annotations.APGeneratorDestinaton;
+import org.openjdk.jmh.generators.annotations.APGeneratorSource;
+import org.openjdk.jmh.generators.core.BenchmarkGenerator;
+import org.openjdk.jmh.generators.core.GeneratorDestination;
+import org.openjdk.jmh.generators.core.GeneratorSource;
 import org.openjdk.jmh.profile.GCProfiler;
 import org.openjdk.jmh.profile.HotspotRuntimeProfiler;
 import org.openjdk.jmh.profile.HotspotThreadProfiler;
@@ -28,7 +29,6 @@ import com.gocypher.cybench.launcher.environment.model.HardwareProperties;
 import com.gocypher.cybench.launcher.environment.model.JVMProperties;
 import com.gocypher.cybench.launcher.environment.services.CollectSystemInformation;
 import com.gocypher.cybench.launcher.model.BenchmarkOverviewReport;
-import com.gocypher.cybench.launcher.model.BenchmarkReport;
 import com.gocypher.cybench.launcher.report.DeliveryService;
 import com.gocypher.cybench.launcher.report.ReportingService;
 import com.gocypher.cybench.launcher.utils.ComputationUtils;
@@ -135,7 +135,7 @@ public class CyBenchLauncher {
         String reportJSON = JSONUtils.marshalToPrettyJson(report);
         System.out.println(reportJSON);
         String pathToReportFile = launcherConfiguration.getPathToPlainReportFile();
-        System.out.println("Store file at: "+pathToReportFile);
+        System.out.println("Store file at: "+pathToReportFile+reportScore+".cybench");
         CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cybench", reportJSON);
         CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cyb", reportEncrypted);
         
@@ -196,6 +196,8 @@ public class CyBenchLauncher {
 
         return customUserProperties;
     }
+	
+
 	
 	private static void fillLaunchConfigurations(LauncherConfiguration launcherConfiguration) {
 		launcherConfiguration.setReportName(checkNullAndReturnString("REPORT_NAME"));

@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.gocypher.cybench.plugin.model.LaunchConfiguration;
 
-public class CybenchTab extends AbstractLaunchConfigurationTab {
+public class CybenchTabView extends AbstractLaunchConfigurationTab {
 
 	private Group benchmarking;
 	private Group configuration;
@@ -340,7 +340,8 @@ public class CybenchTab extends AbstractLaunchConfigurationTab {
             measurmentSeconds.addModifyListener(modifyListener);
             expectedScore.setValues(-1, -1, 10000, 2, 1, 1);
             expectedScore.addModifyListener(modifyListener);
-            
+
+            userProperties.addModifyListener(modifyListener);
 //            shouldStoreReportToFileSystem.setSelection(storeReportInFile);
 //            shouldStoreReportToFileSystem.addSelectionListener(selectionListener);
             shouldSendReportToCyBench.setSelection(sendReportCybnech);

@@ -133,10 +133,10 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	private void loadData () {
 		//String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
 		//System.out.println("Reports default directory:"+pathToPluginLocalStateDirectory);
+//		IViewPart explorerView = workbench.getActiveWorkbenchWindow().getActivePage().findView(ReportsDisplayView.ID) ;
 		
-		IViewPart explorerView = workbench.getActiveWorkbenchWindow().getActivePage().findView(CyBenchExplorerView.ID) ;
-		if (explorerView instanceof CyBenchExplorerView 
-				&& this.getViewSite().getSecondaryId() != null 
+		if (
+			 this.getViewSite().getSecondaryId() != null 
 				&& !this.getViewSite().getSecondaryId().isEmpty()) {
 			
 				//System.out.println("Explorer:"+explorerView);
@@ -155,7 +155,6 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 				else {					
 					entry.setFullPathToFile(CybenchUtils.findPathToFileByPrefix(fullPathToPatialFile));
 				}
-				
 				reportUIModel = reportService.prepareReportDisplayModel(entry) ;
 				
 				this.setPartName(reportUIModel.getReportTitle());

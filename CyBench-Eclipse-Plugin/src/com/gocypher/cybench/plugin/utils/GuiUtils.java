@@ -117,10 +117,10 @@ public class GuiUtils {
 	    	Display.getDefault().asyncExec(new Runnable() {
 			    public void run() {
 			    	try {
-			    		System.out.println("Will open part for reports");
 			    		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 			    		
 			    		String reportIdentifier = encodeBase64(fullPathToReport) ;
+			    		System.out.println("Will open part for reports: "+ fullPathToReport);
 			    		page.showView(ReportsDisplayView.ID,reportIdentifier , IWorkbenchPage.VIEW_ACTIVATE);			
 		    		
 	//			    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportsDisplayView.ID) ; 

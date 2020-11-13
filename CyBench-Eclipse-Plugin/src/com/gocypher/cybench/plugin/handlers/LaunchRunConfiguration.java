@@ -27,6 +27,11 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.openjdk.jmh.generators.annotations.APGeneratorDestinaton;
+import org.openjdk.jmh.generators.annotations.APGeneratorSource;
+import org.openjdk.jmh.generators.core.BenchmarkGenerator;
+import org.openjdk.jmh.generators.core.GeneratorDestination;
+import org.openjdk.jmh.generators.core.GeneratorSource;
 
 import com.gocypher.cybench.core.utils.JSONUtils;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
@@ -95,11 +100,14 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			e.printStackTrace();
 		}
 	}
-
+	
+   
+	
 	@Override
 	public void launch(ILaunchConfiguration configuration, String arg1, ILaunch arg2, IProgressMonitor arg3)
 			throws CoreException {
 		try {
+			
 	    	setRunConfigurationProperties(configuration);
 
 			//MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
@@ -145,10 +153,10 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			System.out.println("Classpath:"+classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
-			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, pathToTempReportPlainFile+" "+pathToTempReportEncryptedFile);
+			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "com.gocypher.cybench.launcher.CyBenchLauncher");
 			
-		
+			
 			new Thread ( new Runnable() {
 				
 				@Override
@@ -174,9 +182,9 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 						out.println("                                 Finished CyBench benchmarks                             ");
 						out.println("-----------------------------------------------------------------------------------------");
 						*/
-						
-						GuiUtils.refreshCybenchExplorer();
-						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);					
+
+						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);		
+						GuiUtils.refreshCybenchExplorer();			
 						
 						/*Display.getDefault().asyncExec(new Runnable() {
 						    public void run() {

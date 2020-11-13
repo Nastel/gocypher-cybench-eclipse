@@ -124,7 +124,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 //			System.out.println("Classpath:"+classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
-			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, pathToTempReportPlainFile+" "+pathToTempReportEncryptedFile);
+			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "com.gocypher.cybench.launcher.CyBenchLauncher");
 			
 		
@@ -153,9 +153,9 @@ public class LaunchShortcut implements ILaunchShortcut {
 						out.println("                                 Finished CyBench benchmarks                             ");
 						out.println("-----------------------------------------------------------------------------------------");
 						*/
-						
-						GuiUtils.refreshCybenchExplorer();
-						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);					
+
+						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);	
+//						GuiUtils.refreshCybenchExplorer();				
 						
 						/*Display.getDefault().asyncExec(new Runnable() {
 						    public void run() {
@@ -174,7 +174,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 						    }
 						});
 						*/	
-					} catch (CoreException e) {
+					} catch (Exception e) {
 					    System.err.println(e.getMessage());
 					}
 				}
