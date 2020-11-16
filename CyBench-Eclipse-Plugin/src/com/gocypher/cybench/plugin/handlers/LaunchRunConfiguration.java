@@ -5,9 +5,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IContainer;
@@ -28,7 +33,9 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -106,40 +113,49 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		}
 	}
 	
-    private void setClasspathSelectionEntries() {
-	    try {
-	    	IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
-	    	for(IProject proj : projects) {
-	    		if(proj.isAccessible()) {
-		    		String projectPackageFullPath = "";
-		    		String projectOutputPath = "";
-		    		if(proj.getLocation()!=null) {
-		    			projectPackageFullPath = proj.getLocation().toPortableString();
-		    		}
-		    		IJavaProject javaProject = JavaCore.create(proj);
-	    			if(javaProject.getOutputLocation()!=null) {
-	    				projectOutputPath = projectPackageFullPath.substring(0, projectPackageFullPath.lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString();
-	    			}
-	    			System.out.println(projectPackageFullPath +" : "+ projectOutputPath);
-	    		}
-	    	}
-	    	IPath stringPath = new Path(selectionFolderPath);
-    	    System.out.println("IPath: "+stringPath);
-	    	IFolder res = ResourcesPlugin.getWorkspace().getRoot().getFolder(stringPath);
-    	    System.out.println("IFolder: "+res);
-		    classPaths = LauncherUtils.addClasses(res.members(), classPaths);
-		} catch (CoreException e) {
-			e.printStackTrace();
-		}
-    }
-	
+//	  private Set<String> getProjectPaths(List<String> classList) {
+//		  Set<String> projectPaths = new HashSet<String>();
+//	    	try {
+//	    		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
+//		    	for(IProject proj : projects) {
+//		    		if(proj.isAccessible()) {
+//			    		IJavaProject javaProject = JavaCore.create(proj);
+//			    		if(javaProject!=null && javaProject.getOutputLocation()!=null) {
+//		    				IPackageFragmentRoot[] fragmetnRootsTest = javaProject.getAllPackageFragmentRoots();
+//		    				Set<String> tempClassSet = new HashSet<String>();
+//		    				for(IPackageFragmentRoot root : fragmetnRootsTest) {
+//		    					if(root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+//		    						for(String classPath : classList) {
+//			    						if(classPath.contains(root.getPath().toPortableString())){
+//			    							tempClassSet.add(classPath.replace(root.getPath().toPortableString()+"/", "").replace("/", "."));
+//			    						}
+//				    					 System.out.println("root2: "+ classPath);
+//		    						}
+//		    					}
+//		    					 System.out.println("root1: "+ root.getPath());
+//		    				}
+//		    				projectPaths.addAll(tempClassSet);
+//		    				return projectPaths;
+//			    		}
+//		    		}
+//		    	}
+//			} catch (JavaModelException e) {
+//				e.printStackTrace();
+//			}
+//	    	return projectPaths;
+//	    }
+//	  
 	@Override
 	public void launch(ILaunchConfiguration configuration, String arg1, ILaunch arg2, IProgressMonitor arg3)
 			throws CoreException {
 		try {
-			
+			List<String> benchmarkClassList = new LinkedList<String>();
 	    	setRunConfigurationProperties(configuration);
 	    	selectionFolderPath = selectionFolderPath.replaceAll("\\s+","");
+//	    	File file = new File(selectionFolderPath);
+//	    	benchmarkClassList = LauncherUtils.addClasses(file.listFiles(),benchmarkClassList);
+//	    	String selectionFolderPath = LauncherUtils.setToString(getProjectPaths(benchmarkClassList));
+//	        System.out.println(selectionFolderPath);
 //	    	setCorrectClassRelativePath();
 	    	
 			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;

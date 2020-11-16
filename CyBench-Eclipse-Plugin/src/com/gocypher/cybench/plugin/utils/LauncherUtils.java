@@ -1,7 +1,9 @@
 package com.gocypher.cybench.plugin.utils;
 
+import java.io.File;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.commands.ExecutionEvent;
@@ -77,14 +79,11 @@ public class LauncherUtils {
 	   try {
 			for(IResource file : files) {
 				  if (file.getType() == IResource.FOLDER) {
-//							  System.out.println("Directory: " + file.getName());
 					  IFolder tempFolder = (IFolder) file;
 					  addClasses(tempFolder.members(), selectionEntry);
 				  }else {
 					 String benchmarkClass = file.getFullPath().toPortableString().replace(".java", "");
-//							 System.out.println("selectedPath IResource members: "+benchmarkClass);
 					 selectionEntry.add(benchmarkClass);
-//					 selectionEntry.addClassPaths(benchmarkClass);
 				  }
 			}
 		} catch (CoreException e) {
@@ -93,27 +92,21 @@ public class LauncherUtils {
 	   return selectionEntry; 
 	}
 	
-	public static MessageConsole findConsole(String name) {
-	      ConsolePlugin plugin = ConsolePlugin.getDefault();
-	      IConsoleManager conMan = plugin.getConsoleManager();
-	      IConsole[] existing = conMan.getConsoles();
-	      for (int i = 0; i < existing.length; i++)
-	         if (name.equals(existing[i].getName()))
-	            return (MessageConsole) existing[i];
-	      //no console found, so create a new one
-	      MessageConsole myConsole = new MessageConsole(name, null);
-	      conMan.addConsoles(new IConsole[]{myConsole});
-	      return myConsole;
-	   }
-	public static void showMsgBox (String msg,ExecutionEvent event) {
-		try {
-			IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-			MessageDialog.openInformation(
-					window.getShell(),
-					"CyBench plugin",
-					msg);
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+//	public static List<String> addClasses(File[] fileList, List<String> selectionEntry) {
+//		   try {
+//				for(File file : fileList) {
+//					  if (file.isDirectory()) {
+//						  addClasses(file.listFiles(), selectionEntry);
+//					  }else {
+//						 String benchmarkClass = file.getPath().replace(".java", "");
+//						 System.out.println("File class path: "+ benchmarkClass);
+//						 selectionEntry.add(benchmarkClass);
+//					  }
+//				}
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		   return selectionEntry; 
+//		}
+//	
 }

@@ -28,6 +28,8 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -172,8 +174,18 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        
  	        /* Report selection field */
  	        Label runOnlySelectedLabel = new Label(configuration, SWT.NONE);
- 	        runOnlySelectedLabel.setText("Execute Only:");
+ 	        runOnlySelectedLabel.setText("Execute:");
  	        onlySelectedLaunch = new Text(configuration, SWT.BORDER);
+
+	        /* Empty field */
+ 	        Label emptyField = new Label(configuration, SWT.NONE);
+	        /* Report selection field Explanation*/
+ 	        Label runOnlySelectedExplained = new Label(configuration, SWT.NONE);
+ 	        FontData[] fD = runOnlySelectedExplained.getFont().getFontData();
+ 	        fD[0].setHeight(8);
+ 	        runOnlySelectedExplained.setFont( new Font(configuration.getDisplay(),fD[0]));
+ 	        runOnlySelectedExplained.setText("Syntax:   	org.test.jmh.Benchmark, org.test.jmh.StringBenchmarks. Leave emty to run all project benchmarks.");
+ 	        
  	        
  	        /* Report status input field */
  	        Label benchmarkUploadStatusLabel = new Label(configuration, SWT.NONE);
@@ -250,6 +262,11 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(benchmarkUploadStatusLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(userPropertiesLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(runOnlySelectedLabel);
+ 	        
+ 	       
+	        GridDataFactory.swtDefaults().span(2,1).applyTo(emptyField);
+ 	        GridDataFactory.swtDefaults().span(8,1).applyTo(runOnlySelectedExplained);
+ 	       
  	        
  	        GridDataFactory.fillDefaults().grab(true, false).span(7,1).applyTo(reportsFolder);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(userProperties);
