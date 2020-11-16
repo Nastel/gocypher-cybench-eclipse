@@ -1,9 +1,7 @@
 package com.gocypher.cybench.plugin.handlers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -162,11 +160,12 @@ public class LaunchShortcut implements ILaunchShortcut {
 	    				IAdaptable adaptable = (IAdaptable) elem;
 	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
 	    		        IFolder folder = (IFolder)  adaptable.getAdapter(IFolder.class);
+	    		        System.out.println(folder);
 	    		        IProject project = res.getProject();
 	    		        selectedPath = res.getLocation().toString();
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
 	    				javaProject = (IJavaProject)JavaCore.create((IProject)project);
-	    				addClasses(folder.members(), selectionEntry);
+	    				selectionEntry.setClassPaths(LauncherUtils.addClasses(folder.members(), selectionEntry.getClassPaths()));
 	    			}
 	    			else if (elem instanceof IFile) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
@@ -218,39 +217,17 @@ public class LaunchShortcut implements ILaunchShortcut {
 		}
 		return selectionEntry;
 	}
-	public static void addClasses(IResource[] files, RunSelectionEntry selectionEntry) {
-	   try {
-			for(IResource file : files) {
-				  if (file.getType() == IResource.FOLDER) {
-//					  System.out.println("Directory: " + file.getName());
-					  IFolder tempFolder = (IFolder) file;
-						addClasses(tempFolder.members(), selectionEntry);
-				  }else {
-					 String benchmarkClass = file.getFullPath().toPortableString().replace(".java", "");
-//					 System.out.println("selectedPath IResource members: "+benchmarkClass);
-					 selectionEntry.addClassPaths(benchmarkClass);
-				  }
-			}
-		} catch (CoreException e) {
-			e.printStackTrace();
-		} 
-	}
+
     private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config, RunSelectionEntry selection) {
 		System.out.println(
 				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\""
-				+ "-DREPORT_CLASSES=\""+selection.getClassPaths().toString()+"\"");
+				+ " -DREPORT_CLASSES=\""+selection.getClassPaths().toString()+"\"");
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, 
 				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\" "
-				+ "-DREPORT_CLASSES=\""+setToString(selection.getClassPaths())+"\"");
+				+ " -DREPORT_CLASSES=\""+LauncherUtils.setToString(selection.getClassPaths())+"\"");
     }
     
-    private String setToString(Set<String> setData) {
-    	String result ="";
-    	for(String data : setData) {
-    		result += data + ",";
-    	}
-    	return result;
-    }
+   
     
 	@Override
 	public void launch(IEditorPart arg0, String arg1) {

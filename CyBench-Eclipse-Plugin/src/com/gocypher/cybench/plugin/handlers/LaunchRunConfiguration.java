@@ -1,12 +1,23 @@
 package com.gocypher.cybench.plugin.handlers;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -16,6 +27,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -56,6 +69,8 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private boolean includeHardware;
 	private String userProperties;
 	private int excutionScoreBoundary ;
+	String selectionFolderPath;
+	Set<String> classPaths = new LinkedHashSet<>();
     
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
@@ -77,31 +92,46 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		}
 		return "" ;
 	}
-	public static MessageConsole findConsole(String name) {
-	      ConsolePlugin plugin = ConsolePlugin.getDefault();
-	      IConsoleManager conMan = plugin.getConsoleManager();
-	      IConsole[] existing = conMan.getConsoles();
-	      for (int i = 0; i < existing.length; i++)
-	         if (name.equals(existing[i].getName()))
-	            return (MessageConsole) existing[i];
-	      //no console found, so create a new one
-	      MessageConsole myConsole = new MessageConsole(name, null);
-	      conMan.addConsoles(new IConsole[]{myConsole});
-	      return myConsole;
-	   }
-	public static void showMsgBox (String msg,ExecutionEvent event) {
-		try {
-			IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-			MessageDialog.openInformation(
-					window.getShell(),
-					"CyBench plugin",
-					msg);
-		}catch (Exception e) {
+	
+	private void setCorrectClassRelativePath() {
+		 try {
+			Files.list(new File(selectionFolderPath).toPath())
+			    .limit(10)
+			    .forEach(path -> {
+			        System.out.println(path);
+			    });
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-   
+    private void setClasspathSelectionEntries() {
+	    try {
+	    	IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
+	    	for(IProject proj : projects) {
+	    		if(proj.isAccessible()) {
+		    		String projectPackageFullPath = "";
+		    		String projectOutputPath = "";
+		    		if(proj.getLocation()!=null) {
+		    			projectPackageFullPath = proj.getLocation().toPortableString();
+		    		}
+		    		IJavaProject javaProject = JavaCore.create(proj);
+	    			if(javaProject.getOutputLocation()!=null) {
+	    				projectOutputPath = projectPackageFullPath.substring(0, projectPackageFullPath.lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString();
+	    			}
+	    			System.out.println(projectPackageFullPath +" : "+ projectOutputPath);
+	    		}
+	    	}
+	    	IPath stringPath = new Path(selectionFolderPath);
+    	    System.out.println("IPath: "+stringPath);
+	    	IFolder res = ResourcesPlugin.getWorkspace().getRoot().getFolder(stringPath);
+    	    System.out.println("IFolder: "+res);
+		    classPaths = LauncherUtils.addClasses(res.members(), classPaths);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+    }
 	
 	@Override
 	public void launch(ILaunchConfiguration configuration, String arg1, ILaunch arg2, IProgressMonitor arg3)
@@ -109,23 +139,11 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		try {
 			
 	    	setRunConfigurationProperties(configuration);
-
-			//MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
-			//cyBenchConsole.clearConsole();
-			//cyBenchConsole.activate();
-			/*MessageConsoleStream out = cyBenchConsole.newMessageStream();
-				
-			out.println("-----------------------------------------------------------------------------------------");
-			out.println("                                 Starting CyBench benchmarks                             ");
-			out.println("-----------------------------------------------------------------------------------------");
-			*/
-//			System.out.println("Location of workspace:"+ResourcesPlugin.getWorkspace().getRoot().getRawLocationURI().toASCIIString() );
-//			String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
-//			System.out.println("Location of bundle state:"+pathToPluginLocalStateDirectory) ;
-//			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(pathToPluginLocalStateDirectory, true, reportName) ;
-//			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(pathToPluginLocalStateDirectory, true, reportName);
-			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(reportFolder, true, reportName.replaceAll(" ", "_").toLowerCase()) ;
-			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(reportFolder, true, reportName.replaceAll(" ", "_").toLowerCase()) ;
+	    	selectionFolderPath = selectionFolderPath.replaceAll("\\s+","");
+//	    	setCorrectClassRelativePath();
+	    	
+			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;
+			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;
 	
 			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager() ;
 			ILaunchConfigurationType launchType = manager.getLaunchConfigurationType("org.eclipse.jdt.launching.localJavaApplication");
@@ -163,9 +181,6 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				public void run() {
 					try {
 					    ILaunch launchedBenchmarks = config.launch(ILaunchManager.RUN_MODE, null);
-					  
-					    //out.println("Waiting for CyBench to finish...");
-					    
 					    while (!launchedBenchmarks.isTerminated()) {
 					    	try {
 					    		Thread.sleep(1000);
@@ -173,44 +188,13 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 					    		
 					    	}
 					    }
-					    //out.println("Finished CyBench tests:"+launchedBenchmarks.isTerminated());
-						/*String results = CybenchUtils.loadFile(pathToTempReportPlainFile) ;
-						if (results != null && !results.isEmpty()) {
-								out.println("Results from tests:"+JSONUtils.parseJsonIntoMap(results));
-						}
-						out.println("-----------------------------------------------------------------------------------------");
-						out.println("                                 Finished CyBench benchmarks                             ");
-						out.println("-----------------------------------------------------------------------------------------");
-						*/
-
 						GuiUtils.refreshCybenchExplorer();			
 						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);		
-						
-						/*Display.getDefault().asyncExec(new Runnable() {
-						    public void run() {
-						    	try {
-						    		System.out.println("Will open part for reports");
-						    		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-						    		page.showView(ReportsDisplayView.ID) ;
-									IViewPart view = page.findView(ReportsDisplayView.ID) ;
-						    		if (view instanceof ICybenchPartView) {
-					    			((ICybenchPartView)view).refreshView();
-					    		}
-//							    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportsDisplayView.ID) ; 
-						    	}catch (Exception e) {
-						    		e.printStackTrace();
-						    	}
-						    }
-						});
-						*/	
 					} catch (CoreException e) {
 					    System.err.println(e.getMessage());
-					    //this.showMsgBox(e.getMessage(),event);
 					}
 				}
 			}).start();
-		//this.showMsgBox("Reality:"+LauncherDemo.resultsMap, event);
-		//this.launchCyBenchLauncher();
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -229,7 +213,8 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
 				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
 				" -DEXECUTION_SCORE="+excutionScoreBoundary+
-				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\"");
+				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
+				" -DREPORT_CLASSES=\""+selectionFolderPath+"\"");
 		
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-DFORKS_COUNT="+forks+
 				" -DTHREADS_COUNT="+thread+
@@ -243,7 +228,8 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
 				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
 				" -DEXECUTION_SCORE="+excutionScoreBoundary+
-				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\"");
+				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
+				" -DREPORT_CLASSES=\""+selectionFolderPath+"\"");
 		
     }
     private void setRunConfigurationProperties(ILaunchConfiguration configuration) throws CoreException {
@@ -265,7 +251,11 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
        
        userProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, "");
    	   excutionScoreBoundary = configuration.getAttribute(LaunchConfiguration.EXECUTION_SCORE, -1);
-   	   launchPath = configuration.getAttribute(LaunchConfiguration.BUILD_PATH, "");
    	   
+   	   launchPath = configuration.getAttribute(LaunchConfiguration.BUILD_PATH, "");
+   	   selectionFolderPath =configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");
     }
+    
+    
+//	addClasses(folder.members(), selectionEntry);
 }

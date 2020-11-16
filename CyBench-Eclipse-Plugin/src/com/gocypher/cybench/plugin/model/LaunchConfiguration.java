@@ -20,6 +20,7 @@ public interface LaunchConfiguration {
 	public static final String CUSTOM_USER_PROPERTIES = "com.cybench.customUserProperties";
 	
 
+	public static final String LAUNCH_SELECTED_PATH = "com.cybench.launchPathSetFolderFileSelection";
 	public static final String LAUNCH_PATH = "com.cybench.launchPathSet";
 	public static final String BUILD_PATH = "com.cybench.buildhPathSet";
 	

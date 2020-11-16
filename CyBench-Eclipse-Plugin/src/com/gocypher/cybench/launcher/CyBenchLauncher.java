@@ -251,7 +251,6 @@ public class CyBenchLauncher {
 	}
 	
 	private static Set<String> checkNullAndReturnSet(String propertyName)  {
-		System.out.println("Classes selected "+System.getProperty(propertyName));
 		Set<String>  classesToInclude= new HashSet<String>();
 		if(System.getProperty(propertyName)!= null) {
 			classesToInclude.addAll(Arrays.asList(System.getProperty(propertyName).split(",")));

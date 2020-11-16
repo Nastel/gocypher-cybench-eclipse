@@ -2,12 +2,18 @@ package com.gocypher.cybench.plugin.views;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -34,6 +40,7 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
 import com.gocypher.cybench.plugin.model.LaunchConfiguration;
+import com.gocypher.cybench.plugin.utils.LauncherUtils;
 
 public class CybenchTabView extends AbstractLaunchConfigurationTab {
 
@@ -44,9 +51,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private Text reportsFolder;
     private Button browse;
 
-    private String buildPath;
     private Combo launchPath;
     private Text reportName;
+    private Text onlySelectedLaunch;
     private Combo reportUploadStatus;
     
     private Spinner forks;
@@ -64,7 +71,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private Button shouldSendReportToCyBench;
     private Button shouldDoHardwareSnapshot;
 
-
+    Set<String> classPaths =  new HashSet<String>();
 	Map<String, String> paths =  new HashMap<>();
 
     @Override
@@ -150,11 +157,6 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        reportNameLabel.setText("Report Name:");
  	        reportName = new Text(configuration, SWT.BORDER);
  	        
- 	        /* Report selection field */
- 	        Label runOnlySelectedLabel = new Label(configuration, SWT.NONE);
- 	        reportNameLabel.setText("Report Name:");
- 	        reportName = new Text(configuration, SWT.BORDER);
-
  	        /* Report launch path input field */
  	        Label reportlaunchPathLabel = new Label(configuration, SWT.NONE);
  	        launchPath = new Combo(configuration, SWT.BORDER); 
@@ -167,6 +169,11 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 	            }
 	
 	        });
+ 	        
+ 	        /* Report selection field */
+ 	        Label runOnlySelectedLabel = new Label(configuration, SWT.NONE);
+ 	        runOnlySelectedLabel.setText("Execute Only:");
+ 	        onlySelectedLaunch = new Text(configuration, SWT.BORDER);
  	        
  	        /* Report status input field */
  	        Label benchmarkUploadStatusLabel = new Label(configuration, SWT.NONE);
@@ -242,12 +249,14 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(reportlaunchPathLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(benchmarkUploadStatusLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(userPropertiesLabel);
+ 	        GridDataFactory.swtDefaults().span(2,1).applyTo(runOnlySelectedLabel);
  	        
  	        GridDataFactory.fillDefaults().grab(true, false).span(7,1).applyTo(reportsFolder);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(userProperties);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(reportName);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(launchPath);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(reportUploadStatus);
+ 	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(onlySelectedLaunch);
  	        
  	        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(configuration);
  	        
@@ -302,14 +311,13 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     	    Map.Entry<String,String> entry = paths.entrySet().iterator().next();
         	String launchPathDef = "";
         	String reportFolderDef = "";
-        	String buildPathDef = "";
-            if(entry!= null) {
+        	if(entry!= null) {
             	reportFolderDef = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, entry.getKey()+"/reports");
             	launchPathDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_PATH, entry.getKey());
-            	buildPathDef = configuration.getAttribute(LaunchConfiguration.BUILD_PATH, entry.getValue());
             }
             String reportNameDef = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "CyBench Report");
             String reportUploadStatusDef = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
+            String pathToSourceSelectedDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");
          
             int threadDef = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
             int forksDef  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
@@ -347,6 +355,10 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             expectedScore.addModifyListener(modifyListener);
 
             userProperties.addModifyListener(modifyListener);
+            
+            onlySelectedLaunch.setText(pathToSourceSelectedDef);
+            onlySelectedLaunch.addModifyListener(modifyListener);
+            
 //            shouldStoreReportToFileSystem.setSelection(storeReportInFile);
 //            shouldStoreReportToFileSystem.addSelectionListener(selectionListener);
             shouldSendReportToCyBench.setSelection(sendReportCybnech);
@@ -366,6 +378,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         configuration.setAttribute(LaunchConfiguration.REPORT_NAME, reportName.getText());
         configuration.setAttribute(LaunchConfiguration.LAUNCH_PATH, launchPath.getText());
         configuration.setAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, reportUploadStatus.getText());
+        configuration.setAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, onlySelectedLaunch.getText());
         
         configuration.setAttribute(LaunchConfiguration.TREADS_COUNT, threads.getSelection());
         configuration.setAttribute(LaunchConfiguration.FORKS_COUNT, forks.getSelection());
@@ -425,5 +438,4 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 		}
     	return projectPaths;
     }
-
 }
