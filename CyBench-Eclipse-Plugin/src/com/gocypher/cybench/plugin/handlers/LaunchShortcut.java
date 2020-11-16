@@ -2,6 +2,7 @@ package com.gocypher.cybench.plugin.handlers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
@@ -159,23 +161,22 @@ public class LaunchShortcut implements ILaunchShortcut {
 	    			else if (elem instanceof IFolder) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
 	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
+	    		        IFolder folder = (IFolder)  adaptable.getAdapter(IFolder.class);
 	    		        IProject project = res.getProject();
 	    		        selectedPath = res.getLocation().toString();
-	    		        
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
-	    				
 	    				javaProject = (IJavaProject)JavaCore.create((IProject)project);
-	    				System.out.println("selectedPath IFolder: "+selectionEntry.getProjectPath());
-	    				
+	    				addClasses(folder.members(), selectionEntry);
 	    			}
 	    			else if (elem instanceof IFile) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
 	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
 	    		        IProject project = res.getProject();
+	    		        
 	    		        selectedPath = res.getLocation().toString();
-	    		        selectionEntry.addClassPaths(res.getFullPath().toPortableString().replace(".java", ""));
+	    		        String benchmarkClass = res.getFullPath().toPortableString().replace(".java", "");
+	    		        selectionEntry.addClassPaths(benchmarkClass);
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
-	    				
 	    				javaProject = (IJavaProject)JavaCore.create((IProject)project);
 	    				System.out.println("selectedPath IFile: "+selectionEntry.getProjectPath());
 	    			}
@@ -192,16 +193,48 @@ public class LaunchShortcut implements ILaunchShortcut {
 
 	    			if(javaProject!=null && javaProject.getOutputLocation()!=null) {
 	    				selectionEntry.setOutputPath(selectionEntry.getProjectPath().substring(0, selectionEntry.getProjectPath().lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString());
+	    				IPackageFragmentRoot[] fragmetnRootsTest = javaProject.getAllPackageFragmentRoots();
+	    				Set<String> tempClassSet = new HashSet<String>();
+	    				for(IPackageFragmentRoot root : fragmetnRootsTest) {
+	    					if(root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+//    							System.out.println("selectionEntry.getClassPaths() ==  "+selectionEntry.getClassPaths());
+	    						for(String classPath : selectionEntry.getClassPaths()) {
+		    						if(classPath.contains(root.getPath().toPortableString())){
+		    							tempClassSet.add(classPath.replace(root.getPath().toPortableString()+"/", "").replace("/", "."));
+		    						}
+	    						}
+
+//	    						System.out.println("root.toString() ==  "+root.toString());
+//	    						System.out.println("root.getPath() ==  "+root.getPath().toPortableString().replace("/", "."));
+	    					}
+	    				}
+	    				selectionEntry.setClassPaths(tempClassSet);
 	    			}  
  				selectionEntry.setProjectReportsPath(selectionEntry.getProjectPath()+reportsDirectory);
 		    	}
 		    }
 		}catch(Exception e){
-			System.err.println("Probjem on Selected paths collection: "+e.getMessage());
+			System.err.println("Problem on Selected paths collection: "+e.getStackTrace());
 		}
 		return selectionEntry;
 	}
-	
+	public static void addClasses(IResource[] files, RunSelectionEntry selectionEntry) {
+	   try {
+			for(IResource file : files) {
+				  if (file.getType() == IResource.FOLDER) {
+//					  System.out.println("Directory: " + file.getName());
+					  IFolder tempFolder = (IFolder) file;
+						addClasses(tempFolder.members(), selectionEntry);
+				  }else {
+					 String benchmarkClass = file.getFullPath().toPortableString().replace(".java", "");
+//					 System.out.println("selectedPath IResource members: "+benchmarkClass);
+					 selectionEntry.addClassPaths(benchmarkClass);
+				  }
+			}
+		} catch (CoreException e) {
+			e.printStackTrace();
+		} 
+	}
     private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config, RunSelectionEntry selection) {
 		System.out.println(
 				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\""

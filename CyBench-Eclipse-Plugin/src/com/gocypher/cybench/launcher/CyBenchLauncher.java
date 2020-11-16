@@ -90,8 +90,8 @@ public class CyBenchLauncher {
 		if(launcherConfiguration.getClassCalled().size() > 0) {
 			for(String classname : launcherConfiguration.getClassCalled()) {
 				System.out.println("Classes sellected to run: "+ classname);
-				//"test.MyBenchmark"
-				optBuild.include(classname);
+//				optBuild.include("src.main.java.com.local.demo.MyBenchmark\\b");
+				optBuild.include(classname+"\\b");
 			}
 		}
 		

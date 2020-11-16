@@ -25,6 +25,9 @@ public class RunSelectionEntry {
 		public void addClassPaths(String classPath) {
 			this.classPaths.add(classPath);
 		}
+		public void removeClassPaths(String classPath) {
+			this.classPaths.remove(classPath);
+		}
 		public Set<String> getClassPaths() {
 			return classPaths;
 		}

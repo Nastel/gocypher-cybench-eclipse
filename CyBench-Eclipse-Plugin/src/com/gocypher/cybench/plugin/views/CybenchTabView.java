@@ -149,6 +149,11 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        Label reportNameLabel = new Label(configuration, SWT.NONE);
  	        reportNameLabel.setText("Report Name:");
  	        reportName = new Text(configuration, SWT.BORDER);
+ 	        
+ 	        /* Report selection field */
+ 	        Label runOnlySelectedLabel = new Label(configuration, SWT.NONE);
+ 	        reportNameLabel.setText("Report Name:");
+ 	        reportName = new Text(configuration, SWT.BORDER);
 
  	        /* Report launch path input field */
  	        Label reportlaunchPathLabel = new Label(configuration, SWT.NONE);
