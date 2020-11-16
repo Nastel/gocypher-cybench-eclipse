@@ -44,43 +44,31 @@ public class CyBechProjectNatureHandler implements ILaunchShortcut{
 			IJavaProject javaProject = this.resolveJavaProject(selection) ;
 			
 			String cyBenchExternalsPath = LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID, false) ;
-			
+			System.out.println("Externals path:"+cyBenchExternalsPath);
 			
 			
 			String fullPathHardcodedCore = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-core-1.26.jar" ;
 			String fullPathHardcodedAnnotations = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-generator-annprocess-1.26.jar" ;
 			
 			
-			//FIXME Code for adding external library , shall use path to "cyBenchExternalsPath" variable
-			this.addAndSaveClassPathEntry(javaProject, fullPathHardcodedCore);
-			this.addAndSaveClassPathEntry(javaProject, fullPathHardcodedAnnotations);
 			
-			System.out.println("Externals path:"+cyBenchExternalsPath);
+			//FIXME Code for adding external library , shall use path to "cyBenchExternalsPath" variable
+			//Externals for real Eclipse test
+			this.addAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
+			
+			//Externals for local tests
+			//this.addAndSaveClassPathEntry(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
+			
+			//FIXME code for update of factory path for the project
+			//Externals for real Eclipse test
+			this.updateProjectAPTSettings (javaProject,cyBenchExternalsPath) ;
+			//Externals for local tests
+			//this.updateProjectAPTSettings (javaProject,fullPathHardcodedCore,fullPathHardcodedAnnotations) ;
+			
+			
 			
 			//FIXME code for updated of project preferences in order to enable Annotation Processing
 			//this.attachAptBasedPreferences(javaProject) ;
-			
-			
-			//FIXME code for update of factory path for the project
-			Map<String, String> props = AptConfig.getProcessorOptions(javaProject, false) ;
-			System.out.println("APT props:"+props);
-			
-			AptConfig.setEnabled(javaProject, true);
-			AptConfig.setGenSrcDir(javaProject, "target/jmh-generated");
-			AptConfig.setGenTestSrcDir(javaProject, "target/jmh-generated-tests");
-			AptConfig.setProcessDuringReconcile(javaProject, true);
-			
-			
-			System.out.println("Raw Processor options:"+AptConfig.getRawProcessorOptions(javaProject)) ;
-			IFactoryPath factoryPath= AptConfig.getFactoryPath(javaProject) ;
-		
-			
-			factoryPath.addExternalJar(new File (fullPathHardcodedCore));
-			factoryPath.addExternalJar(new File (fullPathHardcodedAnnotations));
-			
-			AptConfig.setFactoryPath(javaProject, factoryPath);
-			System.out.println("Factory path:"+factoryPath);
-			
 			
 			
 			//GuiUtils.logMessage("Externals path:"+cyBenchExternalsPath);
@@ -143,31 +131,32 @@ public class CyBechProjectNatureHandler implements ILaunchShortcut{
 		}
 		return javaProject;
 	}
-	public void addAndSaveClassPathEntry (IJavaProject javaProject, String fullPathToExternalLibrary) throws Exception {
-		
-		IClasspathEntry externalJar = JavaCore.newLibraryEntry(new Path(fullPathToExternalLibrary), null, null) ;
-		
-		if (javaProject.getClasspathEntryFor(externalJar.getPath()) == null) { 
-		
-			List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
+	public void addAndSaveClassPathEntry (IJavaProject javaProject, String ...fullPathToExternalLibraries) throws Exception {
+		for (String pathToExternalLib:fullPathToExternalLibraries) {
+			IClasspathEntry externalJar = JavaCore.newLibraryEntry(new Path(pathToExternalLib), null, null) ;
 			
-			for (IClasspathEntry entry :javaProject.getRawClasspath()) {			
-				classPathEntries.add (entry) ;
-			}
-			classPathEntries.add(externalJar);
+			if (javaProject.getClasspathEntryFor(externalJar.getPath()) == null) { 
 			
-			int i = 0 ;
-			IClasspathEntry[] classPathRaw = new IClasspathEntry[classPathEntries.size()] ;
-			for (IClasspathEntry item: classPathEntries) {
-				classPathRaw[i] = item ;
-				i++ ;
+				List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
+				
+				for (IClasspathEntry entry :javaProject.getRawClasspath()) {			
+					classPathEntries.add (entry) ;
+				}
+				classPathEntries.add(externalJar);
+				
+				int i = 0 ;
+				IClasspathEntry[] classPathRaw = new IClasspathEntry[classPathEntries.size()] ;
+				for (IClasspathEntry item: classPathEntries) {
+					classPathRaw[i] = item ;
+					i++ ;
+				}
+							
+				javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());
+										
 			}
-						
-			javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());
-									
-		}
-		else {
-			System.err.println("Class path entry pointing to external lib exists:"+fullPathToExternalLibrary);
+			else {
+				System.err.println("Class path entry pointing to external lib exists:"+pathToExternalLib);
+			}
 		}
 		
 	}
@@ -186,7 +175,7 @@ public class CyBechProjectNatureHandler implements ILaunchShortcut{
 		
 	}
 	
-	public void attachAptBasedPreferences (IJavaProject javaProject) throws Exception {
+	private void attachAptBasedPreferences (IJavaProject javaProject) throws Exception {
 		ProjectScope projectScope = new ProjectScope(javaProject.getProject()) ;
 		IEclipsePreferences prefs = projectScope.getNode("org.eclipse.jdt.apt.core") ;
 		prefs.putBoolean("org.eclipse.jdt.apt.aptEnabled", true);
@@ -196,6 +185,26 @@ public class CyBechProjectNatureHandler implements ILaunchShortcut{
 		prefs.put("org.eclipse.jdt.apt.genTestSrcDir", "target/jmh-generated-tests");
 		prefs.flush();
 		
+	}
+	
+	private void updateProjectAPTSettings (IJavaProject javaProject, String ... pathToExternalJars) {
+		AptConfig.setEnabled(javaProject, true);
+		AptConfig.setGenSrcDir(javaProject, "target/jmh-generated");
+		AptConfig.setGenTestSrcDir(javaProject, "target/jmh-generated-tests");
+		AptConfig.setProcessDuringReconcile(javaProject, true);
+		
+		
+		IFactoryPath factoryPath= AptConfig.getFactoryPath(javaProject) ;
+	
+		for (String item : pathToExternalJars) {
+			factoryPath.addExternalJar(new File (item));
+		}
+		try {
+			AptConfig.setFactoryPath(javaProject, factoryPath);
+		}catch (Exception e) {
+			System.err.println ("Error on update of APT factory classpath:" + e.getMessage()) ;
+			e.printStackTrace();
+		}
 	}
    
 
