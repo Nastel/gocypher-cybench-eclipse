@@ -33,6 +33,27 @@
 	        </contextualLaunch>
 	    </shortcut>
 	</extension>
+	<!-- CyBench Project nature shortcut launch  -->
+	<extension
+	    point="org.eclipse.debug.ui.launchShortcuts">
+	    <shortcut
+	        class="com.gocypher.cybench.plugin.handlers.CyBechProjectNatureHandler"
+	        icon="icons/cybench_symbol_small.png"
+	        id="com.gocypher.cybench.plugin.shortcut.cybenchnature"
+	        label="Add CyBench Nature"
+	        modes="run">
+	        <contextualLaunch>
+	            <enablement>
+	                <with
+	                    variable="selection">
+	                    <count
+	                        value="+">
+	                    </count>
+	                </with>
+	            </enablement>
+	        </contextualLaunch>
+	    </shortcut>
+	</extension>
 	
 	<!-- Tab for launch configurations -->
 	<extension
