@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
+import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
 
 public class CyBenchProjectNature implements IProjectNature {
@@ -61,9 +62,9 @@ public class CyBenchProjectNature implements IProjectNature {
 			//Externals for real Eclipse test
 			//this.updateProjectAPTSettings (javaProject,cyBenchExternalsPath) ;
 			//Externals for local tests
-			this.updateProjectAPTSettings (javaProject,fullPathHardcodedCore,fullPathHardcodedAnnotations) ;
+			this.configureProjectAPTSettings (javaProject,fullPathHardcodedCore,fullPathHardcodedAnnotations) ;
 		}catch (Exception e) {
-			System.err.println("Error during set of project nature:"+e.getMessage());
+			System.err.println("Error during configure of CyBench nature:"+e.getMessage());
 			e.printStackTrace();
 			throw new CoreException(null);
 		}
@@ -73,7 +74,32 @@ public class CyBenchProjectNature implements IProjectNature {
 	@Override
 	public void deconfigure() throws CoreException {
 		System.out.println("-->Deconfigure CyBench nature for project:"+this.project);
+		IJavaProject javaProject = (IJavaProject)JavaCore.create(this.project);
 		
+		String cyBenchExternalsPath = LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID, false) ;
+		System.out.println("Externals path:"+cyBenchExternalsPath);
+		
+		
+		String fullPathHardcodedCore = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-core-1.26.jar" ;
+		String fullPathHardcodedAnnotations = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-generator-annprocess-1.26.jar" ;
+		try {
+			//FIXME uncomment this for production usage Externals for real Eclipse test
+			//this.deconfigureAptSettings (javaProject,cyBenchExternalsPath) ;
+			//FIXME comment this for production usage Externals for local tests
+			this.deconfigureAptSettings(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
+			if (!this.isMavenProject(javaProject)) {
+				//FIXME uncomment this for production usage
+				//this.removeAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
+				//FIXME comment this for production usage 
+				this.removeAndSaveClassPathEntry(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
+			}
+			GuiUtils.refreshProject(javaProject);
+			
+		}catch (Exception e) {
+			System.err.println("Error during deconfigure of CyBench nature:"+e.getMessage());
+			e.printStackTrace();
+			throw new CoreException(null);
+		}
 	}
 
 	@Override
@@ -87,7 +113,7 @@ public class CyBenchProjectNature implements IProjectNature {
 		
 	}
 	
-	public void addAndSaveClassPathEntry (IJavaProject javaProject, String ...fullPathToExternalLibraries) throws Exception {
+	private void addAndSaveClassPathEntry (IJavaProject javaProject, String ...fullPathToExternalLibraries) throws Exception {
 		for (String pathToExternalLib:fullPathToExternalLibraries) {
 			IClasspathEntry externalJar = JavaCore.newLibraryEntry(new Path(pathToExternalLib), null, null) ;
 			
@@ -116,7 +142,32 @@ public class CyBenchProjectNature implements IProjectNature {
 		}
 		
 	}
-	private void updateProjectAPTSettings (IJavaProject javaProject, String ... pathToExternalJars) throws Exception {
+	private void removeAndSaveClassPathEntry (IJavaProject javaProject, String ...fullPathToExternalLibraries) throws Exception{
+		List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
+		for (IClasspathEntry entry :javaProject.getRawClasspath()) {
+			boolean found = false ;
+			for (String externalItem:fullPathToExternalLibraries) {
+				//System.out.println("Classpath:"+entry.getPath().toPortableString()+";"+externalItem);
+				if (entry.getPath().toPortableString().equalsIgnoreCase(externalItem)) {
+					found = true ;
+				}
+			}
+			if (!found) {
+				classPathEntries.add (entry) ;
+			}
+		}
+		int i = 0 ;
+		IClasspathEntry[] classPathRaw = new IClasspathEntry[classPathEntries.size()] ;
+		for (IClasspathEntry item: classPathEntries) {
+			classPathRaw[i] = item ;
+			i++ ;
+		}
+					
+		javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());
+		
+	}
+	
+	private void configureProjectAPTSettings (IJavaProject javaProject, String ... pathToExternalJars) throws Exception {
 		AptConfig.setEnabled(javaProject, true);	
 		if (this.isMavenProject(javaProject)) {
 			AptConfig.setGenSrcDir(javaProject, "target/jmh-generated");
@@ -135,6 +186,21 @@ public class CyBenchProjectNature implements IProjectNature {
 		}
 		
 		AptConfig.setFactoryPath(javaProject, factoryPath);
+		
+	}
+	private void deconfigureAptSettings (IJavaProject javaProject,String ... pathToExternalJars)throws Exception {
+		AptConfig.setEnabled(javaProject, false);
+		AptConfig.setProcessDuringReconcile(javaProject, false);
+		//AptConfig.setGenSrcDir(javaProject, null);
+		//AptConfig.setGenTestSrcDir(javaProject, null);
+		
+		IFactoryPath factoryPath= AptConfig.getFactoryPath(javaProject) ;
+		
+		for (String item : pathToExternalJars) {
+			factoryPath.removeExternalJar(new File (item));
+		}
+		AptConfig.setFactoryPath(javaProject, factoryPath);
+		
 		
 	}
 	

@@ -3,21 +3,17 @@ package com.gocypher.cybench.plugin.handlers;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.gocypher.cybench.plugin.CyBenchProjectNature;
+import com.gocypher.cybench.plugin.utils.GuiUtils;
 
 public class CyBechProjectNatureHandler extends AbstractHandler {
 	
@@ -29,11 +25,11 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 			System.out.println("--->Adding CyBench Nature");
 					
 			//System.out.println("Selection:"+selection.getClass());
-			IJavaProject javaProject = this.resolveJavaProject(selection) ;
+			IJavaProject javaProject = GuiUtils.resolveJavaProject(selection) ;
 		
 			this.addCybenchNature(javaProject);
 			
-			this.refreshProject(javaProject);
+			GuiUtils.refreshProject(javaProject);
 			
 			System.out.println("--->CyBench Nature finish");
 		}catch (Exception e) {
@@ -43,35 +39,6 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 		return null;
 	}
 	
-		
-	private IJavaProject resolveJavaProject (ISelection selection) {
-		IJavaProject javaProject = null ;
-		if (selection instanceof IStructuredSelection) {
-    		IStructuredSelection ss = (IStructuredSelection) selection;
-    		System.out.println(ss.getFirstElement());
-    		for (Object elem : ss.toList()) {
-    			if (elem instanceof IProject) {
-    				javaProject = (IJavaProject)JavaCore.create((IProject)elem);
-    			}
-    		}
-		}
-		return javaProject;
-	}
-	
-	private void refreshProject (IJavaProject javaProject) {
-		if (javaProject != null) {
-			try {
-				javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-			}catch (Exception e) {
-				System.err.println("Error on proejct refresh:"+e.getMessage());
-				e.printStackTrace();
-			}
-		}
-		else {
-			System.err.println("Unable to frefresh null project!");
-		}
-		
-	}
 	
 	private void addCybenchNature (IJavaProject javaProject) throws Exception{
 		

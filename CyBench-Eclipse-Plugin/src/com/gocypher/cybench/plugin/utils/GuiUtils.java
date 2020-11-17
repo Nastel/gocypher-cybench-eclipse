@@ -7,20 +7,25 @@ import java.util.Base64;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
-import org.osgi.framework.FrameworkUtil;
 
 import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.ICybenchPartView;
@@ -159,6 +164,33 @@ public class GuiUtils {
 		prefs.put("org.eclipse.jdt.apt.genTestSrcDir", "target/jmh-generated-tests");
 		prefs.flush();
 		
+	}
+    public static void refreshProject (IJavaProject javaProject) {
+		if (javaProject != null) {
+			try {
+				javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+			}catch (Exception e) {
+				System.err.println("Error on proejct refresh:"+e.getMessage());
+				e.printStackTrace();
+			}
+		}
+		else {
+			System.err.println("Unable to refresh null project!");
+		}
+		
+	}
+    public static IJavaProject resolveJavaProject (ISelection selection) {
+		IJavaProject javaProject = null ;
+		if (selection instanceof IStructuredSelection) {
+    		IStructuredSelection ss = (IStructuredSelection) selection;
+    		System.out.println(ss.getFirstElement());
+    		for (Object elem : ss.toList()) {
+    			if (elem instanceof IProject) {
+    				javaProject = (IJavaProject)JavaCore.create((IProject)elem);
+    			}
+    		}
+		}
+		return javaProject;
 	}
 
 }
