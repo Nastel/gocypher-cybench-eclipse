@@ -286,7 +286,8 @@ Export-Package: joptsimple,
  org.codehaus.plexus.util.dag,
  org.codehaus.plexus.util.introspection,
  org.codehaus.plexus.util.io,
- org.codehaus.plexus.util.reflection
+ org.codehaus.plexus.util.reflection,
+ com.sun.codemodel
  
  
  
