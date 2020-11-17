@@ -18,7 +18,6 @@
 	    <shortcut
 	        class="com.gocypher.cybench.plugin.handlers.LaunchShortcut"
 	        icon="icons/cybench_symbol_small.png"
-	        id="com.gocypher.cybench.plugin.shortcut"
 	        label="Run on CyBench"
 	        modes="run">
 	        <contextualLaunch>
@@ -34,7 +33,7 @@
 	    </shortcut>
 	</extension>
 	<!-- CyBench Project nature shortcut launch  -->
-	<extension
+	<!--extension
 	    point="org.eclipse.debug.ui.launchShortcuts">
 	    <shortcut
 	        class="com.gocypher.cybench.plugin.handlers.CyBechProjectNatureHandler"
@@ -53,7 +52,7 @@
 	            </enablement>
 	        </contextualLaunch>
 	    </shortcut>
-	</extension>
+	</extension-->
 	
 	<!-- Tab for launch configurations -->
 	<extension
@@ -75,38 +74,46 @@
 	    </launchConfigurationTypeImage>
 	</extension>
 
-
-
-   <extension
-         point="org.eclipse.ui.commands">
-      <category
-            id="FirstPlugin.commands.category"
-            name="CyBench">
-      </category>
-      <command
-            categoryId="FirstPlugin.commands.category"
-            name="Run CyBench All tests"
-            id="FirstPlugin.commands.sampleCommand">
-      </command>
-   </extension>
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="com.gocypher.cybench.plugin.handlers.BenchmarkLauncherHandler"
-            commandId="FirstPlugin.commands.sampleCommand">
-      </handler>
-   </extension>
-   <extension
-         point="org.eclipse.ui.bindings">
-      <key
-            commandId="FirstPlugin.commands.sampleCommand"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            contextId="org.eclipse.ui.contexts.window"
-            sequence="M1+6">
-      </key>
-   </extension>
+	<!-- CyBench Project nature and generate launch tab for selection -->
    <extension
          point="org.eclipse.ui.menus">
+       	   <!-- locationURI="popup:org.eclipse.ui.popup.any"-->
+	       <!-- locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions"-->
+		  <menuContribution
+		        locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+		         <separator name="com.mycompany.converterhelper.separator" visible="true" />
+		         <menu
+			           id="com.gocypher.cybench.ProjectMenu"
+	                   tooltip="Confgiure CyBench"
+	                   icon="icons/cybench_symbol_small.png"   
+			           label="CyBench">
+			    </menu>
+	 	  </menuContribution>
+	 	  <menuContribution
+		        locationURI="popup:com.gocypher.cybench.ProjectMenu?after=additions">
+		         <separator name="com.mycompany.converterhelper.separator" visible="true" />
+	            <command
+	                  id="com.gocypher.cybench.plugin.ProjectConfigureLaunchInner"
+	                  commandId="com.gocypher.cybench.plugin.handlers.AddNature"
+		        	  label="Add CyBench Nature"
+	                  icon="icons/cybench_symbol_small.png"                
+	                  tooltip="Launch CyBench Benchmark"
+	                  style="push">
+	            </command>
+	 	  </menuContribution>
+	 	  <menuContribution
+		        locationURI="popup:com.gocypher.cybench.ProjectMenu?after=additions">
+		         <separator name="com.mycompany.converterhelper.separator" visible="true" />
+	            <command
+	                  id="com.gocypher.cybench.plugin.ProjectGeneratebenchmarks"
+	                  commandId="FirstPlugin.commands.sampleCommand"
+		        	  label="CyBench Generate"
+	                  icon="icons/cybench_symbol_small.png"                
+	                  tooltip="Launch CyBench Benchmark"
+	                  style="push">
+	            </command>
+	 	  </menuContribution>
+	 	  
       <!--menuContribution
             locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
@@ -119,8 +126,8 @@
                   mnemonic="S">
             </command>
          </menu>
-      </menuContribution-->
-      <!--menuContribution
+      </menuContribution>
+      <menuContribution
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
          <toolbar
                id="FirstPlugin.toolbars.sampleToolbar">
@@ -132,6 +139,54 @@
             </command>
          </toolbar>
       </menuContribution-->
+   </extension>
+
+
+	     
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="FirstPlugin.commands.category"
+            name="CyBench">
+      </category>
+      <command
+            categoryId="FirstPlugin.commands.category"
+            name="Run CyBench All tests"
+            id="FirstPlugin.commands.sampleCommand">
+      </command>
+      <command
+            categoryId="FirstPlugin.commands.category"
+            name="Run CyBench Add Nature"
+            id="com.gocypher.cybench.plugin.handlers.AddNature">
+      </command>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="com.gocypher.cybench.plugin.handlers.BenchmarkLauncherHandler"
+            commandId="FirstPlugin.commands.sampleCommand">
+      </handler>
+      <handler
+            class="com.gocypher.cybench.plugin.handlers.CyBechProjectNatureHandler"
+            commandId="com.gocypher.cybench.plugin.handlers.AddNature">
+      </handler>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="FirstPlugin.commands.sampleCommand"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6">
+      </key>
+      <key
+            commandId="com.gocypher.cybench.plugin.handlers.AddNature"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6">
+      </key>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -190,5 +245,4 @@
             file="contexts.xml">
       </contexts>
    </extension>
-
 </plugin>

@@ -8,6 +8,9 @@ import java.util.Map;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
@@ -33,17 +36,21 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
 
-public class CyBechProjectNatureHandler implements ILaunchShortcut{
+public class CyBechProjectNatureHandler extends AbstractHandler {
 
 	@Override
-	public void launch(ISelection selection, String mode) {
+	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
+			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+			IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
 			System.out.println("--->Add CyBench Nature");
 			
 			System.out.println("Location of workspace:"+ResourcesPlugin.getWorkspace().getRoot().getRawLocationURI().toASCIIString() );
@@ -109,13 +116,7 @@ public class CyBechProjectNatureHandler implements ILaunchShortcut{
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
-	
-	@Override
-	public void launch(IEditorPart arg0, String arg1) {
-		// TODO Auto-generated method stub
-		
+		return null;
 	}
 	
 	public IClasspathEntry getClasspathEntry(IPackageFragmentRoot root) throws JavaModelException {
