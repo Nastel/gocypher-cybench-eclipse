@@ -1,28 +1,13 @@
 package com.gocypher.cybench.plugin.handlers;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -32,28 +17,10 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.openjdk.jmh.generators.annotations.APGeneratorDestinaton;
-import org.openjdk.jmh.generators.annotations.APGeneratorSource;
-import org.openjdk.jmh.generators.core.BenchmarkGenerator;
-import org.openjdk.jmh.generators.core.GeneratorDestination;
-import org.openjdk.jmh.generators.core.GeneratorSource;
 
-import com.gocypher.cybench.core.utils.JSONUtils;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.LaunchConfiguration;
@@ -100,20 +67,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		return "" ;
 	}
 	
-	private void setCorrectClassRelativePath() {
-		 try {
-			Files.list(new File(selectionFolderPath).toPath())
-			    .limit(10)
-			    .forEach(path -> {
-			        System.out.println(path);
-			    });
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-//	  private Set<String> getProjectPaths(List<String> classList) {
+	//	  private Set<String> getProjectPaths(List<String> classList) {
 //		  Set<String> projectPaths = new HashSet<String>();
 //	    	try {
 //	    		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
@@ -149,8 +103,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	public void launch(ILaunchConfiguration configuration, String arg1, ILaunch arg2, IProgressMonitor arg3)
 			throws CoreException {
 		try {
-			List<String> benchmarkClassList = new LinkedList<String>();
-	    	setRunConfigurationProperties(configuration);
+			setRunConfigurationProperties(configuration);
 	    	selectionFolderPath = selectionFolderPath.replaceAll("\\s+","");
 //	    	File file = new File(selectionFolderPath);
 //	    	benchmarkClassList = LauncherUtils.addClasses(file.listFiles(),benchmarkClassList);
