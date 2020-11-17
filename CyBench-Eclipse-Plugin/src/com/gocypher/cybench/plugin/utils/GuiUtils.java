@@ -7,9 +7,12 @@ import java.util.Base64;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewPart;
@@ -146,5 +149,16 @@ public class GuiUtils {
     	URL url = FileLocator.find(Platform.getBundle(Activator.PLUGIN_ID), new Path(pathToImage), null);
     	return ImageDescriptor.createFromURL(url);
     }
+    public static void attachAptBasedPreferences (IJavaProject javaProject) throws Exception {
+		ProjectScope projectScope = new ProjectScope(javaProject.getProject()) ;
+		IEclipsePreferences prefs = projectScope.getNode("org.eclipse.jdt.apt.core") ;
+		prefs.putBoolean("org.eclipse.jdt.apt.aptEnabled", true);
+		prefs.putBoolean("org.eclipse.jdt.apt.reconcileEnabled", true);
+		
+		prefs.put("org.eclipse.jdt.apt.genSrcDir", "target/jmh-generated");
+		prefs.put("org.eclipse.jdt.apt.genTestSrcDir", "target/jmh-generated-tests");
+		prefs.flush();
+		
+	}
 
 }

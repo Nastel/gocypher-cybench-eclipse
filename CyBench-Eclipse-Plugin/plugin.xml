@@ -266,4 +266,15 @@
             file="contexts.xml">
       </contexts>
    </extension>
+   <extension
+    id="cybenchnature"
+    name="CyBench Nature"
+    point="org.eclipse.core.resources.natures">
+    <runtime>
+        <run
+            class="com.gocypher.cybench.plugin.CyBenchProjectNature">
+        </run>
+    </runtime>
+</extension>
+   
 </plugin>
