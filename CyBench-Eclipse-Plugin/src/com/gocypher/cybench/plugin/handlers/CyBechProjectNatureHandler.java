@@ -1,14 +1,21 @@
 package com.gocypher.cybench.plugin.handlers;
 
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Preferences;
@@ -27,6 +34,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
 
+import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
@@ -43,6 +51,15 @@ public class CyBechProjectNatureHandler implements ILaunchShortcut{
 			//System.out.println("Selection:"+selection.getClass());
 			IJavaProject javaProject = this.resolveJavaProject(selection) ;
 			
+			//IProjectNature projectNature = 
+			/*boolean hasJavaNature = javaProject.getProject().hasNature("org.eclipse.jdt.core.javanature") ;
+			
+			boolean hasGradleNature = javaProject.getProject().hasNature("org.eclipse.buildship.core.gradleprojectnature") ;
+			
+			
+			System.out.println("Project natures:"+hasJavaNature +";"+hasMavenNature);
+			*/
+			
 			String cyBenchExternalsPath = LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID, false) ;
 			System.out.println("Externals path:"+cyBenchExternalsPath);
 			
@@ -51,6 +68,8 @@ public class CyBechProjectNatureHandler implements ILaunchShortcut{
 			String fullPathHardcodedAnnotations = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-generator-annprocess-1.26.jar" ;
 			
 			
+			this.updateDependenciesForNature(javaProject) ;
+			/*
 			
 			//FIXME Code for adding external library , shall use path to "cyBenchExternalsPath" variable
 			//Externals for real Eclipse test
@@ -72,7 +91,7 @@ public class CyBechProjectNatureHandler implements ILaunchShortcut{
 			
 			
 			//GuiUtils.logMessage("Externals path:"+cyBenchExternalsPath);
-			
+			*/
 			
 			
 			
@@ -204,6 +223,50 @@ public class CyBechProjectNatureHandler implements ILaunchShortcut{
 		}catch (Exception e) {
 			System.err.println ("Error on update of APT factory classpath:" + e.getMessage()) ;
 			e.printStackTrace();
+		}
+	}
+	private void registerCybenchNature (IJavaProject javaProject) throws Exception{
+		String cybenchNature = "com.gocypher.cybench.cybenchnature";
+		IProjectDescription description = javaProject.getProject().getDescription();
+		String[] natures = description.getNatureIds();
+		for (String nature:natures) {
+			System.out.println("Nature:"+nature);
+		}
+		
+		String[] newNatures = new String[natures.length + 1];
+		System.arraycopy(natures, 0, newNatures, 0, natures.length);
+		newNatures[natures.length] = cybenchNature;
+		
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IStatus status = workspace.validateNatureSet(newNatures);
+		
+		System.out.println("Nature status:"+status);
+		if (status.getCode() == IStatus.OK) {
+		    description.setNatureIds(newNatures);
+		    javaProject.getProject().setDescription(description, null);
+		}		
+	}
+	private void updateDependenciesForNature (IJavaProject javaProject) throws Exception{
+		boolean hasMavenNature = javaProject.getProject().hasNature("org.eclipse.m2e.core.maven2Nature") ;
+		if (hasMavenNature) {
+			String projectLocation = javaProject.getProject().getLocation().toPortableString() ;
+			System.out.println("Selected project location:"+projectLocation);
+			List<File> files = CybenchUtils.listFilesInDirectory(projectLocation) ;
+			File pomXML = null ;
+			for (File file:files) {
+				if ("pom.xml".equals(file.getName())){
+					pomXML = file ;
+				}
+			}
+			if (pomXML != null) {
+				System.out.println("POM file found:"+pomXML.getAbsolutePath());
+				MavenXpp3Reader reader = new MavenXpp3Reader();
+				Model model = reader.read(new FileReader(pomXML)) ;
+				System.out.println("Pom model:"+model.getDependencies());
+			}
+			
+			
+			
 		}
 	}
    
