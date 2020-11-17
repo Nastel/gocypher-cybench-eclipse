@@ -22,11 +22,14 @@
 	        modes="run">
 	        <contextualLaunch>
 	            <enablement>
-	                <with
-	                    variable="selection">
-	                    <count
-	                        value="+">
-	                    </count>
+	                <with variable="selection">
+	                  <count value="+"/>
+                      <iterate operator="or">
+                      	<or>
+					        <adapt type="org.eclipse.jdt.internal.core.CompilationUnit"></adapt>
+					        <adapt type="org.eclipse.core.resources.IContainer"> </adapt>
+				        </or>
+				      </iterate>
 	                </with>
 	            </enablement>
 	        </contextualLaunch>
@@ -97,7 +100,7 @@
 	                  commandId="com.gocypher.cybench.plugin.handlers.AddNature"
 		        	  label="Add CyBench Nature"
 	                  icon="icons/cybench_symbol_small.png"                
-	                  tooltip="Launch CyBench Benchmark"
+	                  tooltip="Add needed parts and configurations for CyBench"
 	                  style="push">
 	            </command>
 	 	  </menuContribution>
@@ -106,10 +109,10 @@
 		         <separator name="com.mycompany.converterhelper.separator" visible="true" />
 	            <command
 	                  id="com.gocypher.cybench.plugin.ProjectGeneratebenchmarks"
-	                  commandId="FirstPlugin.commands.sampleCommand"
+	                  commandId="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks"
 		        	  label="CyBench Generate"
 	                  icon="icons/cybench_symbol_small.png"                
-	                  tooltip="Launch CyBench Benchmark"
+	                  tooltip="Generate benchmarks"
 	                  style="push">
 	            </command>
 	 	  </menuContribution>
@@ -159,17 +162,29 @@
             name="Run CyBench Add Nature"
             id="com.gocypher.cybench.plugin.handlers.AddNature">
       </command>
+      <command
+            categoryId="FirstPlugin.commands.category"
+            name="Run CyBench Add Nature"
+            id="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks">
+      </command>
    </extension>
    
    <extension
          point="org.eclipse.ui.handlers">
       <handler
+       		id="com.gocypher.cybench.plugin.handlers.BenchmarkLauncherHandler"
             class="com.gocypher.cybench.plugin.handlers.BenchmarkLauncherHandler"
             commandId="FirstPlugin.commands.sampleCommand">
       </handler>
       <handler
+       		id="com.gocypher.cybench.plugin.handlers.CyBechProjectNatureHandler"
             class="com.gocypher.cybench.plugin.handlers.CyBechProjectNatureHandler"
             commandId="com.gocypher.cybench.plugin.handlers.AddNature">
+      </handler>
+       <handler
+        	id="com.gocypher.cybench.plugin.handlers.BenchmarksGenerationHandler"
+            class="com.gocypher.cybench.plugin.handlers.BenchmarksGenerationHandler"
+            commandId="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks">
       </handler>
    </extension>
    
@@ -183,6 +198,12 @@
       </key>
       <key
             commandId="com.gocypher.cybench.plugin.handlers.AddNature"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6">
+      </key>
+       <key
+            commandId="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             contextId="org.eclipse.ui.contexts.window"
             sequence="M1+6">

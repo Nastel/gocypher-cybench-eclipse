@@ -149,6 +149,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 		    	for (Object elem : ss.toList()) {
 		    		String selectedPath = "";
 		    		System.out.println("elem: "+elem.toString());
+		    		System.out.println("getClass: "+elem.getClass());
 	    			IJavaProject javaProject = null;
  				if (elem instanceof IProject) {
 	    				javaProject = (IJavaProject)JavaCore.create((IProject)elem);
@@ -182,10 +183,19 @@ public class LaunchShortcut implements ILaunchShortcut {
 	    			else if (elem instanceof IAdaptable) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
 	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
+	    		    	System.out.println(System.getProperty("line.separator"));
+	    				System.out.println("selectedPath getFullPath: "+res.getFullPath());
+	    				System.out.println("selectedPath res.getLocation().toString(): "+res.getLocation().toString());
+	    		    	System.out.println(System.getProperty("line.separator"));
+	    				if(res.getFullPath().toPortableString().endsWith(".java")) {
+		    		        String benchmarkClass = res.getFullPath().toPortableString().replace(".java", "");
+		    		        selectionEntry.addClassPaths(benchmarkClass);
+	    				}
 	    		        IProject project = res.getProject();
 	    		        selectedPath = res.getLocation().toString();
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
 	    				javaProject = (IJavaProject)JavaCore.create((IProject)project);
+	    				System.out.println("selectedPath IAdaptable: "+selectionEntry.getProjectPath());
 	    			} else {
 	    				System.err.println("The run selection was not recognized: "+ selection);
 	    			}
