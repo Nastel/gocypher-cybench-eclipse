@@ -1,13 +1,16 @@
 package com.gocypher.cybench.plugin.handlers;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -45,7 +48,12 @@ import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
 
 public class CyBechProjectNatureHandler extends AbstractHandler {
-
+	private static final String JMH_GROUP_ID="org.openjdk.jmh" ;
+	private static final String JMH_CORE_ARTIFACT_ID="jmh-core" ;
+	private static final String JMH_ANNOTATIONDS_ARTIFACT_ID="jmh-generator-annprocess" ;
+	private static final String JMH_VERSION = "1.26" ;
+	private static final String CYBENCH_PROJECT_NATURE = "com.gocypher.cybench.cybenchnature";
+	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
@@ -58,14 +66,6 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 			//System.out.println("Selection:"+selection.getClass());
 			IJavaProject javaProject = this.resolveJavaProject(selection) ;
 			
-			//IProjectNature projectNature = 
-			/*boolean hasJavaNature = javaProject.getProject().hasNature("org.eclipse.jdt.core.javanature") ;
-			
-			boolean hasGradleNature = javaProject.getProject().hasNature("org.eclipse.buildship.core.gradleprojectnature") ;
-			
-			
-			System.out.println("Project natures:"+hasJavaNature +";"+hasMavenNature);
-			*/
 			
 			String cyBenchExternalsPath = LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID, false) ;
 			System.out.println("Externals path:"+cyBenchExternalsPath);
@@ -76,44 +76,25 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 			
 			
 			this.updateDependenciesForNature(javaProject) ;
-			/*
 			
-			//FIXME Code for adding external library , shall use path to "cyBenchExternalsPath" variable
-			//Externals for real Eclipse test
-			this.addAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
-			
-			//Externals for local tests
-			//this.addAndSaveClassPathEntry(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
-			
-			//FIXME code for update of factory path for the project
-			//Externals for real Eclipse test
-			this.updateProjectAPTSettings (javaProject,cyBenchExternalsPath) ;
-			//Externals for local tests
-			//this.updateProjectAPTSettings (javaProject,fullPathHardcodedCore,fullPathHardcodedAnnotations) ;
-			
-			
-			
-			//FIXME code for updated of project preferences in order to enable Annotation Processing
-			//this.attachAptBasedPreferences(javaProject) ;
-			
-			
-			//GuiUtils.logMessage("Externals path:"+cyBenchExternalsPath);
-			*/
-			
-			
-			
-			
-			
-			/*System.out.println("Java Project:"+javaProject);
-			for (IPackageFragmentRoot root :javaProject.getAllPackageFragmentRoots()) {
-				System.out.println("Fragment root:"+root.getElementName());
-				IClasspathEntry rawEntry= getClasspathEntry(root);
-				System.out.println("\tClass path:"+rawEntry.getPath());
-				
+			if (!this.isMavenProject(javaProject)) {
+				//Externals for real Eclipse test
+				//this.addAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
+				///Externals for local tests
+				this.addAndSaveClassPathEntry(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
 			}
-			*/
+				
+
+			//Externals for real Eclipse test
+			//this.updateProjectAPTSettings (javaProject,cyBenchExternalsPath) ;
+			//Externals for local tests
+			this.updateProjectAPTSettings (javaProject,fullPathHardcodedCore,fullPathHardcodedAnnotations) ;
+			
+			this.refreshProject(javaProject);
+			
 			System.out.println("--->CyBench Nature finish");
 		}catch (Exception e) {
+			System.err.println("Error on project nature update:"+e.getMessage());
 			e.printStackTrace();
 		}
 		return null;
@@ -195,7 +176,7 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 		
 	}
 	
-	private void attachAptBasedPreferences (IJavaProject javaProject) throws Exception {
+	/*private void attachAptBasedPreferences (IJavaProject javaProject) throws Exception {
 		ProjectScope projectScope = new ProjectScope(javaProject.getProject()) ;
 		IEclipsePreferences prefs = projectScope.getNode("org.eclipse.jdt.apt.core") ;
 		prefs.putBoolean("org.eclipse.jdt.apt.aptEnabled", true);
@@ -206,28 +187,31 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 		prefs.flush();
 		
 	}
+	*/
 	
-	private void updateProjectAPTSettings (IJavaProject javaProject, String ... pathToExternalJars) {
-		AptConfig.setEnabled(javaProject, true);
-		AptConfig.setGenSrcDir(javaProject, "target/jmh-generated");
-		AptConfig.setGenTestSrcDir(javaProject, "target/jmh-generated-tests");
+	private void updateProjectAPTSettings (IJavaProject javaProject, String ... pathToExternalJars) throws Exception {
+		AptConfig.setEnabled(javaProject, true);	
+		if (this.isMavenProject(javaProject)) {
+			AptConfig.setGenSrcDir(javaProject, "target/jmh-generated");
+			AptConfig.setGenTestSrcDir(javaProject, "target/jmh-generated-tests");
+		}
+		else {
+			AptConfig.setGenSrcDir(javaProject, "jmh-generated");
+			AptConfig.setGenTestSrcDir(javaProject, "jmh-generated-tests");
+		}
 		AptConfig.setProcessDuringReconcile(javaProject, true);
-		
-		
+				
 		IFactoryPath factoryPath= AptConfig.getFactoryPath(javaProject) ;
 	
 		for (String item : pathToExternalJars) {
 			factoryPath.addExternalJar(new File (item));
 		}
-		try {
-			AptConfig.setFactoryPath(javaProject, factoryPath);
-		}catch (Exception e) {
-			System.err.println ("Error on update of APT factory classpath:" + e.getMessage()) ;
-			e.printStackTrace();
-		}
+		
+		AptConfig.setFactoryPath(javaProject, factoryPath);
+		
 	}
 	private void registerCybenchNature (IJavaProject javaProject) throws Exception{
-		String cybenchNature = "com.gocypher.cybench.cybenchnature";
+		
 		IProjectDescription description = javaProject.getProject().getDescription();
 		String[] natures = description.getNatureIds();
 		for (String nature:natures) {
@@ -236,7 +220,7 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 		
 		String[] newNatures = new String[natures.length + 1];
 		System.arraycopy(natures, 0, newNatures, 0, natures.length);
-		newNatures[natures.length] = cybenchNature;
+		newNatures[natures.length] = CYBENCH_PROJECT_NATURE;
 		
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IStatus status = workspace.validateNatureSet(newNatures);
@@ -248,14 +232,14 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 		}		
 	}
 	private void updateDependenciesForNature (IJavaProject javaProject) throws Exception{
-		boolean hasMavenNature = javaProject.getProject().hasNature("org.eclipse.m2e.core.maven2Nature") ;
-		if (hasMavenNature) {
+	
+		if (this.isMavenProject(javaProject)) {
 			String projectLocation = javaProject.getProject().getLocation().toPortableString() ;
 			System.out.println("Selected project location:"+projectLocation);
 			List<File> files = CybenchUtils.listFilesInDirectory(projectLocation) ;
 			File pomXML = null ;
 			for (File file:files) {
-				if ("pom.xml".equals(file.getName())){
+				if (!file.getAbsolutePath().contains("target") && "pom.xml".equals(file.getName())){
 					pomXML = file ;
 				}
 			}
@@ -264,12 +248,62 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 				MavenXpp3Reader reader = new MavenXpp3Reader();
 				Model model = reader.read(new FileReader(pomXML)) ;
 				System.out.println("Pom model:"+model.getDependencies());
+								
+				for (Dependency dep:createCyBenchMvnDependencies(model.getDependencies())) {
+					System.out.println("will add new dependency:"+dep);
+					model.addDependency(dep);
+				}
+				
+				System.out.println("Will write model to file:"+pomXML.getAbsolutePath());
+				MavenXpp3Writer writer = new MavenXpp3Writer() ;
+				writer.write(new FileOutputStream(pomXML), model);
+				System.out.println("POM file updated successfully!");
 			}
-			
-			
-			
 		}
 	}
-   
+	private List<Dependency>createCyBenchMvnDependencies (List<Dependency>currentDependencies){
+		List<Dependency>dependencies = new ArrayList<>() ;
+		if (!hasJMHDependency(currentDependencies, JMH_GROUP_ID,JMH_CORE_ARTIFACT_ID)) {
+		
+			Dependency core = new Dependency() ;
+			core.setGroupId(JMH_GROUP_ID);
+			core.setArtifactId(JMH_CORE_ARTIFACT_ID);
+			core.setVersion(JMH_VERSION);
+			
+			dependencies.add(core) ;
+		}
+		if (!hasJMHDependency(currentDependencies,JMH_GROUP_ID, JMH_ANNOTATIONDS_ARTIFACT_ID)) {
+			Dependency annotations = new Dependency() ;
+			annotations.setGroupId(JMH_GROUP_ID);
+			annotations.setArtifactId(JMH_ANNOTATIONDS_ARTIFACT_ID);
+			annotations.setVersion(JMH_VERSION);
+			annotations.setScope("provided");
+		dependencies.add(annotations) ;
+		}
+				
+		return dependencies ;
+	}
+	private boolean hasJMHDependency (List<Dependency>dependencies , String groupId, String artifacId) {
+		
+		for (Dependency item:dependencies) {
+			if (groupId.equals(item.getGroupId()) && artifacId.equals(item.getArtifactId())  ) {
+				return true ;
+			}
+		}
+		
+		return false ;
+	}
+	private boolean isMavenProject (IJavaProject javaProject) throws Exception{		
+		if (javaProject.getProject().hasNature("org.eclipse.m2e.core.maven2Nature")) {
+			return true ;
+		}		
+		return false ;
+	}
+	private boolean isJavaProject (IJavaProject javaProject) throws Exception{		
+		if (javaProject.getProject().hasNature("org.eclipse.jdt.core.javanature")) {
+			return true ;
+		}		
+		return false ;
+	}  
 
 }
