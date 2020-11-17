@@ -275,7 +275,19 @@ Export-Package: joptsimple,
  org.apache.http.impl.client,
  org.apache.http.util,
  org.apache.http.message,
- org.apache.commons.logging
+ org.apache.commons.logging,
+ org.apache.maven.model,
+ org.apache.maven.model.merge,
+ org.apache.maven.model.io.xpp3,
+ org.codehaus.plexus.util,
+ org.codehaus.plexus.util.xml,
+ org.codehaus.plexus.util.xml.pull,
+ org.codehaus.plexus.util.cli,
+ org.codehaus.plexus.util.dag,
+ org.codehaus.plexus.util.introspection,
+ org.codehaus.plexus.util.io,
+ org.codehaus.plexus.util.reflection
+ 
  
  
  
