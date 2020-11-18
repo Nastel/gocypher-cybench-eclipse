@@ -42,13 +42,13 @@ public class LaunchShortcut implements ILaunchShortcut {
 	public void launch(ISelection selection, String mode) {
 		try {
 			RunSelectionEntry selectionEntry = LauncherUtils.fillRunselectionData(selection);
-		    System.out.println("Execution Mode: " + mode);
-	    	System.out.println(System.getProperty("line.separator"));
-			System.out.println("project path: "+selectionEntry.getProjectPath());
-			System.out.println("output path: "+selectionEntry.getOutputPath());
-			System.out.println("classes paths: "+selectionEntry.getClassPaths());
-			System.out.println("project reports path: "+selectionEntry.getProjectReportsPath());
-	    	System.out.println(System.getProperty("line.separator"));
+//		    System.out.println("Execution Mode: " + mode);
+//	    	System.out.println(System.getProperty("line.separator"));
+//			System.out.println("project path: "+selectionEntry.getProjectPath());
+//			System.out.println("output path: "+selectionEntry.getOutputPath());
+//			System.out.println("classes paths: "+selectionEntry.getClassPaths());
+//			System.out.println("project reports path: "+selectionEntry.getProjectReportsPath());
+//	    	System.out.println(System.getProperty("line.separator"));
 	    	
 			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(selectionEntry.getProjectReportsPath(), true, "report") ;
 			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(selectionEntry.getProjectReportsPath(), true, "report") ;
@@ -89,8 +89,6 @@ public class LaunchShortcut implements ILaunchShortcut {
 				public void run() {
 					try {
 					    ILaunch launchedBenchmarks = config.launch(ILaunchManager.RUN_MODE, null);
-					  
-					    //out.println("Waiting for CyBench to finish...");
 					    
 					    while (!launchedBenchmarks.isTerminated()) {
 					    	try {
@@ -99,36 +97,10 @@ public class LaunchShortcut implements ILaunchShortcut {
 					    		
 					    	}
 					    }
-					    /*out.println("Finished CyBench tests:"+launchedBenchmarks.isTerminated());
-						String results = CybenchUtils.loadFile(pathToTempReportPlainFile) ;
-						if (results != null && !results.isEmpty()) {
-								out.println("Results from tests:"+JSONUtils.parseJsonIntoMap(results));
-						}
-						out.println("-----------------------------------------------------------------------------------------");
-						out.println("                                 Finished CyBench benchmarks                             ");
-						out.println("-----------------------------------------------------------------------------------------");
-						*/
 
 						GuiUtils.refreshCybenchExplorer();				
 						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);	
-						
-						/*Display.getDefault().asyncExec(new Runnable() {
-						    public void run() {
-						    	try {
-						    		System.out.println("Will open part for reports");
-						    		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-						    		page.showView(ReportsDisplayView.ID) ;
-									IViewPart view = page.findView(ReportsDisplayView.ID) ;
-						    		if (view instanceof ICybenchPartView) {
-					    			((ICybenchPartView)view).refreshView();
-					    		}
-//							    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportsDisplayView.ID) ; 
-						    	}catch (Exception e) {
-						    		e.printStackTrace();
-						    	}
-						    }
-						});
-						*/	
+
 					} catch (Exception e) {
 					    System.err.println(e.getMessage());
 					}

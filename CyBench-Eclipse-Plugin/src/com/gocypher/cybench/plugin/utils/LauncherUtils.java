@@ -99,6 +99,7 @@ public class LauncherUtils {
 					  addClasses(tempFolder.members(), selectionEntry);
 				  }else {
 					 String benchmarkClass = file.getFullPath().toPortableString().replace(".java", "");
+	    				System.out.println("selectedPath IProject: "+benchmarkClass);
 					 selectionEntry.add(benchmarkClass);
 				  }
 			}
@@ -117,14 +118,13 @@ public class LauncherUtils {
 		    	for (Object elem : ss.toList()) {
 		    		IProject project = null;
 		    		String selectedPath = "";
-		    		System.out.println("elem: "+elem.toString());
-		    		System.out.println("getClass: "+elem.getClass());
+//		    		System.out.println("elem: "+elem.toString());
 	    			IJavaProject javaProject = null;
  				if (elem instanceof IProject) {
-	    				javaProject = (IJavaProject)JavaCore.create((IProject)elem);
+ 						IAdaptable adaptable = (IAdaptable) elem;
+	    		        IFolder folder = (IFolder)  adaptable.getAdapter(IFolder.class);
 	    				project = (IProject) elem;
 	    				selectionEntry.setProjectPath(project.getLocation().toString());
-	    				System.out.println("selectedPath IProject: "+selectionEntry.getProjectPath());
 	    			}
 	    			else if (elem instanceof IFolder) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
@@ -151,23 +151,19 @@ public class LauncherUtils {
 	    			else if (elem instanceof IAdaptable) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
 	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
-//	    		    	System.out.println(System.getProperty("line.separator"));
-//	    				System.out.println("selectedPath getFullPath: "+res.getFullPath());
-//	    				System.out.println("selectedPath res.getLocation().toString(): "+res.getLocation().toString());
-//	    		    	System.out.println(System.getProperty("line.separator"));
 	    				if(res.getFullPath().toPortableString().endsWith(".java")) {
 		    		        String benchmarkClass = res.getFullPath().toPortableString().replace(".java", "");
 		    		        selectionEntry.addClassPaths(benchmarkClass);
 	    				}
 	    		        project = res.getProject();
-	    				javaProject = (IJavaProject)JavaCore.create((IProject)project);
 	    		        selectedPath = res.getLocation().toString();
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
 	    				System.out.println("selectedPath IAdaptable: "+selectionEntry.getProjectPath());
 	    			} else {
 	    				System.err.println("The run selection was not recognized: "+ selection);
 	    			}
- 					
+
+ 					javaProject = (IJavaProject)JavaCore.create((IProject)project);
 					selectionEntry.setProjectSelected(project);
 	 				runSelectionClassesInformation(javaProject, selectionEntry);
 		    		selectionEntry.setProjectName(selectionEntry.getProjectPath().substring(selectionEntry.getProjectPath().lastIndexOf('/') + 1));
@@ -175,7 +171,8 @@ public class LauncherUtils {
 		    	}
 		    }
 		}catch(Exception e){
-			System.err.println("Problem on Selected paths collection: "+e.getStackTrace());
+			System.err.println("Problem on Selected paths collection");
+			e.printStackTrace();
 		}
 		return selectionEntry;
 	}
@@ -194,8 +191,6 @@ public class LauncherUtils {
 		    							tempClassSet.add(classPath.replace(root.getPath().toPortableString()+"/", "").replace("/", "."));
 		    						}
 	    						}
-//	    						System.out.println("root.toString() ==  "+root.toString());
-//	    						System.out.println("root.getPath() ==  "+root.getPath().toPortableString().replace("/", "."));
 	    					}
 	    				}
 	    				selectionEntry.setClassPaths(tempClassSet);

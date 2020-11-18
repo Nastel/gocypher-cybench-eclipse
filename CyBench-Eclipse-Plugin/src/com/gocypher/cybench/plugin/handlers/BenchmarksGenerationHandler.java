@@ -2,8 +2,10 @@ package com.gocypher.cybench.plugin.handlers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -57,86 +59,49 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
 		RunSelectionEntry selectionEntry = LauncherUtils.fillRunselectionData(selection);
-		
-		List<BenchmarkMethodModel> benchmarkMethods = methodGeneration(selection, selectionEntry);
+	
 //    	System.out.println("getOutputPath: "+ selectionEntry.getOutputPath());
 //    	System.out.println("getProjectPath: "+ selectionEntry.getProjectPath());
 //    	System.out.println("getProjectReportsPath: "+ selectionEntry.getProjectReportsPath());
 //    	System.out.println("getSourcePathsWithClasses: "+ selectionEntry.getSourcePathsWithClasses());
 //    	System.out.println("getClassPaths: "+ selectionEntry.getClassPaths());
-//    	
     	try {
         	String outputPath= LauncherUtils.getRawSourceFolderForBenchmarks(selectionEntry.getProjectSelected());
     		for(String packagePath :  selectionEntry.getClassPaths()) {
-	    		JDefinedClass generationClass;
-	    		generationClass = codeModelInstance._class(packagePath+"Benchmarks");
-	    		generationClass.annotate(codeModelInstance.ref(State.class)).param("value", Scope.Benchmark);
-	    		model.setMethodType(void.class);
-//	        	System.out.println("Class annotation correct");
-	        	
-	        	/*---------------- SET UP METHODS -------------------------*/
-	    		model.setMethodName("setUp");
-	    		model.setMethodHint("//TODO Trial level: write code to be executed before each run of the benchmark");
-	    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 0);
-	    		model.setMethodName("setUpIteration");
-	    		model.setMethodHint("//TODO Iteration level: write code to be executed before each iteration of the benchmark.");
-	    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 2);
-//	        	System.out.println("Set up method creation correct");
-	        	
-	    		
+	    		File file = new File(outputPath);
+				File fileExists = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+"Benchmarks.java");
+	    		if(!fileExists.exists() ) { 
+	    			List<BenchmarkMethodModel> benchmarkMethods = methodGeneration(selection, selectionEntry, packagePath);
+	    			JDefinedClass generationClass;
+		    		generationClass = codeModelInstance._class(packagePath+"Benchmarks");
+		    		generationClass.annotate(codeModelInstance.ref(State.class)).param("value", Scope.Benchmark);
+		        	/*---------------- SET UP METHODS -------------------------*/
+		    		model.setMethodType(void.class);
+		    		model.setMethodName("setUp");
+		    		model.setMethodHint("//TODO Trial level: write code to be executed before each run of the benchmark");
+		    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 0);
+		    		model.setMethodName("setUpIteration");
+		    		model.setMethodHint("//TODO Iteration level: write code to be executed before each iteration of the benchmark.");
+		    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 2);
+		    		
+	
+		        	/*---------------- BENCHMARK METHODS -------------------------*/
+		        	for(BenchmarkMethodModel methodModelEntry : benchmarkMethods) {
+			    		generateBenchmarkMethod(generationClass, codeModelInstance, methodModelEntry);
+		        	}
+	
+		        	/*---------------- TEAR DOWN METHODS -------------------------*/
+		    		model.setMethodType(void.class);
+		        	model.setMethodName("cleanUp");
+		    		model.setMethodHint("//TODO Trial level: write code to be executed after each run of the benchmark");
+		    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 1);
+		    		model.setMethodName("cleanUpIteration");
+		    		model.setMethodHint("//TODO Iteration level: write code to be executed after each iteration of the benchmark.");
+		    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 3);
+	
+					codeModelInstance.build(file);
 
-	        	/*---------------- BENCHMARK METHODS -------------------------*/
-            	System.out.println(System.getProperty("line.separator"));;
-	        	for(BenchmarkMethodModel methodModelEntry : benchmarkMethods) {
-
-//	            	System.out.println("getMethodName: "+ methodModelEntry.getMethodName());
-//	            	System.out.println("getMethodBenchmarkMode: "+ methodModelEntry.getMethodBenchmarkMode());
-//	            	System.out.println("getMethodType: "+ methodModelEntry.getMethodType());
-		    		generateBenchmarkMethod(generationClass, codeModelInstance, methodModelEntry);
-	        	}
-            	System.out.println(System.getProperty("line.separator"));
-//	    		model.setMethodBenchmarkMode("Throughput");
-//	    		model.setMethodName("customBenchmark");
-//	    		model.setMethodHint("//TODO fill up benchmark method with logic");
-//	    		generateBenchmarkMethod(generationClass, codeModelInstance, model);
-//	        	System.out.println("First custom benchmark method creation correct");
-//	    		model.setMethodBenchmarkMode("Throughput");
-//	    		model.setMethodName("customBenchmark1");
-//	    		model.setMethodHint("//TODO fill up benchmark method with logic");
-//	    		generateBenchmarkMethod(generationClass, codeModelInstance, model);
-//	        	System.out.println("Second custom benchmark method creation correct");
-//	    		model.setMethodBenchmarkMode("Throughput");
-//	    		model.setMethodName("customBenchmark2");
-//	    		model.setMethodHint("//TODO fill up benchmark method with logic");
-//	    		generateBenchmarkMethod(generationClass, codeModelInstance, model);
-//	        	System.out.println("Third custom benchmark method creation correct");
-	        	
-
-	        	/*---------------- TEAR DOWN METHODS -------------------------*/
-	        	model.setMethodName("cleanUp");
-	    		model.setMethodHint("//TODO Trial level: write code to be executed after each run of the benchmark");
-	    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 1);
-	    		model.setMethodName("cleanUpIteration");
-	    		model.setMethodHint("//TODO Iteration level: write code to be executed after each iteration of the benchmark.");
-	    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 3);
-//	        	System.out.println("Clean up method creation correct");
-	        	
-
-//	        	System.out.println("selectionEntry.getSourcePathsWithClasses().get(0): "+selectionEntry.getSourcePathsWithClasses().get(0));
-//	        	System.out.println("selectionEntry.getProjectName(): "+selectionEntry.getProjectName());
-//				if(selectionEntry.getSourcePathsWithClasses().get(0) != null) {
-//					outputPath = selectionEntry.getProjectPath() + selectionEntry.getSourcePathsWithClasses().get(0).replace(selectionEntry.getProjectName(), "");
-//				}else {
-//					outputPath = selectionEntry.getProjectPath();
-//				}
-//		    	System.out.println(System.getProperty("line.separator"));
-//	        	System.out.println("outputPath: "+outputPath);
-				File file = new File(outputPath);
-				file.mkdirs();
-
-//	        	System.out.println("Buildin the benchamrks class");
-				codeModelInstance.build(file);
-//	        	System.out.println("Building was completed succesfully");
+	    		}
     		}
 		    IProject project = selectionEntry.getProjectSelected();
 	        if(project != null) {
@@ -199,34 +164,38 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	} 
 
 	
-	private List<BenchmarkMethodModel> methodGeneration(IStructuredSelection selection, RunSelectionEntry selectionEntry) {
+	private List<BenchmarkMethodModel> methodGeneration(IStructuredSelection selection, RunSelectionEntry selectionEntry, String classPath) {
 		LinkedList<BenchmarkMethodModel> benchmarkMethods = new LinkedList<BenchmarkMethodModel>();
 		try {
-			for(String classPath : selectionEntry.getClassPaths()) {
-		        System.out.println(classPath);
-		        IProject project = selectionEntry.getProjectSelected();
-		        if(project != null) {
-		        	IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
-			    	IType itype = javaProject.findType(classPath);
+	        System.out.println(classPath);
+	        IProject project = selectionEntry.getProjectSelected();
+	        if(project != null) {
+	        	IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
+		    	IType itype = javaProject.findType(classPath);
+		    	if(itype != null) {
 			    	IMethod[] allMethods = itype.getMethods();
-		
+			    	Set<String> methodNames = new HashSet<String>();
 			    	for(IMethod methodDataObject: allMethods) {
+			    		methodNames.add(methodDataObject.getElementName()+"Benchmark");
+//		    	        System.out.println("methodDataObject.getElementName(): "+ methodDataObject.getElementName());
+//		    	        System.out.println("methodDataObject.getSource(): "+ methodDataObject.getSource());
+//		    	        System.out.println("methodDataObject.getElementType(): "+ methodDataObject.getElementType());
+//		    	        System.out.println("methodDataObject.getNumberOfParameters(): "+ methodDataObject.getNumberOfParameters());
+//		    	        for(String parameterNames : methodDataObject.getParameterNames()) {
+//		    	        	System.out.println("methodDataObject.getParameterNames(): "+ parameterNames);
+//		    	        }
+		    	        
+			    	}
+			    	for(String name : methodNames) {
 			    		BenchmarkMethodModel model = new BenchmarkMethodModel();
-			    		model.setMethodName(methodDataObject.getElementName()+"Benchmark");
+			    		model.setMethodName(name);
 			    		model.setMethodBenchmarkMode("Throughput");
 			    		model.setMethodType(void.class);
 			    		model.setMethodHint("//TODO fill up benchmark method with logic");
-		    	        System.out.println("methodDataObject.getElementName(): "+ methodDataObject.getElementName());
-		    	        System.out.println("methodDataObject.getSource(): "+ methodDataObject.getSource());
-		    	        System.out.println("methodDataObject.getElementType(): "+ methodDataObject.getElementType());
-		    	        System.out.println("methodDataObject.getNumberOfParameters(): "+ methodDataObject.getNumberOfParameters());
-		    	        for(String parameterNames : methodDataObject.getParameterNames()) {
-		    	        	System.out.println("methodDataObject.getParameterNames(): "+ parameterNames);
-		    	        }
-		    	        benchmarkMethods.add(model);
+			    		benchmarkMethods.add(model);
 			    	}
-		        }
-			}
+		    	}
+	        }
 			
 		} catch (JavaModelException e) {
 			// TODO Auto-generated catch block
