@@ -33,6 +33,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Level;
 
@@ -124,6 +125,7 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	
 	private JMethod generateBenchmarkMethod(JDefinedClass generationClass, JCodeModel codeModelInstance, BenchmarkMethodModel model) {
 		JMethod benchmark = generationClass.method(1, model.getMethodType(), model.getMethodName());
+		benchmark.param(Blackhole.class, "bh");
 		benchmark.annotate(codeModelInstance.ref(Benchmark.class));
 		benchmark.annotate(codeModelInstance.ref(BenchmarkMode.class)).param("value", Mode.deepValueOf(model.getMethodBenchmarkMode()));
 		benchmark.annotate(codeModelInstance.ref(OutputTimeUnit.class)).param("value", TimeUnit.SECONDS);
