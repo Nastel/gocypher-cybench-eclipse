@@ -1,13 +1,17 @@
 package com.gocypher.cybench.plugin.model;
 
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 public class RunSelectionEntry {
 
+		private String projectName;
 	    private String outputPath;
 		private String projectPath;
-		Set<String> classPaths = new LinkedHashSet<>();
+		private List<String> sourcePathsWithClasses = new LinkedList<String>();
+		private Set<String> classPaths = new LinkedHashSet<>();
 		private String projectReportsPath;
 		
 		public String getProjectReportsPath() {
@@ -39,6 +43,24 @@ public class RunSelectionEntry {
 		}
 		public void setOutputPath(String outputPath) {
 			this.outputPath = outputPath;
+		}
+		public List<String> getSourcePathsWithClasses() {
+			return sourcePathsWithClasses;
+		}
+		public void setSourcePathsWithClasses(List<String> sourcePathsWithClasses) {
+			this.sourcePathsWithClasses = sourcePathsWithClasses;
+		}
+		public void addSourcePathsWithClasses(String sourcePathClass) {
+			this.sourcePathsWithClasses.add(sourcePathClass);
+		}
+		public void removeSourcePathsWithClasses(String sourcePathClass) {
+			this.sourcePathsWithClasses.remove(sourcePathClass);
+		}
+		public String getProjectName() {
+			return projectName;
+		}
+		public void setProjectName(String projectName) {
+			this.projectName = projectName;
 		}
 }
 
