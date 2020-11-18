@@ -193,7 +193,7 @@ public class LauncherUtils {
 		}
 		return selectionEntry;
 	}
-	 public static IPath getSourceFolderForBenchmarks (IProject project) throws Exception{
+	public static IPath getSourceFolderForBenchmarks (IProject project) throws Exception{
 	    	if (isMavenProject(project)) {
 	    		IFolder folder = project.getFolder(SRC_FOLDER_FOR_BENCHMARKS_MVN) ;
 	    		return folder.getFullPath();
@@ -202,25 +202,34 @@ public class LauncherUtils {
 	    		IFolder folder = project.getFolder(SRC_FOLDER_FOR_BENCHMARKS_JAVA) ;
 	    		return folder.getFullPath();
 	    	}
-	    }
-	    public static boolean isMavenProject (IProject project) throws Exception{		
+	}
+	public static String getRawSourceFolderForBenchmarks (IProject project) throws Exception{
+    	if (isMavenProject(project)) {
+    		return project.getLocation().append(SRC_FOLDER_FOR_BENCHMARKS_MVN).toPortableString() ;
+    	}
+    	else {    		
+    		return project.getLocation().append(SRC_FOLDER_FOR_BENCHMARKS_JAVA).toPortableString() ;
+    	}
+}
+	
+	public static boolean isMavenProject (IProject project) throws Exception{		
 			if (project.hasNature("org.eclipse.m2e.core.maven2Nature")) {
 				return true ;
 			}		
 			return false ;
-		}
-		public static boolean isJavaProject (IProject project) throws Exception{		
+	}
+	public static boolean isJavaProject (IProject project) throws Exception{		
 			if (project.hasNature("org.eclipse.jdt.core.javanature")) {
 				return true ;
 			}		
 			return false ;
 		}
-		public static boolean isCyBenchProject (IProject project) throws Exception{		
+	public static boolean isCyBenchProject (IProject project) throws Exception{		
 			if (project.hasNature(CyBenchProjectNature.NATURE_ID)) {
 				return true ;
 			}		
 			return false ;
-		}
+	}
 //	public static List<String> addClasses(File[] fileList, List<String> selectionEntry) {
 //		   try {
 //				for(File file : fileList) {
