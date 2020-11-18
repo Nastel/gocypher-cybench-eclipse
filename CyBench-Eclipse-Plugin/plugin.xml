@@ -102,6 +102,13 @@
 	                  icon="icons/cybench_symbol_small.png"                
 	                  tooltip="Add needed parts and configurations for CyBench"
 	                  style="push">
+	                  <visibleWhen>
+              		 	<iterate>
+              		 		<not>              		 		              		 	
+              		 		<reference definitionId="com.gocypher.cybench.project.hasNature"/>
+              		 		</not>              		 	
+              		 	</iterate>
+              		 </visibleWhen>
 	            </command>
 	 	  </menuContribution>
 	 	  <menuContribution
@@ -114,6 +121,14 @@
 	                  icon="icons/cybench_symbol_small.png"                
 	                  tooltip="Generate benchmarks"
 	                  style="push">
+              		 <visibleWhen>
+              		 	<iterate>
+              		 		<and>              		 		              		 	
+              		 			<reference definitionId="com.gocypher.cybench.project.hasNature"/>
+              		 			<reference definitionId="com.gocypher.cybench.isJavaFile"/>
+              		 		</and>              		 	
+              		 	</iterate>
+              		 </visibleWhen>
 	            </command>
 	 	  </menuContribution>
 	 	  
@@ -270,11 +285,25 @@
     id="cybenchnature"
     name="CyBench Nature"
     point="org.eclipse.core.resources.natures">
-    <runtime>
-        <run
-            class="com.gocypher.cybench.plugin.CyBenchProjectNature">
-        </run>
-    </runtime>
-</extension>
+	    <runtime>
+	        <run
+	            class="com.gocypher.cybench.plugin.CyBenchProjectNature">
+	        </run>
+	    </runtime>
+	</extension>
+   <extension
+         point="org.eclipse.core.expressions.definitions">
+       
+         <definition id="com.gocypher.cybench.project.hasNature">
+           	<adapt type="org.eclipse.core.resources.IResource">
+           		<test property="org.eclipse.core.resources.projectNature" value="CyBenchLauncherPlugin.cybenchnature" />
+           	</adapt>
+         </definition>
+         <definition id="com.gocypher.cybench.isJavaFile">
+         	<adapt type="org.eclipse.core.resources.IResource">
+          			<test property="org.eclipse.core.resources.name" value="*.java"/>
+       		</adapt>
+         </definition>
+   </extension>
    
 </plugin>
