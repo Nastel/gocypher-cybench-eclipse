@@ -18,9 +18,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -32,8 +35,11 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Level;
 
 import com.gocypher.cybench.plugin.model.BenchmarkMethodModel;
+import com.gocypher.cybench.plugin.model.ICybenchPartView;
 import com.gocypher.cybench.plugin.model.RunSelectionEntry;
+import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
+import com.gocypher.cybench.plugin.views.ReportsDisplayView;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
@@ -43,7 +49,7 @@ import com.sun.codemodel.JMethod;
 public class BenchmarksGenerationHandler extends AbstractHandler {
 
 	@Override
-	public Object execute(ExecutionEvent arg0) throws ExecutionException {
+	public Object execute(ExecutionEvent event) throws ExecutionException {
 
 		JCodeModel codeModelInstance = new JCodeModel();
 		BenchmarkMethodModel model =  new BenchmarkMethodModel();
@@ -113,7 +119,7 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	    		model.setMethodName("cleanUpIteration");
 	    		model.setMethodHint("//TODO Iteration level: write code to be executed after each iteration of the benchmark.");
 	    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 3);
-	        	System.out.println("Clean up method creation correct");
+//	        	System.out.println("Clean up method creation correct");
 	        	
 
 //	        	System.out.println("selectionEntry.getSourcePathsWithClasses().get(0): "+selectionEntry.getSourcePathsWithClasses().get(0));
@@ -123,15 +129,20 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 //				}else {
 //					outputPath = selectionEntry.getProjectPath();
 //				}
-		    	System.out.println(System.getProperty("line.separator"));
-	        	System.out.println("outputPath: "+outputPath);
+//		    	System.out.println(System.getProperty("line.separator"));
+//	        	System.out.println("outputPath: "+outputPath);
 				File file = new File(outputPath);
 				file.mkdirs();
 
-	        	System.out.println("Buildin the benchamrks class");
+//	        	System.out.println("Buildin the benchamrks class");
 				codeModelInstance.build(file);
-	        	System.out.println("Building was completed succesfully");
+//	        	System.out.println("Building was completed succesfully");
     		}
+		    IProject project = selectionEntry.getProjectSelected();
+	        if(project != null) {
+	        	IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
+	        	GuiUtils.refreshProject(javaProject);
+	        }
 		} catch (JClassAlreadyExistsException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
