@@ -13,6 +13,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.apt.core.util.AptConfig;
@@ -40,7 +41,7 @@ public class CyBenchProjectNature implements IProjectNature {
 		System.out.println("-->Configuring CyBench nature for:"+this.project);
 		
 		IJavaProject javaProject = (IJavaProject)JavaCore.create(this.project);
-		
+	
 		String cyBenchExternalsPath = LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID, false) ;
 		System.out.println("Externals path:"+cyBenchExternalsPath);
 		
@@ -51,13 +52,13 @@ public class CyBenchProjectNature implements IProjectNature {
 		try {
 			this.updateDependenciesForNature(javaProject) ;
 			
-			if (!this.isMavenProject(javaProject)) {
+			if (!LauncherUtils.isMavenProject(javaProject.getProject())) {
 				//Externals for real Eclipse test
 				//this.addAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
 				///Externals for local tests
 				this.addAndSaveClassPathEntry(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
 			}
-				
+			this.createBenchmarksSrcFolder(javaProject);	
 	
 			//Externals for real Eclipse test
 			//this.updateProjectAPTSettings (javaProject,cyBenchExternalsPath) ;
@@ -87,7 +88,7 @@ public class CyBenchProjectNature implements IProjectNature {
 			//this.deconfigureAptSettings (javaProject,cyBenchExternalsPath) ;
 			//FIXME comment this for production usage Externals for local tests
 			this.deconfigureAptSettings(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
-			if (!this.isMavenProject(javaProject)) {
+			if (!LauncherUtils.isMavenProject(javaProject.getProject())) {
 				//FIXME uncomment this for production usage
 				//this.removeAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
 				//FIXME comment this for production usage 
@@ -142,6 +143,46 @@ public class CyBenchProjectNature implements IProjectNature {
 		}
 		
 	}
+	private void createBenchmarksSrcFolder (IJavaProject javaProject) throws Exception {
+		
+		IClasspathEntry srcFolder = JavaCore.newSourceEntry(LauncherUtils.getSourceFolderForBenchmarks(javaProject.getProject())) ;
+		
+		if (javaProject.getClasspathEntryFor(srcFolder.getPath()) == null) {
+			System.out.println("SRC folder for benchmarks does not exist, will add new one.");
+			List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
+			
+			for (IClasspathEntry entry :javaProject.getRawClasspath()) {			
+				classPathEntries.add (entry) ;
+			}
+			classPathEntries.add(srcFolder);
+			
+			int i = 0 ;
+			IClasspathEntry[] classPathRaw = new IClasspathEntry[classPathEntries.size()] ;
+			for (IClasspathEntry item: classPathEntries) {
+				classPathRaw[i] = item ;
+				i++ ;
+			}
+						
+			javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());
+		}
+		else {
+			System.out.println("SRC folder for benchmarks exist.");
+		}
+		
+		IPath projectPath = javaProject.getProject().getLocation() ;
+		if (LauncherUtils.isMavenProject(javaProject.getProject())) {
+			projectPath = projectPath.append(LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_MVN) ;
+		}
+		else {
+			projectPath = projectPath.append(LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_JAVA) ;
+		}
+		File rawFolder = new File(projectPath.toPortableString()) ;
+		System.out.println("-->Raw path on FS:"+projectPath.toPortableString()+"; Existence on FS:"+rawFolder.exists());
+		if (!rawFolder.exists()) {
+			rawFolder.mkdirs();
+		}
+		
+	}
 	private void removeAndSaveClassPathEntry (IJavaProject javaProject, String ...fullPathToExternalLibraries) throws Exception{
 		List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
 		for (IClasspathEntry entry :javaProject.getRawClasspath()) {
@@ -169,7 +210,7 @@ public class CyBenchProjectNature implements IProjectNature {
 	
 	private void configureProjectAPTSettings (IJavaProject javaProject, String ... pathToExternalJars) throws Exception {
 		AptConfig.setEnabled(javaProject, true);	
-		if (this.isMavenProject(javaProject)) {
+		if (LauncherUtils.isMavenProject(javaProject.getProject())) {
 			AptConfig.setGenSrcDir(javaProject, "target/jmh-generated");
 			AptConfig.setGenTestSrcDir(javaProject, "target/jmh-generated-tests");
 		}
@@ -206,7 +247,7 @@ public class CyBenchProjectNature implements IProjectNature {
 	
 	private void updateDependenciesForNature (IJavaProject javaProject) throws Exception{
 		
-		if (this.isMavenProject(javaProject)) {
+		if (LauncherUtils.isMavenProject(javaProject.getProject())) {
 			String projectLocation = javaProject.getProject().getLocation().toPortableString() ;
 			System.out.println("Selected project location:"+projectLocation);
 			List<File> files = CybenchUtils.listFilesInDirectory(projectLocation) ;
@@ -267,17 +308,6 @@ public class CyBenchProjectNature implements IProjectNature {
 		
 		return false ;
 	}
-	private boolean isMavenProject (IJavaProject javaProject) throws Exception{		
-		if (javaProject.getProject().hasNature("org.eclipse.m2e.core.maven2Nature")) {
-			return true ;
-		}		
-		return false ;
-	}
-	protected boolean isJavaProject (IJavaProject javaProject) throws Exception{		
-		if (javaProject.getProject().hasNature("org.eclipse.jdt.core.javanature")) {
-			return true ;
-		}		
-		return false ;
-	}  
+	
 
 }

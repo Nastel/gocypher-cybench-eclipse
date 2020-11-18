@@ -27,10 +27,11 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 			//System.out.println("Selection:"+selection.getClass());
 			IJavaProject javaProject = GuiUtils.resolveJavaProject(selection) ;
 		
-			this.addCybenchNature(javaProject);
-			
-			GuiUtils.refreshProject(javaProject);
-			
+			if (javaProject != null) {
+				this.addCybenchNature(javaProject);
+								
+				GuiUtils.refreshProject(javaProject);
+			}
 			System.out.println("--->CyBench Nature finish");
 		}catch (Exception e) {
 			System.err.println("Error on project nature update:"+e.getMessage());

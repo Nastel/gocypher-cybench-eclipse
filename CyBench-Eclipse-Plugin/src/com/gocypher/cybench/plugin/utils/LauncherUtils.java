@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -28,9 +29,12 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.gocypher.cybench.plugin.CyBenchProjectNature;
 import com.gocypher.cybench.plugin.model.RunSelectionEntry;
 
 public class LauncherUtils {
+	public static String SRC_FOLDER_FOR_BENCHMARKS_JAVA="/src-benchmarks" ;
+	public static String SRC_FOLDER_FOR_BENCHMARKS_MVN="/src/test/java" ;
 	
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
@@ -189,7 +193,34 @@ public class LauncherUtils {
 		}
 		return selectionEntry;
 	}
-	
+	 public static IPath getSourceFolderForBenchmarks (IProject project) throws Exception{
+	    	if (isMavenProject(project)) {
+	    		IFolder folder = project.getFolder(SRC_FOLDER_FOR_BENCHMARKS_MVN) ;
+	    		return folder.getFullPath();
+	    	}
+	    	else {
+	    		IFolder folder = project.getFolder(SRC_FOLDER_FOR_BENCHMARKS_JAVA) ;
+	    		return folder.getFullPath();
+	    	}
+	    }
+	    public static boolean isMavenProject (IProject project) throws Exception{		
+			if (project.hasNature("org.eclipse.m2e.core.maven2Nature")) {
+				return true ;
+			}		
+			return false ;
+		}
+		public static boolean isJavaProject (IProject project) throws Exception{		
+			if (project.hasNature("org.eclipse.jdt.core.javanature")) {
+				return true ;
+			}		
+			return false ;
+		}
+		public static boolean isCyBenchProject (IProject project) throws Exception{		
+			if (project.hasNature(CyBenchProjectNature.NATURE_ID)) {
+				return true ;
+			}		
+			return false ;
+		}
 //	public static List<String> addClasses(File[] fileList, List<String> selectionEntry) {
 //		   try {
 //				for(File file : fileList) {
