@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
+
 public class RunSelectionEntry {
 
 		private String projectName;
@@ -13,6 +15,7 @@ public class RunSelectionEntry {
 		private List<String> sourcePathsWithClasses = new LinkedList<String>();
 		private Set<String> classPaths = new LinkedHashSet<>();
 		private String projectReportsPath;
+		private IProject projectSelected;
 		
 		public String getProjectReportsPath() {
 			return projectReportsPath;
@@ -61,6 +64,12 @@ public class RunSelectionEntry {
 		}
 		public void setProjectName(String projectName) {
 			this.projectName = projectName;
+		}
+		public IProject getProjectSelected() {
+			return projectSelected;
+		}
+		public void setProjectSelected(IProject projectSelected) {
+			this.projectSelected = projectSelected;
 		}
 }
 

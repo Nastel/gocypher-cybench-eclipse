@@ -16,9 +16,13 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -111,14 +115,15 @@ public class LauncherUtils {
 		 if (selection instanceof IStructuredSelection) {
 	    		IStructuredSelection ss = (IStructuredSelection) selection;
 		    	for (Object elem : ss.toList()) {
+		    		IProject project = null;
 		    		String selectedPath = "";
 		    		System.out.println("elem: "+elem.toString());
 		    		System.out.println("getClass: "+elem.getClass());
 	    			IJavaProject javaProject = null;
  				if (elem instanceof IProject) {
 	    				javaProject = (IJavaProject)JavaCore.create((IProject)elem);
-	    				IProject iproject = (IProject) elem;
-	    				selectionEntry.setProjectPath(iproject.getLocation().toString());
+	    				project = (IProject) elem;
+	    				selectionEntry.setProjectPath(project.getLocation().toString());
 	    				System.out.println("selectedPath IProject: "+selectionEntry.getProjectPath());
 	    			}
 	    			else if (elem instanceof IFolder) {
@@ -126,66 +131,47 @@ public class LauncherUtils {
 	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
 	    		        IFolder folder = (IFolder)  adaptable.getAdapter(IFolder.class);
 	    		        System.out.println(folder);
-	    		        IProject project = res.getProject();
+	    		        project = res.getProject();
 	    		        selectedPath = res.getLocation().toString();
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
-	    				javaProject = (IJavaProject)JavaCore.create((IProject)project);
 	    				selectionEntry.setClassPaths(LauncherUtils.addClasses(folder.members(), selectionEntry.getClassPaths()));
+	    				System.out.println("selectedPath IFolder: "+selectionEntry.getProjectPath());
 	    			}
 	    			else if (elem instanceof IFile) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
 	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
-	    		        IProject project = res.getProject();
+	    		        project = res.getProject();
 	    		        
 	    		        selectedPath = res.getLocation().toString();
 	    		        String benchmarkClass = res.getFullPath().toPortableString().replace(".java", "");
 	    		        selectionEntry.addClassPaths(benchmarkClass);
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
-	    				javaProject = (IJavaProject)JavaCore.create((IProject)project);
 	    				System.out.println("selectedPath IFile: "+selectionEntry.getProjectPath());
 	    			}
 	    			else if (elem instanceof IAdaptable) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
 	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
-	    		    	System.out.println(System.getProperty("line.separator"));
-	    				System.out.println("selectedPath getFullPath: "+res.getFullPath());
-	    				System.out.println("selectedPath res.getLocation().toString(): "+res.getLocation().toString());
-	    		    	System.out.println(System.getProperty("line.separator"));
+//	    		    	System.out.println(System.getProperty("line.separator"));
+//	    				System.out.println("selectedPath getFullPath: "+res.getFullPath());
+//	    				System.out.println("selectedPath res.getLocation().toString(): "+res.getLocation().toString());
+//	    		    	System.out.println(System.getProperty("line.separator"));
 	    				if(res.getFullPath().toPortableString().endsWith(".java")) {
 		    		        String benchmarkClass = res.getFullPath().toPortableString().replace(".java", "");
 		    		        selectionEntry.addClassPaths(benchmarkClass);
 	    				}
-	    		        IProject project = res.getProject();
+	    		        project = res.getProject();
+	    				javaProject = (IJavaProject)JavaCore.create((IProject)project);
 	    		        selectedPath = res.getLocation().toString();
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
-	    				javaProject = (IJavaProject)JavaCore.create((IProject)project);
 	    				System.out.println("selectedPath IAdaptable: "+selectionEntry.getProjectPath());
 	    			} else {
 	    				System.err.println("The run selection was not recognized: "+ selection);
 	    			}
-
-	    			if(javaProject!=null && javaProject.getOutputLocation()!=null) {
-	    				selectionEntry.setOutputPath(selectionEntry.getProjectPath().substring(0, selectionEntry.getProjectPath().lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString());
-	    				IPackageFragmentRoot[] fragmetnRootsTest = javaProject.getAllPackageFragmentRoots();
-	    				Set<String> tempClassSet = new HashSet<String>();
-	    				for(IPackageFragmentRoot root : fragmetnRootsTest) {
-	    					if(root.getKind() == IPackageFragmentRoot.K_SOURCE) {
-//    							System.out.println("selectionEntry.getClassPaths() ==  "+selectionEntry.getClassPaths());
-	    						for(String classPath : selectionEntry.getClassPaths()) {
-		    						if(classPath.contains(root.getPath().toPortableString())){
-		    							selectionEntry.addSourcePathsWithClasses(root.getPath().toPortableString());
-		    							tempClassSet.add(classPath.replace(root.getPath().toPortableString()+"/", "").replace("/", "."));
-		    						}
-	    						}
-
-//	    						System.out.println("root.toString() ==  "+root.toString());
-//	    						System.out.println("root.getPath() ==  "+root.getPath().toPortableString().replace("/", "."));
-	    					}
-	    				}
-	    				selectionEntry.setClassPaths(tempClassSet);
-	    			}  
-	    		selectionEntry.setProjectName(selectionEntry.getProjectPath().substring(selectionEntry.getProjectPath().lastIndexOf('/') + 1));
- 				selectionEntry.setProjectReportsPath(selectionEntry.getProjectPath()+reportsDirectory);
+ 					
+					selectionEntry.setProjectSelected(project);
+	 				runSelectionClassesInformation(javaProject, selectionEntry);
+		    		selectionEntry.setProjectName(selectionEntry.getProjectPath().substring(selectionEntry.getProjectPath().lastIndexOf('/') + 1));
+	 				selectionEntry.setProjectReportsPath(selectionEntry.getProjectPath()+reportsDirectory);
 		    	}
 		    }
 		}catch(Exception e){
@@ -193,6 +179,34 @@ public class LauncherUtils {
 		}
 		return selectionEntry;
 	}
+	
+	public static void runSelectionClassesInformation(IJavaProject javaProject, RunSelectionEntry selectionEntry ) {
+		try {
+	    			if(javaProject!=null && javaProject.getOutputLocation()!=null) {
+	    				selectionEntry.setOutputPath(selectionEntry.getProjectPath().substring(0, selectionEntry.getProjectPath().lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString());
+	    				IPackageFragmentRoot[] fragmetnRootsTest = javaProject.getAllPackageFragmentRoots();
+	    				Set<String> tempClassSet = new HashSet<String>();
+	    				for(IPackageFragmentRoot root : fragmetnRootsTest) {
+	    					if(root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+	    						for(String classPath : selectionEntry.getClassPaths()) {
+		    						if(classPath.contains(root.getPath().toPortableString())){
+		    							selectionEntry.addSourcePathsWithClasses(root.getPath().toPortableString());
+		    							tempClassSet.add(classPath.replace(root.getPath().toPortableString()+"/", "").replace("/", "."));
+		    						}
+	    						}
+//	    						System.out.println("root.toString() ==  "+root.toString());
+//	    						System.out.println("root.getPath() ==  "+root.getPath().toPortableString().replace("/", "."));
+	    					}
+	    				}
+	    				selectionEntry.setClassPaths(tempClassSet);
+	    			}  
+
+		} catch (JavaModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		    	}
+		    }
+	
 	public static IPath getSourceFolderForBenchmarks (IProject project) throws Exception{
 	    	if (isMavenProject(project)) {
 	    		IFolder folder = project.getFolder(SRC_FOLDER_FOR_BENCHMARKS_MVN) ;
@@ -230,21 +244,5 @@ public class LauncherUtils {
 			}		
 			return false ;
 	}
-//	public static List<String> addClasses(File[] fileList, List<String> selectionEntry) {
-//		   try {
-//				for(File file : fileList) {
-//					  if (file.isDirectory()) {
-//						  addClasses(file.listFiles(), selectionEntry);
-//					  }else {
-//						 String benchmarkClass = file.getPath().replace(".java", "");
-//						 System.out.println("File class path: "+ benchmarkClass);
-//						 selectionEntry.add(benchmarkClass);
-//					  }
-//				}
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		   return selectionEntry; 
-//		}
 //	
 }

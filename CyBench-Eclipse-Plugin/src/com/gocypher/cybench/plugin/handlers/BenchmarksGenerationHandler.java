@@ -2,13 +2,21 @@ package com.gocypher.cybench.plugin.handlers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -44,20 +52,21 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
 		RunSelectionEntry selectionEntry = LauncherUtils.fillRunselectionData(selection);
 		
-    	System.out.println("getOutputPath: "+ selectionEntry.getOutputPath());
-    	System.out.println("getProjectPath: "+ selectionEntry.getProjectPath());
-    	System.out.println("getProjectReportsPath: "+ selectionEntry.getProjectReportsPath());
-    	System.out.println("getSourcePathsWithClasses: "+ selectionEntry.getSourcePathsWithClasses());
-    	System.out.println("getClassPaths: "+ selectionEntry.getClassPaths());
-    	System.out.println(System.getProperty("line.separator"));
+		List<BenchmarkMethodModel> benchmarkMethods = methodGeneration(selection, selectionEntry);
+//    	System.out.println("getOutputPath: "+ selectionEntry.getOutputPath());
+//    	System.out.println("getProjectPath: "+ selectionEntry.getProjectPath());
+//    	System.out.println("getProjectReportsPath: "+ selectionEntry.getProjectReportsPath());
+//    	System.out.println("getSourcePathsWithClasses: "+ selectionEntry.getSourcePathsWithClasses());
+//    	System.out.println("getClassPaths: "+ selectionEntry.getClassPaths());
+//    	
     	try {
+        	String outputPath= LauncherUtils.getRawSourceFolderForBenchmarks(selectionEntry.getProjectSelected());
     		for(String packagePath :  selectionEntry.getClassPaths()) {
-    			String outputPath = "";
 	    		JDefinedClass generationClass;
-	    		generationClass = codeModelInstance._class("cybench."+packagePath);
+	    		generationClass = codeModelInstance._class(packagePath+"Benchmarks");
 	    		generationClass.annotate(codeModelInstance.ref(State.class)).param("value", Scope.Benchmark);
 	    		model.setMethodType(void.class);
-	        	System.out.println("Class annotation correct");
+//	        	System.out.println("Class annotation correct");
 	        	
 	        	/*---------------- SET UP METHODS -------------------------*/
 	    		model.setMethodName("setUp");
@@ -66,29 +75,35 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	    		model.setMethodName("setUpIteration");
 	    		model.setMethodHint("//TODO Iteration level: write code to be executed before each iteration of the benchmark.");
 	    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 2);
-	        	System.out.println("Set up method creation correct");
+//	        	System.out.println("Set up method creation correct");
 	        	
 	    		
 
 	        	/*---------------- BENCHMARK METHODS -------------------------*/
-	    		model.setMethodBenchmarkMode("Throughput");
-	    		model.setMethodName("customBenchmark");
-	    		model.setMethodHint("//TODO fill up benchmark method with logic");
-	    		generateBenchmarkMethod(generationClass, codeModelInstance, model);
-	        	System.out.println("First custom benchmark method creation correct");
-	        	
+            	System.out.println(System.getProperty("line.separator"));;
+	        	for(BenchmarkMethodModel methodModelEntry : benchmarkMethods) {
 
-	    		model.setMethodBenchmarkMode("Throughput");
-	    		model.setMethodName("customBenchmark1");
-	    		model.setMethodHint("//TODO fill up benchmark method with logic");
-	    		generateBenchmarkMethod(generationClass, codeModelInstance, model);
-	        	System.out.println("Second custom benchmark method creation correct");
-	    		
-	    		model.setMethodBenchmarkMode("Throughput");
-	    		model.setMethodName("customBenchmark2");
-	    		model.setMethodHint("//TODO fill up benchmark method with logic");
-	    		generateBenchmarkMethod(generationClass, codeModelInstance, model);
-	        	System.out.println("Third custom benchmark method creation correct");
+//	            	System.out.println("getMethodName: "+ methodModelEntry.getMethodName());
+//	            	System.out.println("getMethodBenchmarkMode: "+ methodModelEntry.getMethodBenchmarkMode());
+//	            	System.out.println("getMethodType: "+ methodModelEntry.getMethodType());
+		    		generateBenchmarkMethod(generationClass, codeModelInstance, methodModelEntry);
+	        	}
+            	System.out.println(System.getProperty("line.separator"));
+//	    		model.setMethodBenchmarkMode("Throughput");
+//	    		model.setMethodName("customBenchmark");
+//	    		model.setMethodHint("//TODO fill up benchmark method with logic");
+//	    		generateBenchmarkMethod(generationClass, codeModelInstance, model);
+//	        	System.out.println("First custom benchmark method creation correct");
+//	    		model.setMethodBenchmarkMode("Throughput");
+//	    		model.setMethodName("customBenchmark1");
+//	    		model.setMethodHint("//TODO fill up benchmark method with logic");
+//	    		generateBenchmarkMethod(generationClass, codeModelInstance, model);
+//	        	System.out.println("Second custom benchmark method creation correct");
+//	    		model.setMethodBenchmarkMode("Throughput");
+//	    		model.setMethodName("customBenchmark2");
+//	    		model.setMethodHint("//TODO fill up benchmark method with logic");
+//	    		generateBenchmarkMethod(generationClass, codeModelInstance, model);
+//	        	System.out.println("Third custom benchmark method creation correct");
 	        	
 
 	        	/*---------------- TEAR DOWN METHODS -------------------------*/
@@ -101,13 +116,13 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	        	System.out.println("Clean up method creation correct");
 	        	
 
-	        	System.out.println("selectionEntry.getSourcePathsWithClasses().get(0): "+selectionEntry.getSourcePathsWithClasses().get(0));
-	        	System.out.println("selectionEntry.getProjectName(): "+selectionEntry.getProjectName());
-				if(selectionEntry.getSourcePathsWithClasses().get(0) != null) {
-					outputPath = selectionEntry.getProjectPath() + selectionEntry.getSourcePathsWithClasses().get(0).replace(selectionEntry.getProjectName(), "");
-				}else {
-					outputPath = selectionEntry.getProjectPath();
-				}
+//	        	System.out.println("selectionEntry.getSourcePathsWithClasses().get(0): "+selectionEntry.getSourcePathsWithClasses().get(0));
+//	        	System.out.println("selectionEntry.getProjectName(): "+selectionEntry.getProjectName());
+//				if(selectionEntry.getSourcePathsWithClasses().get(0) != null) {
+//					outputPath = selectionEntry.getProjectPath() + selectionEntry.getSourcePathsWithClasses().get(0).replace(selectionEntry.getProjectName(), "");
+//				}else {
+//					outputPath = selectionEntry.getProjectPath();
+//				}
 		    	System.out.println(System.getProperty("line.separator"));
 	        	System.out.println("outputPath: "+outputPath);
 				File file = new File(outputPath);
@@ -121,6 +136,9 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -169,4 +187,40 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		return method;
 	} 
 
+	
+	private List<BenchmarkMethodModel> methodGeneration(IStructuredSelection selection, RunSelectionEntry selectionEntry) {
+		LinkedList<BenchmarkMethodModel> benchmarkMethods = new LinkedList<BenchmarkMethodModel>();
+		try {
+			for(String classPath : selectionEntry.getClassPaths()) {
+		        System.out.println(classPath);
+		        IProject project = selectionEntry.getProjectSelected();
+		        if(project != null) {
+		        	IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
+			    	IType itype = javaProject.findType(classPath);
+			    	IMethod[] allMethods = itype.getMethods();
+		
+			    	for(IMethod methodDataObject: allMethods) {
+			    		BenchmarkMethodModel model = new BenchmarkMethodModel();
+			    		model.setMethodName(methodDataObject.getElementName()+"Benchmark");
+			    		model.setMethodBenchmarkMode("Throughput");
+			    		model.setMethodType(void.class);
+			    		model.setMethodHint("//TODO fill up benchmark method with logic");
+		    	        System.out.println("methodDataObject.getElementName(): "+ methodDataObject.getElementName());
+		    	        System.out.println("methodDataObject.getSource(): "+ methodDataObject.getSource());
+		    	        System.out.println("methodDataObject.getElementType(): "+ methodDataObject.getElementType());
+		    	        System.out.println("methodDataObject.getNumberOfParameters(): "+ methodDataObject.getNumberOfParameters());
+		    	        for(String parameterNames : methodDataObject.getParameterNames()) {
+		    	        	System.out.println("methodDataObject.getParameterNames(): "+ parameterNames);
+		    	        }
+		    	        benchmarkMethods.add(model);
+			    	}
+		        }
+			}
+			
+		} catch (JavaModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return benchmarkMethods; 
+	}
 }
