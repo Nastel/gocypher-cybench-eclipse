@@ -43,7 +43,6 @@ public class CyBenchLauncher {
 		System.out.println("                                 Starting CyBench benchmarks                             ");
 		System.out.println("-----------------------------------------------------------------------------------------");
 //		System.out.println("Launcher classpath:"+System.getProperty("java.class.path"));
-		long start = System.currentTimeMillis();
 		LauncherConfiguration launcherConfiguration = new LauncherConfiguration () ;
 		fillLaunchConfigurations(launcherConfiguration);
 		
