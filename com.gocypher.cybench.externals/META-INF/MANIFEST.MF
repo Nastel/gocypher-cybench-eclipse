@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Cybench Externals
 Bundle-SymbolicName: com.gocypher.cybench.externals
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.gocypher.cybench.externals
@@ -297,6 +297,7 @@ Export-Package: joptsimple,
  com.gocypher.cybench.launcher.scores,
  com.gocypher.cybench.launcher.services,
  com.gocypher.cybench.launcher.utils
+Bundle-Vendor: K2N.IO
  
  
  

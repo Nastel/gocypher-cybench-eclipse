@@ -2,7 +2,7 @@
 <feature
       id="com.gocypher.cybench.eclipse.feature"
       label="CyBench"
-      version="1.0.0"
+      version="1.0.0.qualifier"
       provider-name="K2N.IO"
       plugin="com.gocypher.cybench.plugin.tools">
 
@@ -19,17 +19,17 @@
    </license>
 
    <plugin
-         id="com.gocypher.cybench.externals"
-         download-size="0"
-         install-size="0"
-         version="1.0.0"
-         unpack="false"/>
-
-   <plugin
          id="com.gocypher.cybench.plugin.tools"
          download-size="0"
          install-size="0"
-         version="1.0.0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.gocypher.cybench.externals"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>
