@@ -34,6 +34,9 @@ public class CyBenchProjectNature implements IProjectNature {
 	private static final String JMH_ANNOTATIONDS_ARTIFACT_ID="jmh-generator-annprocess" ;
 	private static final String JMH_VERSION = "1.26" ;
 	
+	//private static final String fullPathHardcodedCore = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-core-1.26.jar" ;
+	//private static final String fullPathHardcodedAnnotations = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-generator-annprocess-1.26.jar" ;
+	
 	private IProject project;
 	
 	@Override
@@ -45,25 +48,21 @@ public class CyBenchProjectNature implements IProjectNature {
 		String cyBenchExternalsPath = LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID, false) ;
 		System.out.println("Externals path:"+cyBenchExternalsPath);
 		
-		
-		String fullPathHardcodedCore = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-core-1.26.jar" ;
-		String fullPathHardcodedAnnotations = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-generator-annprocess-1.26.jar" ;
-		
 		try {
 			this.updateDependenciesForNature(javaProject) ;
 			
 			if (!LauncherUtils.isMavenProject(javaProject.getProject())) {
 				//Externals for real Eclipse test
-				//this.addAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
-				///Externals for local tests
-				this.addAndSaveClassPathEntry(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
+				this.addAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
+				//Externals for local tests
+				//this.addAndSaveClassPathEntry(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
 			}
 			this.createBenchmarksSrcFolder(javaProject);	
 	
 			//Externals for real Eclipse test
-			//this.updateProjectAPTSettings (javaProject,cyBenchExternalsPath) ;
+			this.configureProjectAPTSettings (javaProject,cyBenchExternalsPath) ;
 			//Externals for local tests
-			this.configureProjectAPTSettings (javaProject,fullPathHardcodedCore,fullPathHardcodedAnnotations) ;
+			//this.configureProjectAPTSettings (javaProject,fullPathHardcodedCore,fullPathHardcodedAnnotations) ;
 		}catch (Exception e) {
 			System.err.println("Error during configure of CyBench nature:"+e.getMessage());
 			e.printStackTrace();
@@ -81,18 +80,18 @@ public class CyBenchProjectNature implements IProjectNature {
 		System.out.println("Externals path:"+cyBenchExternalsPath);
 		
 		
-		String fullPathHardcodedCore = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-core-1.26.jar" ;
-		String fullPathHardcodedAnnotations = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-generator-annprocess-1.26.jar" ;
+		//String fullPathHardcodedCore = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-core-1.26.jar" ;
+		//String fullPathHardcodedAnnotations = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-generator-annprocess-1.26.jar" ;
 		try {
 			//FIXME uncomment this for production usage Externals for real Eclipse test
-			//this.deconfigureAptSettings (javaProject,cyBenchExternalsPath) ;
+			this.deconfigureAptSettings (javaProject,cyBenchExternalsPath) ;
 			//FIXME comment this for production usage Externals for local tests
-			this.deconfigureAptSettings(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
+			//this.deconfigureAptSettings(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
 			if (!LauncherUtils.isMavenProject(javaProject.getProject())) {
 				//FIXME uncomment this for production usage
-				//this.removeAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
+				this.removeAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
 				//FIXME comment this for production usage 
-				this.removeAndSaveClassPathEntry(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
+				//this.removeAndSaveClassPathEntry(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
 			}
 			GuiUtils.refreshProject(javaProject);
 			
