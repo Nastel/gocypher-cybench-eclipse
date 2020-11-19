@@ -287,8 +287,16 @@ Export-Package: joptsimple,
  org.codehaus.plexus.util.introspection,
  org.codehaus.plexus.util.io,
  org.codehaus.plexus.util.reflection,
- com.sun.codemodel
- 
+ com.sun.codemodel,
+ com.gocypher.cybench.core.model,
+ com.gocypher.cybench.core.utils,
+ com.gocypher.cybench.launcher.environment.model,
+ com.gocypher.cybench.launcher.environment.services,
+ com.gocypher.cybench.launcher.model,
+ com.gocypher.cybench.launcher.report,
+ com.gocypher.cybench.launcher.scores,
+ com.gocypher.cybench.launcher.services,
+ com.gocypher.cybench.launcher.utils
  
  
  
