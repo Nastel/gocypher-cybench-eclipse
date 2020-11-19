@@ -12,10 +12,15 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import com.gocypher.cybench.plugin.utils.Constants;
 
 public class CybenchUtils {
 	
@@ -129,7 +134,38 @@ public class CybenchUtils {
 		
 		return filePath ;
 	}
+	public static String formatInterval(final long l) {
+        final long hr = TimeUnit.MILLISECONDS.toHours(l);
+        final long min = TimeUnit.MILLISECONDS.toMinutes(l - TimeUnit.HOURS.toMillis(hr));
+        final long sec = TimeUnit.MILLISECONDS.toSeconds(l - TimeUnit.HOURS.toMillis(hr) - TimeUnit.MINUTES.toMillis(min));
+        final long ms = TimeUnit.MILLISECONDS.toMillis(l - TimeUnit.HOURS.toMillis(hr) - TimeUnit.MINUTES.toMillis(min) - TimeUnit.SECONDS.toMillis(sec));
+        return String.format("%02d:%02d:%02d.%03d", hr, min, sec, ms);
+    }
 	
+	public static Map<String, Map<String, String>> parseCustomBenchmarkMetadata(String configuration) {
+        Map<String, Map<String, String>> benchConfiguration = new HashMap<>();
+        if (configuration != null && !configuration.isEmpty()) {
+            for (String item : configuration.split(";")) {
+                String[] testCfg = item.split("=");
+                if (testCfg != null && testCfg.length == 2) {
+                    String name = testCfg[0];
+                    if (benchConfiguration.get(name) == null) {
+                        benchConfiguration.put(name, new HashMap<>());
+                    }
+                    String value = testCfg[1];
+                    for (String cfgItem : value.split(",")) {
+                        String[] values = cfgItem.split(":");
+                        if (values != null && values.length == 2) {
+                            String key = values[0];
+                            String val = values[1];
+                            benchConfiguration.get(name).put(key, val);
+                        }
+                    }
+                }
+            }
+        }
+        return benchConfiguration;
+    }
 	/*public static List<File> walkAndFindReports (List<String>pathsToDirectories) {
 		List<File> reports = new ArrayList<>() ;
 		for (String pathToDirectory:pathsToDirectories) {

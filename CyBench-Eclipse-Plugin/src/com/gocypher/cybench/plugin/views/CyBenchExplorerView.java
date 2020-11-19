@@ -9,7 +9,6 @@ import org.eclipse.ui.part.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
-import com.gocypher.cybench.launcher.utils.Constants;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.ICybenchPartView;
@@ -18,6 +17,7 @@ import com.gocypher.cybench.plugin.model.NameValueModelProvider;
 import com.gocypher.cybench.plugin.model.Node;
 import com.gocypher.cybench.plugin.model.ReportFileEntry;
 import com.gocypher.cybench.plugin.model.ReportFileEntryComparator;
+import com.gocypher.cybench.plugin.utils.Constants;
 import com.gocypher.cybench.plugin.views.ReportsDisplayView.ViewLabelProvider;
 
 import org.eclipse.jface.viewers.*;

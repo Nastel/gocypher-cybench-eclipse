@@ -8,7 +8,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.part.*;
 
 import com.gocypher.cybench.core.utils.JSONUtils;
-import com.gocypher.cybench.launcher.utils.Constants;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.ICybenchPartView;
@@ -19,6 +18,7 @@ import com.gocypher.cybench.plugin.model.ReportFileEntry;
 import com.gocypher.cybench.plugin.model.ReportFileEntryComparator;
 import com.gocypher.cybench.plugin.model.ReportHandlerService;
 import com.gocypher.cybench.plugin.model.ReportUIModel;
+import com.gocypher.cybench.plugin.utils.Constants;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.views.CyBenchExplorerView.ReportTimestampLabelProvider;
 

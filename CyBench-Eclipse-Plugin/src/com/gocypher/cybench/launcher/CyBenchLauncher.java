@@ -1,18 +1,13 @@
 package com.gocypher.cybench.launcher;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Arrays;
 
-import org.openjdk.jmh.generators.annotations.APGeneratorDestinaton;
-import org.openjdk.jmh.generators.annotations.APGeneratorSource;
-import org.openjdk.jmh.generators.core.BenchmarkGenerator;
-import org.openjdk.jmh.generators.core.GeneratorDestination;
-import org.openjdk.jmh.generators.core.GeneratorSource;
 import org.openjdk.jmh.profile.GCProfiler;
 import org.openjdk.jmh.profile.HotspotRuntimeProfiler;
 import org.openjdk.jmh.profile.HotspotThreadProfiler;
@@ -33,7 +28,6 @@ import com.gocypher.cybench.launcher.environment.services.CollectSystemInformati
 import com.gocypher.cybench.launcher.model.BenchmarkOverviewReport;
 import com.gocypher.cybench.launcher.report.DeliveryService;
 import com.gocypher.cybench.launcher.report.ReportingService;
-import com.gocypher.cybench.launcher.utils.ComputationUtils;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.launcher.utils.SecurityBuilder;
 import com.jcabi.manifests.Manifests;
@@ -75,7 +69,7 @@ public class CyBenchLauncher {
         SecurityBuilder securityBuilder = new SecurityBuilder();        
         Map<String, Object> benchmarkSettings = new HashMap<>();
 
-        Map<String, Map<String, String>> customBenchmarksMetadata = ComputationUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
+        Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
 
         checkAndConfigureCustomProperties(securityBuilder, benchmarkSettings, customBenchmarksMetadata);
 
@@ -182,7 +176,7 @@ public class CyBenchLauncher {
 			if (Manifests.exists("customBenchmarkMetadata")) {
 				manifestData = Manifests.read("customBenchmarkMetadata");
 			}
-			Map<String, Map<String, String>> benchmarksMetadata = ComputationUtils.parseCustomBenchmarkMetadata(manifestData);
+			Map<String, Map<String, String>> benchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(manifestData);
 			Map<String, String> benchProps;
 			if (manifestData != null) {
 				benchProps = ReportingService.getInstance().prepareBenchmarkSettings(tempBenchmark, benchmarksMetadata);
