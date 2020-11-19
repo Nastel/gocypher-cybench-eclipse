@@ -27,7 +27,7 @@ import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
 
 public class CyBenchProjectNature implements IProjectNature {
-	public  static final String NATURE_ID = "CyBenchLauncherPlugin.cybenchnature";
+	public  static final String NATURE_ID = "com.gocypher.cybench.plugin.tools.cybenchnature";
 
 	private static final String JMH_GROUP_ID="org.openjdk.jmh" ;
 	private static final String JMH_CORE_ARTIFACT_ID="jmh-core" ;

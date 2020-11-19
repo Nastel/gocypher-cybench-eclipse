@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: CyBenchLauncherPlugin
-Bundle-SymbolicName: CyBenchLauncherPlugin;singleton:=true
+Bundle-Name: CyBench Tools
+Bundle-SymbolicName: com.gocypher.cybench.plugin.tools;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Activator: com.gocypher.cybench.plugin.Activator
 Require-Bundle: org.eclipse.ui,
@@ -29,3 +29,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Import-Package: javax.annotation,
  javax.inject
+Bundle-Vendor: K2N.IO

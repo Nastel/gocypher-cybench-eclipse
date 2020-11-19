@@ -9,7 +9,7 @@ import org.osgi.framework.BundleContext;
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "CyBenchLauncherPlugin"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "com.gocypher.cybench.plugin.tools"; //$NON-NLS-1$
 	public static final String EXTERNALS_PLUGIN_ID = "com.gocypher.cybench.externals" ;//$NON-NLS-1$
 
 	// The shared instance

@@ -72,9 +72,9 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 			//+Platform.getBundle("com.gocypher.cybench.externals").getLocation()
 			;
 			
-			bundlePaths += LauncherUtils.resolveBundleLocation("CyBenchLauncherPlugin", true) ;
+			bundlePaths += LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true) ;
 			bundlePaths += ";" ;
-			bundlePaths += LauncherUtils.resolveBundleLocation("com.gocypher.cybench.externals", false) ;
+			bundlePaths += LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID, false) ;
 		
 			
 			System.out.println(bundlePaths);
