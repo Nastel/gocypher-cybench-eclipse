@@ -296,7 +296,7 @@
        
          <definition id="com.gocypher.cybench.project.hasNature">
            	<adapt type="org.eclipse.core.resources.IResource">
-           		<test property="org.eclipse.core.resources.projectNature" value="CyBenchLauncherPlugin.cybenchnature" />
+           		<test property="org.eclipse.core.resources.projectNature" value="com.gocypher.cybench.plugin.tools.cybenchnature" />
            	</adapt>
          </definition>
          <definition id="com.gocypher.cybench.isJavaFile">

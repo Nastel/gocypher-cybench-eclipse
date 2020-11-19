@@ -188,7 +188,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 		reportsListViewer.setLabelProvider(new ViewLabelProvider());
 		reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
 		
-		workbench.getHelpSystem().setHelp(reportsListViewer.getControl(), "CyBenchLauncherPlugin.viewer");
+		workbench.getHelpSystem().setHelp(reportsListViewer.getControl(), "com.gocypher.cybench.plugin.tools.viewer");
 		getSite().setSelectionProvider(reportsListViewer);
 		*/
 
@@ -289,7 +289,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	    });
 	    */
 		
-		workbench.getHelpSystem().setHelp(projectsViewer.getControl(), "CyBenchLauncherPlugin.viewer");
+		workbench.getHelpSystem().setHelp(projectsViewer.getControl(), "com.gocypher.cybench.plugin.tools.viewer");
 		getSite().setSelectionProvider(projectsViewer);
 		makeActions();
 		hookContextMenu();

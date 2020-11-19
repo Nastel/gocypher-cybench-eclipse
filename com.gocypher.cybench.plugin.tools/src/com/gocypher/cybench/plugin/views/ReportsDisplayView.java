@@ -207,7 +207,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 			reportsListViewer.setSelection(new StructuredSelection(reportsListViewer.getElementAt(0)),true);
 		}*/
 		
-		workbench.getHelpSystem().setHelp(reportsListViewer.getControl(), "CyBenchLauncherPlugin.viewer");
+		workbench.getHelpSystem().setHelp(reportsListViewer.getControl(), "com.gocypher.cybench.plugin.tools.viewer");
 		getSite().setSelectionProvider(reportsListViewer);
 		makeActions();
 		hookContextMenu();
