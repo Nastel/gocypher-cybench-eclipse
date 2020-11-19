@@ -72,7 +72,7 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	    		File file = new File(outputPath);
 				File fileExists = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+"Benchmarks.java");
 	    		if(!fileExists.exists() ) { 
-	    			List<BenchmarkMethodModel> benchmarkMethods = methodGeneration(selection, selectionEntry, packagePath);
+	    			List<BenchmarkMethodModel> benchmarkMethods = methodDetection(selection, selectionEntry, packagePath);
 	    			JDefinedClass generationClass;
 		    		generationClass = codeModelInstance._class(packagePath+"Benchmarks");
 		    		generationClass.annotate(codeModelInstance.ref(State.class)).param("value", Scope.Benchmark);
@@ -166,7 +166,7 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	} 
 
 	
-	private List<BenchmarkMethodModel> methodGeneration(IStructuredSelection selection, RunSelectionEntry selectionEntry, String classPath) {
+	private List<BenchmarkMethodModel> methodDetection(IStructuredSelection selection, RunSelectionEntry selectionEntry, String classPath) {
 		LinkedList<BenchmarkMethodModel> benchmarkMethods = new LinkedList<BenchmarkMethodModel>();
 		try {
 	        System.out.println(classPath);
