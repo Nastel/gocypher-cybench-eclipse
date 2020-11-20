@@ -62,24 +62,6 @@ import com.gocypher.cybench.plugin.utils.Constants;
 import com.gocypher.cybench.plugin.views.ReportsDisplayView.ViewLabelProvider;
 
 
-/**
- * This sample class demonstrates how to plug-in a new
- * workbench view. The view shows data obtained from the
- * model. The sample creates a dummy model on the fly,
- * but a real implementation would connect to the model
- * available either in this or another plug-in (e.g. the workspace).
- * The view is connected to the model using a content provider.
- * <p>
- * The view uses a label provider to define how model
- * objects should be presented in the view. Each
- * view can present the same model objects using
- * different labels and icons, if needed. Alternatively,
- * a single label provider can be shared between views
- * in order to ensure that objects of the same type are
- * presented in the same way everywhere.
- * <p>
- */
-
 public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 
 	/**
@@ -564,7 +546,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	
 	private ImageDescriptor createImageDescriptor() {
         Bundle bundle = FrameworkUtil.getBundle(ViewLabelProvider.class);
-        URL url = FileLocator.find(bundle, new Path("icons/sample.png"), null);
+        URL url = FileLocator.find(bundle, new Path("icons/cybench_symbol.png"), null);
         return ImageDescriptor.createFromURL(url);
     }
 }
