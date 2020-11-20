@@ -57,11 +57,6 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
 		RunSelectionEntry selectionEntry = LauncherUtils.fillRunselectionData(selection);
 	
-//    	System.out.println("getOutputPath: "+ selectionEntry.getOutputPath());
-//    	System.out.println("getProjectPath: "+ selectionEntry.getProjectPath());
-//    	System.out.println("getProjectReportsPath: "+ selectionEntry.getProjectReportsPath());
-//    	System.out.println("getSourcePathsWithClasses: "+ selectionEntry.getSourcePathsWithClasses());
-//    	System.out.println("getClassPaths: "+ selectionEntry.getClassPaths());
     	try {
         	String outputPath= LauncherUtils.getRawSourceFolderForBenchmarks(selectionEntry.getProjectSelected());
     		for(String packagePath :  selectionEntry.getClassPaths()) {
@@ -171,7 +166,6 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	private List<BenchmarkMethodModel> methodDetection(IStructuredSelection selection, RunSelectionEntry selectionEntry, String classPath) {
 		LinkedList<BenchmarkMethodModel> benchmarkMethods = new LinkedList<BenchmarkMethodModel>();
 		try {
-	        System.out.println(classPath);
 	        IProject project = selectionEntry.getProjectSelected();
 	        if(project != null) {
 	        	IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
@@ -181,14 +175,6 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 			    	Set<String> methodNames = new HashSet<String>();
 			    	for(IMethod methodDataObject: allMethods) {
 			    		methodNames.add(methodDataObject.getElementName()+"Benchmark");
-//		    	        System.out.println("methodDataObject.getElementName(): "+ methodDataObject.getElementName());
-//		    	        System.out.println("methodDataObject.getSource(): "+ methodDataObject.getSource());
-//		    	        System.out.println("methodDataObject.getElementType(): "+ methodDataObject.getElementType());
-//		    	        System.out.println("methodDataObject.getNumberOfParameters(): "+ methodDataObject.getNumberOfParameters());
-//		    	        for(String parameterNames : methodDataObject.getParameterNames()) {
-//		    	        	System.out.println("methodDataObject.getParameterNames(): "+ parameterNames);
-//		    	        }
-		    	        
 			    	}
 			    	for(String name : methodNames) {
 			    		BenchmarkMethodModel model = new BenchmarkMethodModel();

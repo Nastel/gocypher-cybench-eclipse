@@ -24,7 +24,6 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 			IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
 			System.out.println("--->Adding CyBench Nature");
 					
-			//System.out.println("Selection:"+selection.getClass());
 			IJavaProject javaProject = GuiUtils.resolveJavaProject(selection) ;
 		
 			if (javaProject != null) {
