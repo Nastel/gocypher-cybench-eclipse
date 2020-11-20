@@ -109,7 +109,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	private static Color colorGray= new Color (Display.getCurrent(),232,232,232) ;//Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 	
 	private Styler valueStyler ;
-	private Styler keyStyler ;
+//	private Styler keyStyler ;
 	 
 	
 	@PostConstruct

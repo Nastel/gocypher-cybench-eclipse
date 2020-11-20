@@ -26,18 +26,19 @@ public class ReportHandlerService {
 		return model ;
 	}
 
-	private void extractReportProperties (String reportJSON, List<NameValueEntry>listOfProperties) {
-		listOfProperties.clear();
-		//NameValueModelProvider.INSTANCE.getEntries().add(new NameValueEntry("custom1","custom2")) ;
-		Map<String, Object> reportMap = (Map<String,Object>)JSONUtils.parseJsonIntoMap(reportJSON ) ;
-		
-		reportMap.keySet().forEach(key ->{
-			listOfProperties.add(new  NameValueEntry (key,reportMap.get(key) != null ?reportMap.get(key).toString():"")) ;
-		});
-		
-		
-	}
-	
+//	private void extractReportProperties (String reportJSON, List<NameValueEntry>listOfProperties) {
+//		listOfProperties.clear();
+//		//NameValueModelProvider.INSTANCE.getEntries().add(new NameValueEntry("custom1","custom2")) ;
+//		Map<String, Object> reportMap = (Map<String,Object>)JSONUtils.parseJsonIntoMap(reportJSON ) ;
+//		
+//		reportMap.keySet().forEach(key ->{
+//			listOfProperties.add(new  NameValueEntry (key,reportMap.get(key) != null ?reportMap.get(key).toString():"")) ;
+//		});
+//		
+//		
+//	}
+
+	@SuppressWarnings("unchecked")
 	private ReportUIModel deserializaReportIntoUIModel (String rawReport) {
 		ReportUIModel model = new ReportUIModel() ;
 		if (rawReport != null) {
@@ -82,6 +83,7 @@ public class ReportHandlerService {
 		return model ;
 		
 	}
+	@SuppressWarnings("unchecked")
 	private void extractOverviewProperties (ReportUIModel model,Map<String,Object>reportProperties) {
 		Map<String,Object> benchmarkSettings = (Map<String,Object>)reportProperties.get("benchmarkSettings") ;
 		if (benchmarkSettings != null) {
@@ -163,6 +165,7 @@ public class ReportHandlerService {
 			
 		}
 	}
+	@SuppressWarnings("unchecked")
 	private void extractBaseProperties (ReportUIModel model,Map<String,Object>reportProperties) {
 		Long timestamp = (Long)reportProperties.get("timestamp") ;
 		if (timestamp != null) {

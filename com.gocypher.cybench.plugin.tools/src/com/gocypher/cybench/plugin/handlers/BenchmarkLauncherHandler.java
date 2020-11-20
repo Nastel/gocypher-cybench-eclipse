@@ -52,18 +52,6 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 			String launchPath = "";
 			launchPath = "C:/streams/tests/cybench-eclipse-backup-2020-11-05/cybench-eclipse-backup-2020-11-05/demo-jmh-tests/target/classes";
 			System.out.println("Sync service:"+sync+";"+selectionService);
-			String msg = "" ;
-			//MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
-			//cyBenchConsole.clearConsole();
-			//cyBenchConsole.activate();
-			/*MessageConsoleStream out = cyBenchConsole.newMessageStream();
-				
-			out.println("-----------------------------------------------------------------------------------------");
-			out.println("                                 Starting CyBench benchmarks                             ");
-			out.println("-----------------------------------------------------------------------------------------");
-			*/
-			List<String> programArguments = new ArrayList<>() ;
-			
 			String bundlePaths = ""
 			//+Platform.getBundle("CyBenchLauncherPlugin").getLocation() +";"
 			//+Platform.getBundle("com.gocypher.cybench.externals").getLocation()
@@ -124,7 +112,7 @@ public class BenchmarkLauncherHandler extends AbstractHandler {
 			//e:\benchmarks\eclipse_plugin_ws\demo-jmh-tests\target\classes\
 			
 			
-			List classpathMementos = new ArrayList();
+			List<String> classpathMementos = new ArrayList<String>();
 			for (int i = 0; i < classpath.length; i++) {
 			    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classpath[i]));
 			    cpEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);

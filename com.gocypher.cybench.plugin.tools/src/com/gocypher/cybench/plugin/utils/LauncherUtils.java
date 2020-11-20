@@ -116,9 +116,7 @@ public class LauncherUtils {
 //		    		System.out.println("elem: "+elem.toString());
 	    			IJavaProject javaProject = null;
  				if (elem instanceof IProject) {
- 						IAdaptable adaptable = (IAdaptable) elem;
-	    		        IFolder folder = (IFolder)  adaptable.getAdapter(IFolder.class);
-	    				project = (IProject) elem;
+ 						project = (IProject) elem;
 	    				selectionEntry.setProjectPath(project.getLocation().toString());
 	    			}
 	    			else if (elem instanceof IFolder) {

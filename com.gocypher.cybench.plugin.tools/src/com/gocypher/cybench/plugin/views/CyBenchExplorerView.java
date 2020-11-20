@@ -22,7 +22,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -45,6 +44,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.ide.IDE.SharedImages;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -336,6 +336,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 		//manager.add(action2);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void makeActions() {
 		refreshAction = new Action() {
 			public void run() {
@@ -452,42 +453,39 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
         @Override
         public Object[] getElements(Object inputElement) {
         	//System.out.println("!--->Class:"+inputElement.getClass());
-            return ((List)inputElement).toArray();
+            return ((List<?>)inputElement).toArray();
         }
 
         @Override
         public Object[] getChildren(Object parentElement) {
-            Node node = (Node) parentElement;
+            Node<?> node = (Node<?>) parentElement;
             return node.getChildren().toArray();
         }
 
         @Override
         public Object getParent(Object element) {
-        	Node node = (Node) element;
+        	Node<?> node = (Node<?>) element;
             return node.getParent();
         }
 
         @Override
         public boolean hasChildren(Object element) {
-        	Node node = (Node) element;
+        	Node<?> node = (Node<?>) element;
             if (node.getChildren().size()>0) {
                 return true;
             }
             return false;
         }
 	}
+	@SuppressWarnings("unchecked")
 	class TreeViewMainColumnLabelProvider extends LabelProvider implements IStyledLabelProvider {
-		private ImageDescriptor directoryImage;
-        private ResourceManager resourceManager;
-
-        public TreeViewMainColumnLabelProvider(ImageDescriptor directoryImage) {
-            this.directoryImage = directoryImage;
+		public TreeViewMainColumnLabelProvider(ImageDescriptor directoryImage) {
         }
 
         @Override
         public StyledString getStyledText(Object element) {
         	if (element instanceof Node) {
-        		Node<ReportFileEntry> node = (Node<ReportFileEntry>) element;
+				Node<ReportFileEntry> node = (Node<ReportFileEntry>) element;
             	if (node.getData() != null && node.getData().getName() != null) {
             		return new StyledString(node.getData().getName());
             	}
@@ -512,9 +510,9 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
         @Override
         public Image getImage(Object element) {
             if(element instanceof Node) {
-                if(((Node) element).getChildren().size()>0  ||((Node) element).getParent() == null ) {
+                if(((Node<?>) element).getChildren().size()>0  ||((Node<?>) element).getParent() == null ) {
                     //return getResourceManager().createImage(directoryImage);
-                	return workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_PROJECT);
+                	return workbench.getSharedImages().getImage(SharedImages.IMG_OBJ_PROJECT);
                 }
             }
 
@@ -523,6 +521,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
         }
 
 	}
+	@SuppressWarnings("unchecked")
 	class ReportTimestampLabelProvider extends LabelProvider implements IStyledLabelProvider {
         public ReportTimestampLabelProvider() {
            
@@ -539,6 +538,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
             return new StyledString("");
         }
     }
+	@SuppressWarnings("unchecked")
 	class ReportScoreLabelProvider extends LabelProvider implements IStyledLabelProvider {
 		private Styler styler ;
         public ReportScoreLabelProvider(Styler styler ) {
