@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -18,8 +20,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Level;
@@ -61,9 +65,12 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
     	try {
         	String outputPath= LauncherUtils.getRawSourceFolderForBenchmarks(selectionEntry.getProjectSelected());
     		for(String packagePath :  selectionEntry.getClassPaths()) {
+    			IWorkbenchPage page = window.getActivePage();
 	    		File file = new File(outputPath);
 				File fileExists = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+"Benchmarks.java");
-	    		if(!fileExists.exists() ) { 
+				File fileExists2 = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+".java");
+				
+	    		if(fileExists!= null && !fileExists.exists() && fileExists2 != null && !fileExists2.exists()) { 
 	    			List<BenchmarkMethodModel> benchmarkMethods = methodDetection(selection, selectionEntry, packagePath);
 	    			JDefinedClass generationClass;
 		    		generationClass = codeModelInstance._class(packagePath+"Benchmarks");
@@ -93,7 +100,10 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 3);
 	
 					codeModelInstance.build(file);
-
+	    		}
+	    		if(fileExists!= null && fileExists.exists()) {
+					IFileStore fileStore = EFS.getLocalFileSystem().getStore(fileExists.toURI());
+					IDE.openEditorOnFileStore(page, fileStore);
 	    		}
     		}
 		    IProject project = selectionEntry.getProjectSelected();
@@ -197,4 +207,5 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		}
 		return benchmarkMethods; 
 	}
+
 }

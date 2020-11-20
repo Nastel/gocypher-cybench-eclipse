@@ -6,8 +6,26 @@
       provider-name="K2N.IO"
       plugin="com.gocypher.cybench.plugin.tools">
 
-   <description url="https://www.gocypher.com/cybench/">
-      Cybench Feature Description
+   <description url="https://cybench.io/">
+      Code Benchmark Platform
+
+CyBench is an integrated code benchmark platform for running,
+storing, analyzing &amp; comparing performance benchmarks with one
+mission: help you build fast code.
+
+Benchmark your code, algorithms, platforms, modules, libraries,
+API calls, JVMs, Java garbage collection (GC) settings. Test
+with varying runtime configurations, versions and more. Avoid
+making costly mistakes, which can wreck your reputation and user
+experience.
+
+Create &amp; share performance scorecards with your team &amp; community.
+Compare and choose best performing runtime configurations, libraries,
+code dependencies for your project. 
+
+Leverage Java Microbenchmark Harness -JMH benchmarks and integrate
+into your development, build and CI/CD workflow. Build better,
+faster software with CyBench. Click here to see how CyBench works.
    </description>
 
    <copyright url="http://www.example.com/copyright">
@@ -17,6 +35,11 @@
    <license url="http://www.example.com/license">
       [Enter License Description here.]
    </license>
+
+   <url>
+      <discovery label="CyBench" url="https://cybench.io/"/>
+      <discovery label="Nastel" url="https://www.nastel.com/"/>
+   </url>
 
    <plugin
          id="com.gocypher.cybench.plugin.tools"
