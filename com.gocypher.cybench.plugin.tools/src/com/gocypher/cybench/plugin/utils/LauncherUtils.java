@@ -158,7 +158,7 @@ public class LauncherUtils {
 
  					javaProject = (IJavaProject)JavaCore.create((IProject)project);
 					selectionEntry.setProjectSelected(project);
-	 				runSelectionClassesInformation(javaProject, selectionEntry);
+	 				runSelectionClassesInformation(project, javaProject, selectionEntry);
 		    		selectionEntry.setProjectName(selectionEntry.getProjectPath().substring(selectionEntry.getProjectPath().lastIndexOf('/') + 1));
 	 				selectionEntry.setProjectReportsPath(selectionEntry.getProjectPath()+reportsDirectory);
 		    	}
@@ -170,11 +170,21 @@ public class LauncherUtils {
 		return selectionEntry;
 	}
 	
-	public static void runSelectionClassesInformation(IJavaProject javaProject, RunSelectionEntry selectionEntry ) {
+	public static void runSelectionClassesInformation(IProject project, IJavaProject javaProject, RunSelectionEntry selectionEntry ) {
 		try {
 	    			if(javaProject!=null && javaProject.getOutputLocation()!=null) {
-	    				selectionEntry.setOutputPath(selectionEntry.getProjectPath().substring(0, selectionEntry.getProjectPath().lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString());
+//	    				System.out.println("javaProject.getOutputLocation():"+javaProject.getOutputLocation());
+//	    				System.out.println("selectionEntry.getProjectPath():"+selectionEntry.getProjectPath());
+	    				String outputLocation = javaProject.getOutputLocation().toPortableString();
+	    				String classPathOutput = selectionEntry.getProjectPath().substring(0, selectionEntry.getProjectPath().lastIndexOf('/')) + outputLocation;
+		    			if (isMavenProject(project)) {
+		    				String testPath = classPathOutput.substring(0, classPathOutput.lastIndexOf('/'))+ "/test-"+outputLocation.substring(outputLocation.lastIndexOf('/') + 1);
+	    					selectionEntry.setOutputPath(classPathOutput+","+testPath);
+	    				}else {
+	    					selectionEntry.setOutputPath(classPathOutput);
+	    				}
 	    				IPackageFragmentRoot[] fragmetnRootsTest = javaProject.getAllPackageFragmentRoots();
+//	    				System.out.println("selectionEntry.getOutputPath():"+selectionEntry.getOutputPath());
 	    				Set<String> tempClassSet = new HashSet<String>();
 	    				for(IPackageFragmentRoot root : fragmetnRootsTest) {
 	    					if(root.getKind() == IPackageFragmentRoot.K_SOURCE) {
@@ -192,7 +202,10 @@ public class LauncherUtils {
 		} catch (JavaModelException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		    	}
+		    	} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		    }
 	
 	public static IPath getSourceFolderForBenchmarks (IProject project) throws Exception{

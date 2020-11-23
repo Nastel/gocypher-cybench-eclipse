@@ -1,6 +1,7 @@
 package com.gocypher.cybench.plugin.handlers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -32,13 +33,6 @@ public class LaunchShortcut implements ILaunchShortcut {
 	public void launch(ISelection selection, String mode) {
 		try {
 			RunSelectionEntry selectionEntry = LauncherUtils.fillRunselectionData(selection);
-//		    System.out.println("Execution Mode: " + mode);
-//	    	System.out.println(System.getProperty("line.separator"));
-//			System.out.println("project path: "+selectionEntry.getProjectPath());
-//			System.out.println("output path: "+selectionEntry.getOutputPath());
-//			System.out.println("classes paths: "+selectionEntry.getClassPaths());
-//			System.out.println("project reports path: "+selectionEntry.getProjectReportsPath());
-//	    	System.out.println(System.getProperty("line.separator"));
 	    	
 			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(selectionEntry.getProjectReportsPath(), true, "report") ;
 			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(selectionEntry.getProjectReportsPath(), true, "report") ;
@@ -50,15 +44,15 @@ public class LaunchShortcut implements ILaunchShortcut {
 			setEnvironmentProperties(config, selectionEntry);
 
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
-			String[] classpath = new String[] { selectionEntry.getOutputPath()
-					,LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true)
-					,LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) 
-					};
-			
-		
+			List<String> classPaths = new ArrayList<String>();
+			classPaths.addAll(Arrays.asList(selectionEntry.getOutputPath().split(",")));
+			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true));
+			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) );
+
+			System.out.println("Classpath:"+selectionEntry.getOutputPath());
 			List<String> classpathMementos = new ArrayList<String>();
-			for (int i = 0; i < classpath.length; i++) {
-			    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classpath[i]));
+			for (int i = 0; i < classPaths.size(); i++) {
+			    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classPaths.get(i)));
 			    cpEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
 			    try {
 			        classpathMementos.add(cpEntry.getMemento());
@@ -66,7 +60,8 @@ public class LaunchShortcut implements ILaunchShortcut {
 			        System.err.println(e.getMessage());
 			    }
 			}
-			
+
+			System.out.println("Classpath:"+classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
