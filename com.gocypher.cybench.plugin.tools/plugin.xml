@@ -71,7 +71,7 @@
 			    </menu>
 	 	  </menuContribution>
 	 	  <menuContribution
-		        locationURI="popup:com.gocypher.cybench.ProjectMenu?after=additions">
+		        locationURI="popup:org.eclipse.ui.popup.any?after=additions">
 		         <separator name="com.mycompany.converterhelper.separator" visible="true" />
 	            <command
 	                  id="com.gocypher.cybench.plugin.ProjectConfigureLaunchInner"
@@ -91,7 +91,7 @@
 	            </command>
 	 	  </menuContribution>
 	 	  <menuContribution
-		        locationURI="popup:com.gocypher.cybench.ProjectMenu?after=additions">
+		        locationURI="popup:org.eclipse.ui.popup.any?after=additions">
 		         <separator name="com.mycompany.converterhelper.separator" visible="true" />
 	            <command
 	                  id="com.gocypher.cybench.plugin.ProjectGeneratebenchmarks"

@@ -67,50 +67,12 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		return "" ;
 	}
 	
-	//	  private Set<String> getProjectPaths(List<String> classList) {
-//		  Set<String> projectPaths = new HashSet<String>();
-//	    	try {
-//	    		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
-//		    	for(IProject proj : projects) {
-//		    		if(proj.isAccessible()) {
-//			    		IJavaProject javaProject = JavaCore.create(proj);
-//			    		if(javaProject!=null && javaProject.getOutputLocation()!=null) {
-//		    				IPackageFragmentRoot[] fragmetnRootsTest = javaProject.getAllPackageFragmentRoots();
-//		    				Set<String> tempClassSet = new HashSet<String>();
-//		    				for(IPackageFragmentRoot root : fragmetnRootsTest) {
-//		    					if(root.getKind() == IPackageFragmentRoot.K_SOURCE) {
-//		    						for(String classPath : classList) {
-//			    						if(classPath.contains(root.getPath().toPortableString())){
-//			    							tempClassSet.add(classPath.replace(root.getPath().toPortableString()+"/", "").replace("/", "."));
-//			    						}
-//				    					 System.out.println("root2: "+ classPath);
-//		    						}
-//		    					}
-//		    					 System.out.println("root1: "+ root.getPath());
-//		    				}
-//		    				projectPaths.addAll(tempClassSet);
-//		    				return projectPaths;
-//			    		}
-//		    		}
-//		    	}
-//			} catch (JavaModelException e) {
-//				e.printStackTrace();
-//			}
-//	    	return projectPaths;
-//	    }
-//	  
 	@Override
 	public void launch(ILaunchConfiguration configuration, String arg1, ILaunch arg2, IProgressMonitor arg3)
 			throws CoreException {
 		try {
 			setRunConfigurationProperties(configuration);
 	    	selectionFolderPath = selectionFolderPath.replaceAll("\\s+","");
-//	    	File file = new File(selectionFolderPath);
-//	    	benchmarkClassList = LauncherUtils.addClasses(file.listFiles(),benchmarkClassList);
-//	    	String selectionFolderPath = LauncherUtils.setToString(getProjectPaths(benchmarkClassList));
-//	        System.out.println(selectionFolderPath);
-//	    	setCorrectClassRelativePath();
-	    	
 			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;
 			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;
 	
@@ -137,7 +99,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			        System.err.println(e.getMessage());
 			    }
 			}
-			System.out.println("Classpath:"+classpathMementos);
+//			System.out.println("Classpath:"+classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
@@ -205,26 +167,18 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	   reportFolder = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, "/report");
        reportName = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "CyBench Report");
        reportUploadStatus = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
-      
        thread = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
        forks  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
        warmupIterations  = configuration.getAttribute(LaunchConfiguration.WARMUP_ITERATION, 1);
        measurmentIterations = configuration.getAttribute(LaunchConfiguration.MEASURMENT_ITERATIONS, 5);
        warmupSeconds = configuration.getAttribute(LaunchConfiguration.WARMUP_SECONDS, 10);
        mesurmentSeconds = configuration.getAttribute(LaunchConfiguration.MEASURMENT_SECONDS, 10);
-       
 //       storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
        sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
        includeHardware = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
-       
-       
        userProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, "");
    	   excutionScoreBoundary = configuration.getAttribute(LaunchConfiguration.EXECUTION_SCORE, -1);
-   	   
    	   launchPath = configuration.getAttribute(LaunchConfiguration.BUILD_PATH, "");
    	   selectionFolderPath =configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");
     }
-    
-    
-//	addClasses(folder.members(), selectionEntry);
 }

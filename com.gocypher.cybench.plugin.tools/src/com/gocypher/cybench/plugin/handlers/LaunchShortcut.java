@@ -48,8 +48,6 @@ public class LaunchShortcut implements ILaunchShortcut {
 			classPaths.addAll(Arrays.asList(selectionEntry.getOutputPath().split(",")));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) );
-
-			System.out.println("Classpath:"+selectionEntry.getOutputPath());
 			List<String> classpathMementos = new ArrayList<String>();
 			for (int i = 0; i < classPaths.size(); i++) {
 			    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classPaths.get(i)));
@@ -61,7 +59,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 			    }
 			}
 
-			System.out.println("Classpath:"+classpathMementos);
+//			System.out.println("Classpath:"+classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
