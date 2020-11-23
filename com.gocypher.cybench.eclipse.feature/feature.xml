@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE xml>
 <feature
       id="com.gocypher.cybench.eclipse.feature"
       label="CyBench"
@@ -9,12 +8,13 @@
 
    <description url="https://cybench.io/">
       Code Benchmark Platform
+
 CyBench is an integrated code benchmark platform for running,
 storing, analyzing &amp; comparing performance benchmarks with one
 mission: help you build fast code.
    </description>
 
-   <copyright url="http://www.example.com/copyright">
+   <copyright url="https://github.com/K2NIO/gocypher-cybench-java-core/blob/main/LICENSE">
       Copyright (C) 2020, K2N.IO.
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 02110-1301  USA
    </copyright>
 
-   <license url="http://www.example.com/license">
+   <license url="https://github.com/K2NIO/gocypher-cybench-java-core/blob/main/LICENSE">
       GNU LESSER GENERAL PUBLIC LICENSE
                        Version 2.1, February 1999
 
