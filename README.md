@@ -11,7 +11,7 @@
 
 * File `CybenchTools.zip` contains Eclipse update site files structure.
 
-###Installation from local file system
+### Installation from local file system
 
 * In Eclipse select menu “Help”→ “Install new software”.
 * In installation dialog window click button “Add”.
@@ -46,7 +46,7 @@
 ![](./docs/images/image6.png)
 
 
-##Uninstall
+## Uninstall
 
 * Applicable if CyBench tools were used in developer mode:
     * Stop the Eclipse.
@@ -61,9 +61,9 @@
 
 ![](./docs/images/image7.png)
 
-##Usage Instructions
+## Usage Instructions
 
-###Project nature “CyBench Nature”
+### Project nature “CyBench Nature”
 
 CyBench project nature applies settings to the project that benchmarks are compiled with all annotations and contains all required dependencies at least for startup. It is possible to override project configuration changes made by CyBench plugin; it just configures items which are necessary for successful launch. Project nature must be “CyBench Nature” in order to use further CyBench tools.
 
@@ -95,7 +95,7 @@ This configuration triggers, any JMH benchmarks implementing class recompile and
 
 Configuration allows to run CyBench launcher without any other specific rebuild and this does not depend on project nature. Also this allows to use JMH framework in Eclipse for generic Eclipse JAVA project without Maven usage.
 
-##CyBench Explorer View
+## CyBench Explorer View
 
 View displays all CyBench reports found in the workspace projects.
 * To open this view navigate “Window”→”Show View” → “Other” → “CyBench Tools” → “CyBench Explorer”. If Java perspective is active then it opens on the right side of the screen otherwise opens at the bottom, and can place it anywhere.
@@ -106,7 +106,7 @@ View displays all CyBench reports found in the workspace projects.
 
 ![](./docs/images/image13.png)
 
-##Report Details View
+## Report Details View
 
 View displays selected or generated during launch report details.
 * Displays a list of benchmark tests on the right.    
@@ -118,7 +118,7 @@ View displays selected or generated during launch report details.
 * Also can navigate thorough other report attributes by clicking on the appropriate “tab” - “Summary”, “JVM Properties”, “HW Properties”.
 * Chrome icon at the top-right view side allows to open the report using default system Web browser (which is defined in Eclipse settings) i.e. navigate to CyBench website to particular report details page (if the report was sent to CyBench Repository).
 
-##Generate Benchmarks
+## Generate Benchmarks
 
 Feature generates benchmark class stubs, adds necessary annotations and methods for a selected JAVA file. Benchmark method is generated for each public method found in the class.
 
@@ -143,7 +143,7 @@ Feature generates benchmark class stubs, adds necessary annotations and methods 
 
 ![](./docs/images/image16.png)
 
-##Quick launch benchmarks using CyBench
+## Quick launch benchmarks using CyBench
 
 Launches all JMH benchmarks which are found under selected JAVA file. Quick launch does not collect hardware or JVM settings and does not send report to CyBench repository.
 
@@ -164,7 +164,7 @@ Launches all JMH benchmarks which are found under selected JAVA file. Quick laun
     * report is displayed under “Report Details View”,
     * report entry appears in “CyBench Explorer”.
 
-##CyBench Run Configuration and Launch View
+## CyBench Run Configuration and Launch View
 
 Launch configuration view which allows to create a custom launch settings for a selected workspace project and run CyBench launcher using user defined settings.
 
