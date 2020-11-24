@@ -7,6 +7,9 @@ public class BenchmarkMethodModel {
 	private String methodBenchmarkMode;
 	private String methodHint;
 	
+	public BenchmarkMethodModel(){
+		
+	}
 	public String getMethodName() {
 		return methodName;
 	}

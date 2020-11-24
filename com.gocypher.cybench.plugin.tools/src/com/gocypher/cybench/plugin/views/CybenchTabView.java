@@ -8,6 +8,9 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -35,10 +38,15 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
+import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.LaunchConfiguration;
+import com.gocypher.cybench.plugin.utils.LauncherUtils;
+
 
 public class CybenchTabView extends AbstractLaunchConfigurationTab {
 
+	ILog log = Activator.getDefault().getLog();
+	
 	private Group benchmarking;
 	private Group configuration;
 	private Group conditions;
@@ -103,11 +111,6 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 	        executionThreadsCountLabel.setText("Threads:");
 	        threads = new Spinner(benchmarking, SWT.BORDER);
 	        
-	        /* Report execution number of measurement iterations */
-	        Label executionMeasurmentIterationCountLabel = new Label(benchmarking, SWT.NONE);
-	        executionMeasurmentIterationCountLabel.setText("Measurment Iterations:");
-	        measurmentIterations = new Spinner(benchmarking, SWT.BORDER);
-	        
 	        /* Report execution number of warm-up iterations */
 	        Label executionWarmupIterationCountLabel = new Label(benchmarking, SWT.NONE);
 	        executionWarmupIterationCountLabel.setText("Warmup Iterations:");
@@ -118,6 +121,11 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 	        executionWarmupSecondsLabel.setText("Warmup time (s):");
 	        warmupSeconds = new Spinner(benchmarking, SWT.BORDER);
 	        
+	        /* Report execution number of measurement iterations */
+	        Label executionMeasurmentIterationCountLabel = new Label(benchmarking, SWT.NONE);
+	        executionMeasurmentIterationCountLabel.setText("Measurment Iterations:");
+	        measurmentIterations = new Spinner(benchmarking, SWT.BORDER);	        
+	      
 	        /* Report execution number of measurement seconds */
 	        Label executionMeasurmentsSecondsLabel = new Label(benchmarking, SWT.NONE);
 	        executionMeasurmentsSecondsLabel.setText("Measurment time (s):");
@@ -425,25 +433,36 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     
     private Map<String, String> getProjectPaths(boolean addBuildPath) {
     	Map<String, String> projectPaths = new HashMap<>();
+
     	try {
     		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
 	    	for(IProject proj : projects) {
+	        	log.log(new Status(IStatus.INFO, "proj: "+ proj.getLocation().toPortableString(), getMessage()));
 	    		if(proj.isAccessible()) {
+	    			log.log(new Status(IStatus.INFO, "ACCESSABLE  - TRUE ", getMessage()));
 		    		String projectPackageFullPath = "";
 		    		String projectOutputPath = "";
-		    		if(proj.getLocation()!=null) {
+		    		if(proj.getLocation()!=null && LauncherUtils.isJavaProject(proj)) {
 		    			projectPackageFullPath = proj.getLocation().toPortableString();
+		    			log.log(new Status(IStatus.INFO, "ACCESSABLE  - LOCATION NOT NULL "+projectPackageFullPath, getMessage()));
+		    			if(addBuildPath) {
+				    		IJavaProject javaProject = JavaCore.create(proj);
+			    			log.log(new Status(IStatus.INFO, "ACCESSABLE  - CAST TO JAVA PROJECT "+javaProject, getMessage()));
+			    			if(javaProject.getOutputLocation()!=null) {
+				    			log.log(new Status(IStatus.INFO, "ACCESSABLE  - JAVA PROJECT NOT NULL -"+ javaProject.getOutputLocation(), getMessage()));
+			    				projectOutputPath = projectPackageFullPath.substring(0, projectPackageFullPath.lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString();
+			    			}
+			    		}
+			    		log.log(new Status(IStatus.INFO, "INSERT INTO RETURN MAP: "+ projectPackageFullPath+ " : "+ projectOutputPath, getMessage()));
+		    			projectPaths.put(projectPackageFullPath, projectOutputPath);
 		    		}
-		    		if(addBuildPath) {
-			    		IJavaProject javaProject = JavaCore.create(proj);
-		    			if(javaProject.getOutputLocation()!=null) {
-		    				projectOutputPath = projectPackageFullPath.substring(0, projectPackageFullPath.lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString();
-		    			}
-		    		}
-	    			projectPaths.put(projectPackageFullPath, projectOutputPath);
+		    		
 	    		}
 	    	}
 		} catch (JavaModelException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	return projectPaths;
