@@ -80,7 +80,7 @@
          point="org.eclipse.ui.menus">
 		  <menuContribution
 		        locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-		         <separator name="com.mycompany.converterhelper.separator" visible="true" />
+		         <separator name="com.gocypher.cybench.converterhelper.separator" visible="true" />
 		         <menu
 			           id="com.gocypher.cybench.ProjectMenu"
 	                   tooltip="Configure CyBench"
@@ -90,7 +90,7 @@
 	 	  </menuContribution>
 	 	  <menuContribution
 		        locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-		         <separator name="com.mycompany.converterhelper.separator" visible="true" />
+		         <separator name="com.gocypher.cybench.converterhelper.separator" visible="true" />
 	            <command
 	                  id="com.gocypher.cybench.plugin.ProjectConfigureLaunchInner"
 	                  commandId="com.gocypher.cybench.plugin.handlers.AddNature"
@@ -110,7 +110,7 @@
 	 	  </menuContribution>
 	 	  <menuContribution
 		        locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-		         <separator name="com.mycompany.converterhelper.separator" visible="true" />
+		         <separator name="com.gocypher.cybench.converterhelper.separator" visible="true" />
 	            <command
 	                  id="com.gocypher.cybench.plugin.ProjectGeneratebenchmarks"
 	                  commandId="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks"
@@ -140,12 +140,12 @@
       </category>
       <command
             categoryId="com.gocypher.cybench.plugin.handlers.commands.category"
-            name="Run CyBench Add Nature"
+            name="Add CyBench Nature"
             id="com.gocypher.cybench.plugin.handlers.AddNature">
       </command>
       <command
             categoryId="com.gocypher.cybench.plugin.handlers.commands.category"
-            name="Run CyBench Add Nature"
+            name="Generate Benchmark Classes"
             id="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks">
       </command>
    </extension>
@@ -176,7 +176,7 @@
             commandId="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             contextId="org.eclipse.ui.contexts.window"
-            sequence="M1+6">
+            sequence="M1+7">
       </key>
    </extension>
    <extension
