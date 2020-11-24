@@ -46,18 +46,10 @@ public class ReportFileEntry implements Serializable{
 	}
 
 	public void create (File file) {
-		//this.name = file.getName() ;
 		this.fullPathToFile = file.toString() ;
 		this.reportIdentifier = GuiUtils.encodeBase64(this.fullPathToFile) ;
 		
 		this.extractMetaDataFromFileName(file.getName());
-		
-		/*String timeInMilis = this.name.substring(this.name.lastIndexOf("-")+1,this.name.lastIndexOf(".")) ;
-		if (timeInMilis != null && ! timeInMilis.isEmpty()) {
-			this.timestamp = Long.parseLong(timeInMilis) ;
-			this.timeStampStr = CybenchUtils.formatTimestamp (this.timestamp) ;
-		}
-		*/
 		
 	}
 	private void extractMetaDataFromFileName (String fileName) {
@@ -119,10 +111,6 @@ public class ReportFileEntry implements Serializable{
 
 	@Override
 	public String toString() {
-		/*if (this.timeStampStr != null ) {
-			return this.name+" ("+this.timeStampStr+")";
-		}
-		*/
 		return this.name ;
 	}
 

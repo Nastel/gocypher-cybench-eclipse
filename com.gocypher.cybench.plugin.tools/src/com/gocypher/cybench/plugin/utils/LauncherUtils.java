@@ -69,8 +69,8 @@ public class LauncherUtils {
 			}
 			return pluginInstallDir ; 
 			
-		}catch (Exception ex) {
-			ex.printStackTrace();
+		}catch (Exception e) {
+			GuiUtils.logError ("Error  on resolve bundle location",e) ;
 		}
 		return "" ;
 	}
@@ -94,7 +94,7 @@ public class LauncherUtils {
 					"CyBench plugin",
 					msg);
 		}catch (Exception e) {
-			e.printStackTrace();
+			GuiUtils.logError ("Error  on open msg box",e) ;
 		}
 	}
 	
@@ -118,7 +118,7 @@ public class LauncherUtils {
 				  }
 			}
 		} catch (CoreException e) {
-			e.printStackTrace();
+			GuiUtils.logError ("Error  classes add",e) ;
 		}
 	   return selectionEntry; 
 	}
@@ -141,13 +141,12 @@ public class LauncherUtils {
 	    			else if (elem instanceof IFolder) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
 	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
-	    		        IFolder folder = (IFolder)  adaptable.getAdapter(IFolder.class);
-	    		        System.out.println(folder);
+	    		        IFolder folder = (IFolder)  adaptable.getAdapter(IFolder.class);	    		        
 	    		        project = res.getProject();
 	    		        selectedPath = res.getLocation().toString();
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
 	    				selectionEntry.setClassPaths(LauncherUtils.addClasses(folder.members(), selectionEntry.getClassPaths()));
-	    				System.out.println("selectedPath IFolder: "+selectionEntry.getProjectPath());
+	    				GuiUtils.logInfo("selectedPath IFolder: "+selectionEntry.getProjectPath());
 	    			}
 	    			else if (elem instanceof IFile) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
@@ -158,7 +157,7 @@ public class LauncherUtils {
 	    		        String benchmarkClass = res.getFullPath().toPortableString().replace(".java", "");
 	    		        selectionEntry.addClassPaths(benchmarkClass);
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
-	    				System.out.println("selectedPath IFile: "+selectionEntry.getProjectPath());
+	    				GuiUtils.logInfo("selectedPath IFile: "+selectionEntry.getProjectPath());
 	    			}
 	    			else if (elem instanceof IAdaptable) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
@@ -170,9 +169,9 @@ public class LauncherUtils {
 	    		        project = res.getProject();
 	    		        selectedPath = res.getLocation().toString();
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
-	    				System.out.println("selectedPath IAdaptable: "+selectionEntry.getProjectPath());
+	    				GuiUtils.logInfo("selectedPath IAdaptable: "+selectionEntry.getProjectPath());
 	    			} else {
-	    				System.err.println("The run selection was not recognized: "+ selection);
+	    				GuiUtils.logError("The run selection was not recognized: "+ selection);
 	    			}
 
  					javaProject = (IJavaProject)JavaCore.create((IProject)project);
@@ -182,9 +181,8 @@ public class LauncherUtils {
 	 				selectionEntry.setProjectReportsPath(selectionEntry.getProjectPath()+reportsDirectory);
 		    	}
 		    }
-		}catch(Exception e){
-			System.err.println("Problem on Selected paths collection");
-			e.printStackTrace();
+		}catch(Exception e){			
+			GuiUtils.logError ("Problem on Selected paths collection",e) ;
 		}
 		return selectionEntry;
 	}
@@ -217,15 +215,11 @@ public class LauncherUtils {
 	    				}
 	    				selectionEntry.setClassPaths(tempClassSet);
 	    			}  
-
-		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		    	} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		
+		} catch (Exception e) {			
+			GuiUtils.logError ("Error on class information ",e) ;
 		}
-		    }
+	}
 	
 	public static IPath getSourceFolderForBenchmarks (IProject project) throws Exception{
 	    	if (isMavenProject(project)) {
@@ -264,5 +258,4 @@ public class LauncherUtils {
 			}		
 			return false ;
 	}
-//	
 }

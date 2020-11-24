@@ -21,9 +21,7 @@ package com.gocypher.cybench.plugin.handlers;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -62,8 +60,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private boolean includeHardware;
 	private String userProperties;
 	private int excutionScoreBoundary ;
-	String selectionFolderPath;
-	Set<String> classPaths = new LinkedHashSet<>();
+	private String selectionFolderPath;
     
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
@@ -81,7 +78,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			return pluginInstallDir ; 
 			
 		}catch (Exception ex) {
-			ex.printStackTrace();
+			GuiUtils.logError("Error during bundle location resolve",ex);
 		}
 		return "" ;
 	}
@@ -115,10 +112,9 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			    try {
 			        classpathMementos.add(cpEntry.getMemento());
 			    } catch (CoreException e) {
-			        System.err.println(e.getMessage());
+			    	GuiUtils.logError ("Error during classpath add",e) ;
 			    }
 			}
-//			System.out.println("Classpath:"+classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
@@ -141,17 +137,17 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 						GuiUtils.refreshCybenchExplorer();			
 						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);		
 					} catch (CoreException e) {
-					    System.err.println(e.getMessage());
+						GuiUtils.logError("Error during launch",e);
 					}
 				}
 			}).start();
 		}catch (Exception e) {
-			e.printStackTrace();
+			GuiUtils.logError("Error during launch",e);
 		}
 		
 	}
     private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config) {
-		System.out.println("-DFORKS_COUNT="+forks+
+    	GuiUtils.logInfo("-DFORKS_COUNT="+forks+
 				" -DTHREADS_COUNT="+thread+
 				" -DREPORT_NAME=\""+reportName+"\""+
 				" -DBENCHMARK_REPORT_STATUS=\""+reportUploadStatus+"\""+

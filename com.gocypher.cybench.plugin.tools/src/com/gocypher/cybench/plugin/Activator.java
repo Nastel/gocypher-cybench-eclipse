@@ -29,6 +29,7 @@ public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.gocypher.cybench.plugin.tools"; //$NON-NLS-1$
+	// The 3rd party libs plugin ID
 	public static final String EXTERNALS_PLUGIN_ID = "com.gocypher.cybench.externals" ;//$NON-NLS-1$
 
 	// The shared instance

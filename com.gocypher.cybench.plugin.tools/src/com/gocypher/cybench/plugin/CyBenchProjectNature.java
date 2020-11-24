@@ -60,12 +60,12 @@ public class CyBenchProjectNature implements IProjectNature {
 	
 	@Override
 	public void configure() throws CoreException {
-		System.out.println("-->Configuring CyBench nature for:"+this.project);
+		GuiUtils.logInfo("-->Configuring CyBench nature for:"+this.project);
 		
 		IJavaProject javaProject = (IJavaProject)JavaCore.create(this.project);
 	
 		String cyBenchExternalsPath = LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID, false) ;
-		System.out.println("Externals path:"+cyBenchExternalsPath);
+		GuiUtils.logInfo("Externals path:"+cyBenchExternalsPath);
 		
 		try {
 			this.updateDependenciesForNature(javaProject) ;
@@ -83,8 +83,7 @@ public class CyBenchProjectNature implements IProjectNature {
 			//Externals for local tests
 			//this.configureProjectAPTSettings (javaProject,fullPathHardcodedCore,fullPathHardcodedAnnotations) ;
 		}catch (Exception e) {
-			System.err.println("Error during configure of CyBench nature:"+e.getMessage());
-			e.printStackTrace();
+			GuiUtils.logError ("Error during configure of CyBench nature:",e) ;
 			throw new CoreException(null);
 		}
 			
@@ -92,11 +91,11 @@ public class CyBenchProjectNature implements IProjectNature {
 
 	@Override
 	public void deconfigure() throws CoreException {
-		System.out.println("-->Deconfigure CyBench nature for project:"+this.project);
+		GuiUtils.logInfo("-->Deconfigure CyBench nature for project:"+this.project);
 		IJavaProject javaProject = (IJavaProject)JavaCore.create(this.project);
 		
 		String cyBenchExternalsPath = LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID, false) ;
-		System.out.println("Externals path:"+cyBenchExternalsPath);
+		GuiUtils.logInfo("Externals path:"+cyBenchExternalsPath);
 		
 		
 		//String fullPathHardcodedCore = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-core-1.26.jar" ;
@@ -114,9 +113,8 @@ public class CyBenchProjectNature implements IProjectNature {
 			}
 			GuiUtils.refreshProject(javaProject);
 			
-		}catch (Exception e) {
-			System.err.println("Error during deconfigure of CyBench nature:"+e.getMessage());
-			e.printStackTrace();
+		}catch (Exception e) {			
+			GuiUtils.logError("Error during deconfigure of CyBench nature", e);
 			throw new CoreException(null);
 		}
 	}
@@ -156,7 +154,7 @@ public class CyBenchProjectNature implements IProjectNature {
 										
 			}
 			else {
-				System.err.println("Class path entry pointing to external lib exists:"+pathToExternalLib);
+				GuiUtils.logError("Class path entry pointing to external lib exists:"+pathToExternalLib);
 			}
 		}
 		
@@ -166,7 +164,7 @@ public class CyBenchProjectNature implements IProjectNature {
 		IClasspathEntry srcFolder = JavaCore.newSourceEntry(LauncherUtils.getSourceFolderForBenchmarks(javaProject.getProject())) ;
 		
 		if (javaProject.getClasspathEntryFor(srcFolder.getPath()) == null) {
-			System.out.println("SRC folder for benchmarks does not exist, will add new one.");
+			GuiUtils.logInfo("SRC folder for benchmarks does not exist, will add new one.");
 			List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
 			
 			for (IClasspathEntry entry :javaProject.getRawClasspath()) {			
@@ -184,7 +182,7 @@ public class CyBenchProjectNature implements IProjectNature {
 			javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());
 		}
 		else {
-			System.out.println("SRC folder for benchmarks exist.");
+			GuiUtils.logInfo("SRC folder for benchmarks exist.");
 		}
 		
 		IPath projectPath = javaProject.getProject().getLocation() ;
@@ -195,7 +193,7 @@ public class CyBenchProjectNature implements IProjectNature {
 			projectPath = projectPath.append(LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_JAVA) ;
 		}
 		File rawFolder = new File(projectPath.toPortableString()) ;
-		System.out.println("-->Raw path on FS:"+projectPath.toPortableString()+"; Existence on FS:"+rawFolder.exists());
+		GuiUtils.logInfo("-->Raw path on FS:"+projectPath.toPortableString()+"; Existence on FS:"+rawFolder.exists());
 		if (!rawFolder.exists()) {
 			rawFolder.mkdirs();
 		}
@@ -267,7 +265,7 @@ public class CyBenchProjectNature implements IProjectNature {
 		
 		if (LauncherUtils.isMavenProject(javaProject.getProject())) {
 			String projectLocation = javaProject.getProject().getLocation().toPortableString() ;
-			System.out.println("Selected project location:"+projectLocation);
+			GuiUtils.logInfo("Selected project location:"+projectLocation);
 			List<File> files = CybenchUtils.listFilesInDirectory(projectLocation) ;
 			File pomXML = null ;
 			for (File file:files) {
@@ -276,20 +274,20 @@ public class CyBenchProjectNature implements IProjectNature {
 				}
 			}
 			if (pomXML != null) {
-				System.out.println("POM file found:"+pomXML.getAbsolutePath());
+				GuiUtils.logInfo("POM file found:"+pomXML.getAbsolutePath());
 				MavenXpp3Reader reader = new MavenXpp3Reader();
 				Model model = reader.read(new FileReader(pomXML)) ;
-				System.out.println("Pom model:"+model.getDependencies());
+				GuiUtils.logInfo("Pom model:"+model.getDependencies());
 								
 				for (Dependency dep:createCyBenchMvnDependencies(model.getDependencies())) {
-					System.out.println("will add new dependency:"+dep);
+					GuiUtils.logInfo("will add new dependency:"+dep);
 					model.addDependency(dep);
 				}
 				
-				System.out.println("Will write model to file:"+pomXML.getAbsolutePath());
+				GuiUtils.logInfo("Will write model to file:"+pomXML.getAbsolutePath());
 				MavenXpp3Writer writer = new MavenXpp3Writer() ;
 				writer.write(new FileOutputStream(pomXML), model);
-				System.out.println("POM file updated successfully!");
+				GuiUtils.logInfo("POM file updated successfully!");
 			}
 		}
 	}
@@ -311,7 +309,7 @@ public class CyBenchProjectNature implements IProjectNature {
 			annotations.setArtifactId(JMH_ANNOTATIONDS_ARTIFACT_ID);
 			annotations.setVersion(JMH_VERSION);
 			annotations.setScope("provided");
-		dependencies.add(annotations) ;
+			dependencies.add(annotations) ;
 		}
 				
 		return dependencies ;

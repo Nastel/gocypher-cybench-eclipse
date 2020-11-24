@@ -41,7 +41,7 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 		try {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
-			System.out.println("--->Adding CyBench Nature");
+			GuiUtils.logInfo("--->Adding CyBench Nature");
 					
 			IJavaProject javaProject = GuiUtils.resolveJavaProject(selection) ;
 		
@@ -50,10 +50,9 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 								
 				GuiUtils.refreshProject(javaProject);
 			}
-			System.out.println("--->CyBench Nature finish");
-		}catch (Exception e) {
-			System.err.println("Error on project nature update:"+e.getMessage());
-			e.printStackTrace();
+			GuiUtils.logInfo("--->CyBench Nature finish");
+		}catch (Exception e) {	
+			GuiUtils.logError ("Error on project nature update",e);
 		}
 		return null;
 	}
@@ -63,7 +62,7 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 		
 		IProjectDescription description = javaProject.getProject().getDescription();
 		String[] natures = description.getNatureIds();
-		System.out.println("Natures of project found:");
+		GuiUtils.logInfo("Natures of project found:");
 		for (String nature:natures) {
 			System.out.println("Nature:"+nature);
 		}
@@ -77,13 +76,13 @@ public class CyBechProjectNatureHandler extends AbstractHandler {
 		
 		
 		if (status.getCode() == IStatus.OK) {
-			 System.out.println("CyBench nature will be added:"+status);
+			GuiUtils.logInfo("CyBench nature will be added:"+status);
 		    description.setNatureIds(newNatures);
 		    javaProject.getProject().setDescription(description, null);
 		   
 		}
 		else {
-			System.err.println("CyBench nature won't be added:"+status);
+			GuiUtils.logError("CyBench nature won't be added:"+status);
 		}
 	}
 	

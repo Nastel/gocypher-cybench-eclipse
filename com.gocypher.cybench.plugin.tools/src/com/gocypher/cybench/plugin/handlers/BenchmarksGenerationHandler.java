@@ -124,18 +124,10 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	        if(project != null) {
 	        	IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
 	        	GuiUtils.refreshProject(javaProject);
-	        }
-		} catch (JClassAlreadyExistsException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	        }		
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			GuiUtils.logError ("JAVA Code generation error",e);
 		}
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -206,9 +198,8 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		    	}
 	        }
 			
-		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (JavaModelException e) {		
+			GuiUtils.logError ("JAVA Code generation error, method detection problem",e);
 		}
 		return benchmarkMethods; 
 	}

@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -54,6 +55,7 @@ import com.gocypher.cybench.plugin.views.ReportsDisplayView;
 public class GuiUtils {
 
 	public static ResourceBundle titles = ResourceBundle.getBundle("titles");
+	public static ILog LOG = Activator.getDefault().getLog();
 	
 	public static String getKeyName(String key) {
 		if (titles.containsKey(key)) {
@@ -134,7 +136,7 @@ public class GuiUtils {
 		    		}
 //			    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportsDisplayView.ID) ; 
 		    	}catch (Exception e) {
-		    		e.printStackTrace();
+		    		logError ("Error  on explorer refresh",e) ;
 		    	}
 		    }
 		});	
@@ -149,18 +151,18 @@ public class GuiUtils {
 			    		page.showView(ReportsDisplayView.ID,reportIdentifier , IWorkbenchPage.VIEW_ACTIVATE);			
 		    		
 	//			    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportsDisplayView.ID) ; 
-			    	}catch (Exception e) {
-			    		e.printStackTrace();
+			    	}catch (Exception e) {			    		
+			    		logError ("Error  on view open",e) ;
 			    	}
 			    }
 			});	
     	}
     	else {
-    		System.err.println("Error: full path to report is null or empty, view can't be opened!");
+    		logError("Error: full path to report is null or empty, view can't be opened!");
     	}
     }
     
-    public static void logMessage (String message) {
+    public static void logToConsole (String message) {
     	MessageConsole cyBenchConsole = LauncherUtils.findConsole("CyBench Console");
 		cyBenchConsole.clearConsole();
 		cyBenchConsole.activate();
@@ -188,13 +190,12 @@ public class GuiUtils {
 		if (javaProject != null) {
 			try {
 				javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-			}catch (Exception e) {
-				System.err.println("Error on proejct refresh:"+e.getMessage());
-				e.printStackTrace();
+			}catch (Exception e) {				
+				logError("Error on project refresh",e);
 			}
 		}
 		else {
-			System.err.println("Unable to refresh null project!");
+			logError("Unable to refresh null project!");
 		}
 		
 	}
@@ -211,5 +212,20 @@ public class GuiUtils {
 		}
 		return javaProject;
 	}
-
+    
+    public static void logInfo (String message) {
+    	if (LOG != null) {
+    		LOG.info(message);    		
+    	}    	
+    }
+    public static void logError (String message, Throwable throwable) {
+    	if (LOG != null) {
+    		LOG.error(message, throwable);
+    	}
+    }
+    public static void logError (String message) {
+    	if (LOG != null) {
+    		LOG.error(message);
+    	}
+    }
 }

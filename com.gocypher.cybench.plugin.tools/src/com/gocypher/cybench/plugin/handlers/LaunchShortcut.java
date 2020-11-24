@@ -74,11 +74,9 @@ public class LaunchShortcut implements ILaunchShortcut {
 			    try {
 			        classpathMementos.add(cpEntry.getMemento());
 			    } catch (CoreException e) {
-			        System.err.println(e.getMessage());
+			    	GuiUtils.logError ("Error during classpath add",e) ;
 			    }
 			}
-
-//			System.out.println("Classpath:"+classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
@@ -104,12 +102,12 @@ public class LaunchShortcut implements ILaunchShortcut {
 						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);	
 
 					} catch (Exception e) {
-					    System.err.println(e.getMessage());
+						GuiUtils.logError("Error during launch",e);
 					}
 				}
 			}).start();
 		}catch (Exception e) {
-			e.printStackTrace();
+			GuiUtils.logError("Error during launch",e);
 		}
 		
 	}
@@ -127,8 +125,7 @@ public class LaunchShortcut implements ILaunchShortcut {
     
 	@Override
 	public void launch(IEditorPart arg0, String arg1) {
-		// TODO Auto-generated method stub
-		
+				
 	}
    
 

@@ -20,22 +20,16 @@
 package com.gocypher.cybench.plugin.views;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.ILog;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -57,14 +51,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
-import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.LaunchConfiguration;
+import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
 
 
 public class CybenchTabView extends AbstractLaunchConfigurationTab {
-
-	ILog log = Activator.getDefault().getLog();
 	
 	private Group benchmarking;
 	private Group configuration;
@@ -93,8 +85,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private Button shouldSendReportToCyBench;
     private Button shouldDoHardwareSnapshot;
 
-    Set<String> classPaths =  new HashSet<String>();
-	Map<String, String> paths =  new HashMap<>();
+	private Map<String, String> paths =  new HashMap<>();
 
     @Override
     public void createControl(Composite parent) {
@@ -330,13 +321,11 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 
 		@Override
 		public void widgetDefaultSelected(SelectionEvent arg0) {
-			// TODO Auto-generated method stub
-			
+				
 		}
 
 		@Override
 		public void widgetSelected(SelectionEvent arg0) {
-			// TODO Auto-generated method stub
 			setDirty(true);
 	    	updateLaunchConfigurationDialog();
 		}
@@ -405,7 +394,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             shouldDoHardwareSnapshot.addSelectionListener(selectionListener);
             
         } catch (CoreException e) {
-        	System.out.println("There was a problem on the run configuration initialization: "+ e);
+        	GuiUtils.logError("There was a problem on the run configuration initialization: ", e);
         }
     }
     
@@ -448,41 +437,37 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         return "CyBench properties";
     }
     
- 
-    
+
     private Map<String, String> getProjectPaths(boolean addBuildPath) {
     	Map<String, String> projectPaths = new HashMap<>();
 
     	try {
     		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
 	    	for(IProject proj : projects) {
-	        	log.log(new Status(IStatus.INFO, "proj: "+ proj.getLocation().toPortableString(), getMessage()));
+	    		GuiUtils.logInfo( "proj: "+ proj.getLocation().toPortableString());
 	    		if(proj.isAccessible()) {
-	    			log.log(new Status(IStatus.INFO, "ACCESSABLE  - TRUE ", getMessage()));
+	    			GuiUtils.logInfo("ACCESSABLE  - TRUE ");
 		    		String projectPackageFullPath = "";
 		    		String projectOutputPath = "";
 		    		if(proj.getLocation()!=null && LauncherUtils.isJavaProject(proj)) {
 		    			projectPackageFullPath = proj.getLocation().toPortableString();
-		    			log.log(new Status(IStatus.INFO, "ACCESSABLE  - LOCATION NOT NULL "+projectPackageFullPath, getMessage()));
+		    			GuiUtils.logInfo("ACCESSABLE  - LOCATION NOT NULL "+projectPackageFullPath);
 		    			if(addBuildPath) {
 				    		IJavaProject javaProject = JavaCore.create(proj);
-			    			log.log(new Status(IStatus.INFO, "ACCESSABLE  - CAST TO JAVA PROJECT "+javaProject, getMessage()));
+				    		GuiUtils.logInfo( "ACCESSABLE  - CAST TO JAVA PROJECT "+javaProject);
 			    			if(javaProject.getOutputLocation()!=null) {
-				    			log.log(new Status(IStatus.INFO, "ACCESSABLE  - JAVA PROJECT NOT NULL -"+ javaProject.getOutputLocation(), getMessage()));
+			    				GuiUtils.logInfo("ACCESSABLE  - JAVA PROJECT NOT NULL -"+ javaProject.getOutputLocation());
 			    				projectOutputPath = projectPackageFullPath.substring(0, projectPackageFullPath.lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString();
 			    			}
 			    		}
-			    		log.log(new Status(IStatus.INFO, "INSERT INTO RETURN MAP: "+ projectPackageFullPath+ " : "+ projectOutputPath, getMessage()));
+		    			GuiUtils.logInfo("INSERT INTO RETURN MAP: "+ projectPackageFullPath+ " : "+ projectOutputPath);
 		    			projectPaths.put(projectPackageFullPath, projectOutputPath);
 		    		}
 		    		
 	    		}
-	    	}
-		} catch (JavaModelException e) {
-			e.printStackTrace();
+	    	}		
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			GuiUtils.logError("Error on get project paths",e);
 		}
     	return projectPaths;
     }

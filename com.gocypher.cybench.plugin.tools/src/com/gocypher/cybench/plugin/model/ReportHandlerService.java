@@ -37,25 +37,12 @@ public class ReportHandlerService {
 
 	
 	
-	public ReportUIModel prepareReportDisplayModel (ReportFileEntry reportFile) {
-		//System.out.println("Works using dependency injection");		
+	public ReportUIModel prepareReportDisplayModel (ReportFileEntry reportFile) {	
 			
 		ReportUIModel model = this.deserializaReportIntoUIModel(CybenchUtils.loadFile(reportFile.getFullPathToFile())) ;
 		
 		return model ;
 	}
-
-//	private void extractReportProperties (String reportJSON, List<NameValueEntry>listOfProperties) {
-//		listOfProperties.clear();
-//		//NameValueModelProvider.INSTANCE.getEntries().add(new NameValueEntry("custom1","custom2")) ;
-//		Map<String, Object> reportMap = (Map<String,Object>)JSONUtils.parseJsonIntoMap(reportJSON ) ;
-//		
-//		reportMap.keySet().forEach(key ->{
-//			listOfProperties.add(new  NameValueEntry (key,reportMap.get(key) != null ?reportMap.get(key).toString():"")) ;
-//		});
-//		
-//		
-//	}
 
 	@SuppressWarnings("unchecked")
 	private ReportUIModel deserializaReportIntoUIModel (String rawReport) {

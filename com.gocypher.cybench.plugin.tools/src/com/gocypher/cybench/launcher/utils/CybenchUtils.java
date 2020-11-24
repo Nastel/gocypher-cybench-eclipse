@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.gocypher.cybench.plugin.utils.Constants;
+import com.gocypher.cybench.plugin.utils.GuiUtils;
 
 public class CybenchUtils {
 	
@@ -96,9 +97,7 @@ public class CybenchUtils {
 				obj.close();
 			}
 		} catch (Throwable e) {
-			//FIXME handle logging in an eclipse way
-			//LOG.error("Error on close: obj={}", obj,e);
-			e.printStackTrace();
+			GuiUtils.logError("Error on close",e);
 		}		
 	}
 	
@@ -109,6 +108,8 @@ public class CybenchUtils {
 			content = new String ( Files.readAllBytes( Paths.get(pathToFile) ) );
 		}catch (Exception e) {
 			System.err.println("Error on reading file from:"+pathToFile+" ->"+e.getMessage());
+			GuiUtils.logError("Error on reading file from:"+pathToFile+" ->"+e.getMessage(),e);
+			
 		}
 		return content ;
 	}
@@ -122,6 +123,7 @@ public class CybenchUtils {
 			return filesInFolder ;
 		}catch (Exception e) {
 			System.err.println ("Directory not opened:"+pathToDirectory+" Error:"+e.getMessage()) ;
+			GuiUtils.logError("Directory not opened:"+pathToDirectory+" Error:"+e.getMessage(),e);
 		}
 		return new ArrayList<>() ;
 	}
@@ -181,18 +183,5 @@ public class CybenchUtils {
         }
         return benchConfiguration;
     }
-	/*public static List<File> walkAndFindReports (List<String>pathsToDirectories) {
-		List<File> reports = new ArrayList<>() ;
-		for (String pathToDirectory:pathsToDirectories) {
-			List<File>files = listFilesInDirectory(pathToDirectory) ;
-			for (File file:files) {
-				if (file.getName().endsWith(Constants.REPORT_FILE_EXTENSION)) {
-					reports.add(file) ;
-				}
-			}
-		}
-		return reports;
-	}
-	*/
-   
+	   
 }
