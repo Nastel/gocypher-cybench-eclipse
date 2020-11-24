@@ -186,3 +186,8 @@ Launch configuration view which allows to create a custom launch settings for a 
     * report file is created under `<selected project/reports>` folder, 
     * report is displayed under “Report Details View”, 
     * report entry appears in “CyBench Explorer”.
+
+## Logging
+
+Plugin logs message to Eclipse default log file which is located in `<Path to workspace>\.metadata\.plugins\org.eclipse.ui.workbench\log` or `<Path to workspace>\.metadata\.log`.
+Log messages are also displayed in `Error Log` view, which is accessible via `Menu bar → Window → Show View → Error Log`   
