@@ -61,7 +61,7 @@ public class CyBenchProjectNature implements IProjectNature {
 			//Externals for local tests
 			//this.configureProjectAPTSettings (javaProject,fullPathHardcodedCore,fullPathHardcodedAnnotations) ;
 		}catch (Exception e) {
-			System.err.println("Error during configure of CyBench nature:"+e.getMessage());
+			GuiUtils.logError("Error during configure of CyBench nature:"+e.getMessage());
 			e.printStackTrace();
 			throw new CoreException(null);
 		}
@@ -93,7 +93,7 @@ public class CyBenchProjectNature implements IProjectNature {
 			GuiUtils.refreshProject(javaProject);
 			
 		}catch (Exception e) {
-			System.err.println("Error during deconfigure of CyBench nature:"+e.getMessage());
+			GuiUtils.logError("Error during deconfigure of CyBench nature:"+e.getMessage());
 			e.printStackTrace();
 			throw new CoreException(null);
 		}
@@ -112,8 +112,9 @@ public class CyBenchProjectNature implements IProjectNature {
 	
 	private void addAndSaveClassPathEntry (IJavaProject javaProject, String ...fullPathToExternalLibraries) throws Exception {
 		for (String pathToExternalLib:fullPathToExternalLibraries) {
-			IClasspathEntry externalJar = JavaCore.newLibraryEntry(new Path(pathToExternalLib), null, null) ;
 			
+			IClasspathEntry externalJar = JavaCore.newLibraryEntry(new Path(pathToExternalLib), null, null) ;
+
 //			if (javaProject.getClasspathEntryFor(externalJar.getPath()) == null) { 
 			
 				List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
@@ -134,7 +135,7 @@ public class CyBenchProjectNature implements IProjectNature {
 //										
 //			}
 //			else {
-//				System.err.println("Class path entry pointing to external lib exists:"+pathToExternalLib);
+//				GuiUtils.logError("Class path entry pointing to external lib exists:"+pathToExternalLib);
 //			}
 		}
 		
@@ -143,9 +144,19 @@ public class CyBenchProjectNature implements IProjectNature {
 		IClasspathEntry srcFolder = JavaCore.newSourceEntry(LauncherUtils.getSourceFolderForBenchmarks(javaProject.getProject())) ;
 		java.nio.file.Path path = FileSystems.getDefault().getPath(srcFolder.getPath().toPortableString());
 //		if (javaProject.getClasspathEntryFor(srcFolder.getPath()) == null) {
-		
-		if (Files.exists(path)) {
+		GuiUtils.logInfo("-->srcFolder:"+srcFolder);
+		GuiUtils.logInfo("-->path:"+path);
+		GuiUtils.logInfo("-->LauncherUtils.isMavenProject(javaProject.getProject()):"+!LauncherUtils.isMavenProject(javaProject.getProject()));
+		if(LauncherUtils.isMavenProject(javaProject.getProject())){
+			GuiUtils.logInfo("-->javaProject.getPath().toPortableString():"+javaProject.getProject().getLocation().toPortableString());
+			path = FileSystems.getDefault().getPath(javaProject.getProject().getLocation().toPortableString()+"/src/test/java");
+			GuiUtils.logInfo("-->path:"+path);
+		}
+		GuiUtils.logInfo("-->path:"+path); 
+		GuiUtils.logInfo("-->!Files.exists(path):"+!Files.exists(path));
+		if (!Files.exists(path)) {
 
+			GuiUtils.logInfo("-->Files Not Exists");
 			List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
 			for (IClasspathEntry entry :javaProject.getRawClasspath()) {			
 				classPathEntries.add (entry) ;
@@ -158,6 +169,7 @@ public class CyBenchProjectNature implements IProjectNature {
 				i++ ;
 			}
 			javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());
+
 		}
 		else {
 			GuiUtils.logInfo("SRC folder for benchmarks exist.");

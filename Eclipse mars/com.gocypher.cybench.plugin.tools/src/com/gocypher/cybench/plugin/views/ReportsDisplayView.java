@@ -110,14 +110,14 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	
 	private void loadData () {
 		//String pathToPluginLocalStateDirectory = Platform.getStateLocation(Platform.getBundle(Activator.PLUGIN_ID)).toPortableString() ;
-		//System.out.println("Reports default directory:"+pathToPluginLocalStateDirectory);
+		//GuiUtils.logInfo("Reports default directory:"+pathToPluginLocalStateDirectory);
 //		IViewPart explorerView = workbench.getActiveWorkbenchWindow().getActivePage().findView(ReportsDisplayView.ID) ;
 		
 		if (
 			 this.getViewSite().getSecondaryId() != null 
 				&& !this.getViewSite().getSecondaryId().isEmpty()) {
 			
-				//System.out.println("Explorer:"+explorerView);
+				//GuiUtils.logInfo("Explorer:"+explorerView);
 				//CyBenchExplorerView cybenchExplorerView = (CyBenchExplorerView)explorerView ;
 				
 				//String reportIdentifier = this.getViewSite().getSecondaryId() ;	
@@ -158,7 +158,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	@Override
 	public void createPartControl(Composite parent) {
 		ContextInjectionFactory.inject(this, EclipseContextFactory.create());
-		//System.out.println("-->Creating part view for reports");
+		//GuiUtils.logInfo("-->Creating part view for reports");
 		parent.setLayout(new FillLayout());
 		SashForm sash = new SashForm(parent, SWT.HORIZONTAL) ;
 		
@@ -306,7 +306,7 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 			public void run() {
 				IStructuredSelection selection = reportsListViewer.getStructuredSelection();
 				Object obj = selection.getFirstElement();
-				//System.out.println("Selected on the left:"+obj + ";"+obj.getClass());
+				//GuiUtils.logInfo("Selected on the left:"+obj + ";"+obj.getClass());
 				if (obj instanceof NameValueEntry) {
 					NameValueEntry selEntry = (NameValueEntry)obj ;
 					if (reportUIModel.getBenchmarksAttributes().get(selEntry.getName()) != null){

@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2020, K2N.IO.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
+
 package com.gocypher.cybench.plugin.utils;
 
 import java.net.URL;
@@ -17,7 +36,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -50,8 +68,8 @@ public class LauncherUtils {
 			}
 			return pluginInstallDir ; 
 			
-		}catch (Exception ex) {
-			ex.printStackTrace();
+		}catch (Exception e) {
+			GuiUtils.logError ("Error  on resolve bundle location",e) ;
 		}
 		return "" ;
 	}
@@ -75,7 +93,7 @@ public class LauncherUtils {
 					"CyBench plugin",
 					msg);
 		}catch (Exception e) {
-			e.printStackTrace();
+			GuiUtils.logError ("Error  on open msg box",e) ;
 		}
 	}
 	
@@ -99,7 +117,7 @@ public class LauncherUtils {
 				  }
 			}
 		} catch (CoreException e) {
-			e.printStackTrace();
+			GuiUtils.logError ("Error  classes add",e) ;
 		}
 	   return selectionEntry; 
 	}
@@ -122,13 +140,12 @@ public class LauncherUtils {
 	    			else if (elem instanceof IFolder) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
 	    				IResource res = (IResource) adaptable.getAdapter(IResource.class);
-	    		        IFolder folder = (IFolder)  adaptable.getAdapter(IFolder.class);
-	    		        System.out.println(folder);
+	    		        IFolder folder = (IFolder)  adaptable.getAdapter(IFolder.class);	    		        
 	    		        project = res.getProject();
 	    		        selectedPath = res.getLocation().toString();
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
 	    				selectionEntry.setClassPaths(LauncherUtils.addClasses(folder.members(), selectionEntry.getClassPaths()));
-	    				System.out.println("selectedPath IFolder: "+selectionEntry.getProjectPath());
+	    				GuiUtils.logInfo("selectedPath IFolder: "+selectionEntry.getProjectPath());
 	    			}
 	    			else if (elem instanceof IFile) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
@@ -139,7 +156,7 @@ public class LauncherUtils {
 	    		        String benchmarkClass = res.getFullPath().toPortableString().replace(".java", "");
 	    		        selectionEntry.addClassPaths(benchmarkClass);
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
-	    				System.out.println("selectedPath IFile: "+selectionEntry.getProjectPath());
+	    				GuiUtils.logInfo("selectedPath IFile: "+selectionEntry.getProjectPath());
 	    			}
 	    			else if (elem instanceof IAdaptable) {
 	    				IAdaptable adaptable = (IAdaptable) elem;
@@ -151,30 +168,39 @@ public class LauncherUtils {
 	    		        project = res.getProject();
 	    		        selectedPath = res.getLocation().toString();
 	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
-	    				System.out.println("selectedPath IAdaptable: "+selectionEntry.getProjectPath());
+	    				GuiUtils.logInfo("selectedPath IAdaptable: "+selectionEntry.getProjectPath());
 	    			} else {
-	    				System.err.println("The run selection was not recognized: "+ selection);
+	    				GuiUtils.logError("The run selection was not recognized: "+ selection);
 	    			}
 
  					javaProject = (IJavaProject)JavaCore.create((IProject)project);
 					selectionEntry.setProjectSelected(project);
-	 				runSelectionClassesInformation(javaProject, selectionEntry);
+	 				runSelectionClassesInformation(project, javaProject, selectionEntry);
 		    		selectionEntry.setProjectName(selectionEntry.getProjectPath().substring(selectionEntry.getProjectPath().lastIndexOf('/') + 1));
 	 				selectionEntry.setProjectReportsPath(selectionEntry.getProjectPath()+reportsDirectory);
 		    	}
 		    }
-		}catch(Exception e){
-			System.err.println("Problem on Selected paths collection");
-			e.printStackTrace();
+		}catch(Exception e){			
+			GuiUtils.logError ("Problem on Selected paths collection",e) ;
 		}
 		return selectionEntry;
 	}
 	
-	public static void runSelectionClassesInformation(IJavaProject javaProject, RunSelectionEntry selectionEntry ) {
+	public static void runSelectionClassesInformation(IProject project, IJavaProject javaProject, RunSelectionEntry selectionEntry ) {
 		try {
 	    			if(javaProject!=null && javaProject.getOutputLocation()!=null) {
-	    				selectionEntry.setOutputPath(selectionEntry.getProjectPath().substring(0, selectionEntry.getProjectPath().lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString());
+//	    				System.out.println("javaProject.getOutputLocation():"+javaProject.getOutputLocation());
+//	    				System.out.println("selectionEntry.getProjectPath():"+selectionEntry.getProjectPath());
+	    				String outputLocation = javaProject.getOutputLocation().toPortableString();
+	    				String classPathOutput = selectionEntry.getProjectPath().substring(0, selectionEntry.getProjectPath().lastIndexOf('/')) + outputLocation;
+		    			if (isMavenProject(project)) {
+		    				String testPath = classPathOutput.substring(0, classPathOutput.lastIndexOf('/'))+ "/test-"+outputLocation.substring(outputLocation.lastIndexOf('/') + 1);
+	    					selectionEntry.setOutputPath(classPathOutput+","+testPath);
+	    				}else {
+	    					selectionEntry.setOutputPath(classPathOutput);
+	    				}
 	    				IPackageFragmentRoot[] fragmetnRootsTest = javaProject.getAllPackageFragmentRoots();
+//	    				System.out.println("selectionEntry.getOutputPath():"+selectionEntry.getOutputPath());
 	    				Set<String> tempClassSet = new HashSet<String>();
 	    				for(IPackageFragmentRoot root : fragmetnRootsTest) {
 	    					if(root.getKind() == IPackageFragmentRoot.K_SOURCE) {
@@ -188,12 +214,11 @@ public class LauncherUtils {
 	    				}
 	    				selectionEntry.setClassPaths(tempClassSet);
 	    			}  
-
-		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		    	}
-		    }
+		
+		} catch (Exception e) {			
+			GuiUtils.logError ("Error on class information ",e) ;
+		}
+	}
 	
 	public static IPath getSourceFolderForBenchmarks (IProject project) throws Exception{
 	    	if (isMavenProject(project)) {
@@ -232,5 +257,4 @@ public class LauncherUtils {
 			}		
 			return false ;
 	}
-//	
 }

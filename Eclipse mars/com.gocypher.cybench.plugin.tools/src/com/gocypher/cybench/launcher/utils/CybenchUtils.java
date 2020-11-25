@@ -51,7 +51,7 @@ public class CybenchUtils {
 	public static void storeResultsToFile(String pathToFile, String content) {
 		FileWriter file = null;
 		try {
-	        System.out.println("pathToFile: "+pathToFile);
+			System.out.println("pathToFile: "+pathToFile);
 			File cFile = new File(pathToFile);
 			File pFile = cFile.getParentFile();
 			boolean exists = pFile.exists();

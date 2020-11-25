@@ -61,55 +61,18 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			}
 			return pluginInstallDir ; 
 			
-		}catch (Exception ex) {
-			ex.printStackTrace();
+		}catch (Exception e) {
+			e.printStackTrace();
 		}
 		return "" ;
 	}
-	
-	//	  private Set<String> getProjectPaths(List<String> classList) {
-//		  Set<String> projectPaths = new HashSet<String>();
-//	    	try {
-//	    		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
-//		    	for(IProject proj : projects) {
-//		    		if(proj.isAccessible()) {
-//			    		IJavaProject javaProject = JavaCore.create(proj);
-//			    		if(javaProject!=null && javaProject.getOutputLocation()!=null) {
-//		    				IPackageFragmentRoot[] fragmetnRootsTest = javaProject.getAllPackageFragmentRoots();
-//		    				Set<String> tempClassSet = new HashSet<String>();
-//		    				for(IPackageFragmentRoot root : fragmetnRootsTest) {
-//		    					if(root.getKind() == IPackageFragmentRoot.K_SOURCE) {
-//		    						for(String classPath : classList) {
-//			    						if(classPath.contains(root.getPath().toPortableString())){
-//			    							tempClassSet.add(classPath.replace(root.getPath().toPortableString()+"/", "").replace("/", "."));
-//			    						}
-//				    					 System.out.println("root2: "+ classPath);
-//		    						}
-//		    					}
-//		    					 System.out.println("root1: "+ root.getPath());
-//		    				}
-//		    				projectPaths.addAll(tempClassSet);
-//		    				return projectPaths;
-//			    		}
-//		    		}
-//		    	}
-//			} catch (JavaModelException e) {
-//				e.printStackTrace();
-//			}
-//	    	return projectPaths;
-//	    }
-//	  
+
 	@Override
 	public void launch(ILaunchConfiguration configuration, String arg1, ILaunch arg2, IProgressMonitor arg3)
 			throws CoreException {
 		try {
 			setRunConfigurationProperties(configuration);
 	    	selectionFolderPath = selectionFolderPath.replaceAll("\\s+","");
-//	    	File file = new File(selectionFolderPath);
-//	    	benchmarkClassList = LauncherUtils.addClasses(file.listFiles(),benchmarkClassList);
-//	    	String selectionFolderPath = LauncherUtils.setToString(getProjectPaths(benchmarkClassList));
-//	        System.out.println(selectionFolderPath);
-//	    	setCorrectClassRelativePath();
 	    	
 			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;
 			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;
@@ -134,10 +97,10 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			    try {
 			        classpathMementos.add(cpEntry.getMemento());
 			    } catch (CoreException e) {
-			        System.err.println(e.getMessage());
+			    	GuiUtils.logError(e.getMessage());
 			    }
 			}
-			System.out.println("Classpath:"+classpathMementos);
+			GuiUtils.logInfo("Classpath:"+classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
@@ -160,7 +123,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 						GuiUtils.refreshCybenchExplorer();			
 						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);		
 					} catch (CoreException e) {
-					    System.err.println(e.getMessage());
+						GuiUtils.logError(e.getMessage());
 					}
 				}
 			}).start();
@@ -170,7 +133,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		
 	}
     private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config) {
-		System.out.println("-DFORKS_COUNT="+forks+
+    	GuiUtils.logInfo("-DFORKS_COUNT="+forks+
 				" -DTHREADS_COUNT="+thread+
 				" -DREPORT_NAME=\""+reportName+"\""+
 				" -DBENCHMARK_REPORT_STATUS=\""+reportUploadStatus+"\""+

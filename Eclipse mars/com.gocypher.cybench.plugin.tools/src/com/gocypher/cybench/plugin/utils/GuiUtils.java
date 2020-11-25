@@ -142,7 +142,7 @@ public class GuiUtils {
 			});	
     	}
     	else {
-    		System.err.println("Error: full path to report is null or empty, view can't be opened!");
+    		GuiUtils.logError("Error: full path to report is null or empty, view can't be opened!");
     	}
     }
     
@@ -175,12 +175,11 @@ public class GuiUtils {
 			try {
 				javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 			}catch (Exception e) {
-				System.err.println("Error on proejct refresh:"+e.getMessage());
-				e.printStackTrace();
+				GuiUtils.logError("Error on proejct refresh:",e);
 			}
 		}
 		else {
-			System.err.println("Unable to refresh null project!");
+			GuiUtils.logError("Unable to refresh null project!");
 		}
 		
 	}
