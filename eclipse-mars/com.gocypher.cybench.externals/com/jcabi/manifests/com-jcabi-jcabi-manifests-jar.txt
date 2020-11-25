@@ -1,0 +1,11 @@
+Build Number: 07b37a7
+Project Version: 1.1
+Build Date: 2014-10-07T11:54:04
+
+Manifests.class: 8014
+Mfs.class: 268
+MfMap.class: 348
+ClasspathMfs.class: 2065
+ServletMfs.class: 1362
+StreamsMfs.class: 1087
+FilesMfs.class: 1762

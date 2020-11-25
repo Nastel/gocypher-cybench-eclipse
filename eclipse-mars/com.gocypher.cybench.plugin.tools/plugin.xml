@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<!DOCTYPE xml>
+<plugin>
+
+	<!-- Launcher configuration delegate -->
+	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
+	    <launchConfigurationType
+	        name="CyBench"
+	        delegate="com.gocypher.cybench.plugin.handlers.LaunchRunConfiguration"
+	        modes="run"
+	        id="com.gocypher.cybench.plugin.launchConfigurationType">
+	    </launchConfigurationType>
+	</extension>
+	
+	<!-- Launcher shortcut launch  -->
+	<extension
+	    point="org.eclipse.debug.ui.launchShortcuts">
+	    <shortcut
+	        class="com.gocypher.cybench.plugin.handlers.LaunchShortcut"
+	        icon="icons/cybench_symbol_small.png"
+	        label="Run on CyBench"
+	        modes="run">
+	        <contextualLaunch>
+	            <enablement>
+	                <with variable="selection">
+	                  <count value="+"/>
+                      <iterate operator="and">
+                      	<and>
+                      		<reference definitionId="com.gocypher.cybench.project.CompilationUnitSelection"/>
+				        </and>
+      		 			<reference definitionId="com.gocypher.cybench.project.hasNature"/>
+				      </iterate>
+	                </with>
+	            </enablement>
+	        </contextualLaunch>
+	    </shortcut>
+	</extension>
+	
+	<!-- Tab for launch configurations -->
+	<extension
+	    point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+	    <launchConfigurationTabGroup
+	        class="com.gocypher.cybench.plugin.views.CybenchTabGroupView"
+	        id="com.gocypher.cybench.plugin.launchConfigurationTabGroup"
+	        type="com.gocypher.cybench.plugin.launchConfigurationType">
+	    </launchConfigurationTabGroup>
+	</extension>
+	
+	<!-- Launcher icon  -->
+	<extension
+	        point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+	    <launchConfigurationTypeImage
+	            id="com.gocypher.cybench.plugin.launchconfigurationtypeimage"
+	            configTypeID="com.gocypher.cybench.plugin.launchConfigurationType"
+	            icon="icons/cybench_symbol_small.png">
+	    </launchConfigurationTypeImage>
+	</extension>
+
+	<!-- CyBench Project nature and generate launch tab for selection -->
+   <extension
+         point="org.eclipse.ui.menus">
+		  <menuContribution
+		        locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+		         <separator name="com.mycompany.converterhelper.separator" visible="true" />
+		         <menu
+			           id="com.gocypher.cybench.ProjectMenu"
+	                   tooltip="Configure CyBench"
+	                   icon="icons/cybench_symbol_small.png"   
+			           label="CyBench">
+			    </menu>
+	 	  </menuContribution>
+	 	  <menuContribution
+		        locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+		         <separator name="com.mycompany.converterhelper.separator" visible="true" />
+	            <command
+	                  id="com.gocypher.cybench.plugin.ProjectConfigureLaunchInner"
+	                  commandId="com.gocypher.cybench.plugin.handlers.AddNature"
+		        	  label="Add CyBench Nature"
+	                  icon="icons/cybench_symbol_small.png"                
+	                  tooltip="Add needed parts and configurations for CyBench"
+	                  style="push">
+	                  <visibleWhen>
+              		 	<iterate>
+              		 		<and>
+	              		 		<reference definitionId="com.gocypher.cybench.project.projectSelection"/>
+	              		 		
+	              		 		<not>              		 		              		 	
+	              		 			<reference definitionId="com.gocypher.cybench.project.hasNature"/>
+	              		 		</not> 
+              		 		</and>             		 	
+              		 	</iterate>
+              		 </visibleWhen>
+	            </command>
+	 	  </menuContribution>
+	 	  <menuContribution
+		        locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+		         <separator name="com.mycompany.converterhelper.separator" visible="true" />
+	            <command
+	                  id="com.gocypher.cybench.plugin.ProjectGeneratebenchmarks"
+	                  commandId="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks"
+		        	  label="CyBench Generate"
+	                  icon="icons/cybench_symbol_small.png"                
+	                  tooltip="Generate benchmarks"
+	                  style="push">
+              		 <visibleWhen>
+              		 	<iterate>   
+              		 		<and>           		 		              		 	
+              		 			<reference definitionId="com.gocypher.cybench.project.hasNature"/>
+              		 			<reference definitionId="com.gocypher.cybench.isJavaFile"/> 
+              		 		</and>          		 	
+              		 	</iterate>
+              		 </visibleWhen>
+	            </command>
+	 	  </menuContribution>
+   </extension>
+
+
+	     
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="com.gocypher.cybench.plugin.handlers.commands.category"
+            name="CyBench">
+      </category>
+      <command
+            categoryId="com.gocypher.cybench.plugin.handlers.commands.category"
+            name="Run CyBench Add Nature"
+            id="com.gocypher.cybench.plugin.handlers.AddNature">
+      </command>
+      <command
+            categoryId="com.gocypher.cybench.plugin.handlers.commands.category"
+            name="Run CyBench Add Nature"
+            id="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks">
+      </command>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+       		id="com.gocypher.cybench.plugin.handlers.CyBechProjectNatureHandler"
+            class="com.gocypher.cybench.plugin.handlers.CyBechProjectNatureHandler"
+            commandId="com.gocypher.cybench.plugin.handlers.AddNature">
+      </handler>
+       <handler
+        	id="com.gocypher.cybench.plugin.handlers.BenchmarksGenerationHandler"
+            class="com.gocypher.cybench.plugin.handlers.BenchmarksGenerationHandler"
+            commandId="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks">
+      </handler>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.gocypher.cybench.plugin.handlers.AddNature"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6">
+      </key>
+       <key
+            commandId="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="CyBenchTools"
+            name="CyBench Tools">
+      </category>
+      <view
+            category="CyBenchTools"
+            class="com.gocypher.cybench.plugin.views.ReportsDisplayView"
+            icon="icons/cybench_symbol_small.png"
+            id="com.gocypher.cybench.plugin.views.ReportsDisplayView"
+            inject="true"
+            name="Cybench Reports">
+      </view>
+      <view
+            category="CyBenchTools"
+            class="com.gocypher.cybench.plugin.views.CyBenchExplorerView"
+            icon="icons/cybench_symbol_small.png"
+            id="com.gocypher.cybench.plugin.views.CyBenchExplorerView"
+            inject="true"
+            name="CyBench Explorer">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               id="com.gocypher.cybench.plugin.views.ReportsDisplayView"
+               ratio="0.5"
+               relationship="stack"
+               relative="org.eclipse.jdt.ui.JavadocView"
+               visible="false"
+               >
+         </view>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               id="com.gocypher.cybench.plugin.views.CyBenchExplorerView"
+               ratio="0.5"
+               relationship="stack"
+               relative="org.eclipse.jdt.ui.PackageExplorer"
+               visible="true"
+               >
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>
+   <extension
+    id="cybenchnature"
+    name="CyBench Nature"
+    point="org.eclipse.core.resources.natures">
+	    <runtime>
+	        <run
+	            class="com.gocypher.cybench.plugin.CyBenchProjectNature">
+	        </run>
+	    </runtime>
+	</extension>
+   <extension
+         point="org.eclipse.core.expressions.definitions">
+          <definition id="com.gocypher.cybench.project.CompilationUnitSelection">
+           <adapt type="org.eclipse.jdt.internal.core.CompilationUnit"></adapt>
+         </definition>
+       	 <definition id="com.gocypher.cybench.project.projectSelection">
+           	 <instanceof value="org.eclipse.core.resources.IProject"/>
+         </definition>
+         <definition id="com.gocypher.cybench.project.hasNature">
+           	<adapt type="org.eclipse.core.resources.IResource">
+           		<test property="org.eclipse.core.resources.projectNature" value="com.gocypher.cybench.plugin.tools.cybenchnature" />
+           	</adapt>
+         </definition>
+         <definition id="com.gocypher.cybench.isJavaFile">
+         	<adapt type="org.eclipse.core.resources.IResource">
+          			<test property="org.eclipse.core.resources.name" value="*.java"/>
+       		</adapt>
+         </definition>
+   </extension>
+   
+</plugin>
