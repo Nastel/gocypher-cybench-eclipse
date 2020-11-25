@@ -1,4 +1,0 @@
-grant {
-    permission java.lang.RuntimePermission "modifyThread";
-    permission java.lang.RuntimePermission "setSecurityManager";
-};
