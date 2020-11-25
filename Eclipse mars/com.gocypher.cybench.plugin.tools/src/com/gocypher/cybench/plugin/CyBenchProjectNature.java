@@ -143,20 +143,11 @@ public class CyBenchProjectNature implements IProjectNature {
 	private void createBenchmarksSrcFolder (IJavaProject javaProject) throws Exception {
 		IClasspathEntry srcFolder = JavaCore.newSourceEntry(LauncherUtils.getSourceFolderForBenchmarks(javaProject.getProject())) ;
 		java.nio.file.Path path = FileSystems.getDefault().getPath(srcFolder.getPath().toPortableString());
-//		if (javaProject.getClasspathEntryFor(srcFolder.getPath()) == null) {
-		GuiUtils.logInfo("-->srcFolder:"+srcFolder);
-		GuiUtils.logInfo("-->path:"+path);
-		GuiUtils.logInfo("-->LauncherUtils.isMavenProject(javaProject.getProject()):"+!LauncherUtils.isMavenProject(javaProject.getProject()));
 		if(LauncherUtils.isMavenProject(javaProject.getProject())){
-			GuiUtils.logInfo("-->javaProject.getPath().toPortableString():"+javaProject.getProject().getLocation().toPortableString());
-			path = FileSystems.getDefault().getPath(javaProject.getProject().getLocation().toPortableString()+"/src/test/java");
-			GuiUtils.logInfo("-->path:"+path);
+				path = FileSystems.getDefault().getPath(javaProject.getProject().getLocation().toPortableString()+"/src/test/java");
 		}
-		GuiUtils.logInfo("-->path:"+path); 
-		GuiUtils.logInfo("-->!Files.exists(path):"+!Files.exists(path));
 		if (!Files.exists(path)) {
 
-			GuiUtils.logInfo("-->Files Not Exists");
 			List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
 			for (IClasspathEntry entry :javaProject.getRawClasspath()) {			
 				classPathEntries.add (entry) ;
