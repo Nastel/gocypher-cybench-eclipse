@@ -221,7 +221,7 @@ public class LauncherUtils {
 	}
 	
 	public static IPath getSourceFolderForBenchmarks (IProject project) throws Exception{
-	    	if (isMavenProject(project)) {
+	    	if (isMavenProject(project) || isGradleProject(project)) {
 	    		IFolder folder = project.getFolder(SRC_FOLDER_FOR_BENCHMARKS_MVN) ;
 	    		return folder.getFullPath();
 	    	}
@@ -231,7 +231,7 @@ public class LauncherUtils {
 	    	}
 	}
 	public static String getRawSourceFolderForBenchmarks (IProject project) throws Exception{
-    	if (isMavenProject(project)) {
+    	if (isMavenProject(project) || isGradleProject(project)) {
     		return project.getLocation().append(SRC_FOLDER_FOR_BENCHMARKS_MVN).toPortableString() ;
     	}
     	else {    		
@@ -244,6 +244,12 @@ public class LauncherUtils {
 				return true ;
 			}		
 			return false ;
+	}
+	public static boolean isGradleProject (IProject project) throws Exception{		
+		if (project.hasNature("org.eclipse.buildship.core.gradleprojectnature")) {
+			return true ;
+		}		
+		return false ;
 	}
 	public static boolean isJavaProject (IProject project) throws Exception{		
 			if (project.hasNature("org.eclipse.jdt.core.javanature")) {
