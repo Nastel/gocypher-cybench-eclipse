@@ -46,14 +46,18 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.apt.core.util.AptConfig;
 import org.eclipse.jdt.apt.core.util.IFactoryPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.progress.IProgressService;
 
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
@@ -245,8 +249,8 @@ public class CyBenchProjectNature implements IProjectNature {
 			AptConfig.setGenSrcDir(javaProject, "target/jmh-generated");
 			AptConfig.setGenTestSrcDir(javaProject, "target/jmh-generated-tests");
 		}else if(LauncherUtils.isGradleProject(javaProject.getProject())) {
-			AptConfig.setGenSrcDir(javaProject, "build/jmh-generated");
-			AptConfig.setGenTestSrcDir(javaProject, "build/jmh-generated-tests");
+			AptConfig.setGenSrcDir(javaProject, "jmh-generated");
+			AptConfig.setGenTestSrcDir(javaProject, "jmh-generated-tests");
 		}
 		else {
 			AptConfig.setGenSrcDir(javaProject, "jmh-generated");
@@ -283,7 +287,7 @@ public class CyBenchProjectNature implements IProjectNature {
 		
 		if (LauncherUtils.isMavenProject(javaProject.getProject())) {
 			String projectLocation = javaProject.getProject().getLocation().toPortableString() ;
-			GuiUtils.logInfo("Selected project location:"+projectLocation);
+			GuiUtils.logInfo("Selected maven project location:"+projectLocation);
 			List<File> files = CybenchUtils.listFilesInDirectory(projectLocation) ;
 			File pomXML = null ;
 			for (File file:files) {
@@ -308,15 +312,14 @@ public class CyBenchProjectNature implements IProjectNature {
 				GuiUtils.logInfo("POM file updated successfully!");
 			}
 		} else if(LauncherUtils.isGradleProject(javaProject.getProject())) {
-		    String jmhDependency = "	implementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.26'";
-		    String jmhAnnotationDependency = "	annotationProcessor  group: 'org.openjdk.jmh', name:'jmh-generator-annprocess', version:'1.26'";
+		    String jmhDependency = LauncherUtils.GRADLE_JMH_DEPENDENCY;
+		    String jmhAnnotationDependency = LauncherUtils.GRADLE_JMH_ANNOTATION_DEPENDENCY;
 		    String projectLocation = javaProject.getProject().getLocation().toPortableString() ;
-			GuiUtils.logInfo("Selected project location:"+projectLocation);
+			GuiUtils.logInfo("Selected gradle project location:"+projectLocation);
 			List<File> files = CybenchUtils.listFilesInDirectory(projectLocation) ;
 			File gradleBuild = null ;
 			String fileName ="build.gradle";
 			for (File file:files) {
-				GuiUtils.logInfo("file.getName(): "+file.getName());
 				if (fileName.equals(file.getName())){
 					gradleBuild = file ;
 				}
@@ -327,27 +330,44 @@ public class CyBenchProjectNature implements IProjectNature {
 			    Scanner myReader = new Scanner(gradleBuild);
 			    while (myReader.hasNextLine()) {
 					String data = myReader.nextLine();
+					if (data.contains("org.openjdk.jmh") && data.contains("jmh-core")){
+						jmhDependency = "";
+					}
+					if (data.contains("org.openjdk.jmh") && data.contains("jmh-generator-annprocess")){
+						jmhAnnotationDependency = "";
+					}
+			    }
+				myReader.close();
+			    myReader = new Scanner(gradleBuild);
+			    while (myReader.hasNextLine()) {
+					String data = myReader.nextLine();
 					newBuildFile += data + "\n";
 					if (data.contains("dependencies {")){
-						newBuildFile += jmhDependency + "\n" + jmhAnnotationDependency + "\n";
+						newBuildFile += jmhDependency + jmhAnnotationDependency;
 				    }
 				}
 				myReader.close();
 				FileWriter fw_build = new FileWriter(projectLocation+"\\"+fileName);
 				fw_build.write(newBuildFile);
 				fw_build.close();
-//				IProgressMonitor progressMonitor = getActionBars ().getStatusLineManager () != null ? getActionBars ().getStatusLineManager ().getProgressMonitor () : new NullProgressMonitor ();
-//				    doSave ( progressMonitor );
-				IProgressService test = PlatformUI.getWorkbench().getProgressService();
-				BuildConfiguration configuration = BuildConfiguration
-						.forRootProjectDirectory(new File(projectLocation))
-					    .overrideWorkspaceConfiguration(true)
-					    .autoSync(true)
-					    .build();
-					GradleWorkspace workspace = GradleCore.getWorkspace();
-					GradleBuild newBuild = workspace.createBuild(configuration);
-					//TODO: get the progress monitor and set instead of null
-					newBuild.synchronize(null);
+				Job job = new Job("Gradle dependency refresh") {
+				    @Override
+				    protected IStatus run(IProgressMonitor monitor) {
+			            IProgressService test = PlatformUI.getWorkbench().getProgressService();
+						BuildConfiguration configuration = BuildConfiguration
+								.forRootProjectDirectory(new File(projectLocation))
+							    .overrideWorkspaceConfiguration(true)
+							    .autoSync(true)
+							    .build();
+							GradleWorkspace workspace = GradleCore.getWorkspace();
+							GradleBuild newBuild = workspace.createBuild(configuration);
+							//TODO: get the progress monitor and set instead of null
+						newBuild.synchronize(monitor);
+				        return Status.OK_STATUS;
+				    }
+
+				};
+				job.schedule();
 			}
 			GuiUtils.logInfo("gradle.build file updated successfully!");
 		}

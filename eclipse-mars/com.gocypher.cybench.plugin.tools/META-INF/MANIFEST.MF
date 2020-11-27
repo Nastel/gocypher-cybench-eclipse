@@ -26,7 +26,9 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.107.0",
  org.eclipse.ui.ide;bundle-version="3.11.0",
  org.eclipse.core.filesystem;bundle-version="1.5.0",
  org.eclipse.e4.core.contexts;bundle-version="1.4.0",
- org.eclipse.e4.core.di;bundle-version="1.5.0"
+ org.eclipse.e4.core.di;bundle-version="1.5.0",
+ org.eclipse.buildship.core;bundle-version="3.1.4",
+ org.eclipse.buildship.ui;bundle-version="3.1.4"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.gocypher.cybench.plugin.tools
 Bundle-ActivationPolicy: lazy

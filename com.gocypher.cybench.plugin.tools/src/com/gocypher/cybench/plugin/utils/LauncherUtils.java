@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IAdaptable;
@@ -52,6 +53,8 @@ import com.gocypher.cybench.plugin.model.RunSelectionEntry;
 public class LauncherUtils {
 	public static String SRC_FOLDER_FOR_BENCHMARKS_JAVA="/src-benchmarks" ;
 	public static String SRC_FOLDER_FOR_BENCHMARKS_MVN="/src/test/java" ;
+	public static String GRADLE_JMH_DEPENDENCY="	implementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.26'"+ "\n";
+	public static String GRADLE_JMH_ANNOTATION_DEPENDENCY="	annotationProcessor  group: 'org.openjdk.jmh', name:'jmh-generator-annprocess', version:'1.26'"+ "\n";
 	
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
@@ -185,7 +188,25 @@ public class LauncherUtils {
 		}
 		return selectionEntry;
 	}
-	
+	public static IProject getProjectFromPath(String projectPath) {
+    	try {
+    		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
+	    	for(IProject proj : projects) {
+	    		if(proj.isAccessible()) {
+		    		if(proj.getLocation()!=null && LauncherUtils.isJavaProject(proj)) {
+		    			if(proj.getLocation().toPortableString().equals(projectPath)){
+		    				return proj;
+		    			}
+		    		}
+		    		
+	    		}
+	    	}		
+		} catch (Exception e) {
+			GuiUtils.logError("Error on get project paths",e);
+		}
+    	return null;
+    }
+	  
 	public static void runSelectionClassesInformation(IProject project, IJavaProject javaProject, RunSelectionEntry selectionEntry ) {
 		try {
 	    			if(javaProject!=null && javaProject.getOutputLocation()!=null) {
@@ -196,6 +217,10 @@ public class LauncherUtils {
 		    			if (isMavenProject(project)) {
 		    				String testPath = classPathOutput.substring(0, classPathOutput.lastIndexOf('/'))+ "/test-"+outputLocation.substring(outputLocation.lastIndexOf('/') + 1);
 	    					selectionEntry.setOutputPath(classPathOutput+","+testPath);
+    					}else if(isGradleProject(project)) {
+    						String testPath = classPathOutput.substring(0, classPathOutput.lastIndexOf('/'))+ "/test";
+	    					selectionEntry.setOutputPath(classPathOutput+","+testPath);
+	    					
 	    				}else {
 	    					selectionEntry.setOutputPath(classPathOutput);
 	    				}

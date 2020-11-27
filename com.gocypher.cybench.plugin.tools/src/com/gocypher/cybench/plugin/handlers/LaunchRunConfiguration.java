@@ -21,8 +21,10 @@ package com.gocypher.cybench.plugin.handlers;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -99,15 +101,26 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			setEnvironmentProperties(config);
 			
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
-			String[] classpath = new String[] { launchPath
-					,LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true)
-					,LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) 
-					};
-			
-		
+	    	String projectPath = reportFolder.substring(0, reportFolder.lastIndexOf('/'));
+	    	GuiUtils.logInfo("reportFolder: "+projectPath) ;
+	    	IProject project = LauncherUtils.getProjectFromPath(projectPath);
+	    	if(project != null){
+		    	GuiUtils.logInfo("project: "+project.getLocation().toPortableString()) ;
+				if((LauncherUtils.isMavenProject(project))){
+					String testPath = launchPath.substring(0, launchPath.lastIndexOf('/'))+ "/test-"+launchPath.substring(launchPath.lastIndexOf('/') + 1);
+					launchPath = launchPath +","+ testPath;
+				}else if(LauncherUtils.isGradleProject(project)){
+					String testPath = launchPath.substring(0, launchPath.lastIndexOf('/'))+ "/test";
+					launchPath = launchPath +","+ testPath;
+				}
+	    	}
+			List<String> classPaths = new ArrayList<String>();
+			classPaths.addAll(Arrays.asList(launchPath.split(",")));
+			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true));
+			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) );
 			List<String> classpathMementos = new ArrayList<String>();
-			for (int i = 0; i < classpath.length; i++) {
-			    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classpath[i]));
+			for (int i = 0; i < classPaths.size(); i++) {
+			    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classPaths.get(i)));
 			    cpEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
 			    try {
 			        classpathMementos.add(cpEntry.getMemento());
@@ -115,6 +128,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			    	GuiUtils.logError ("Error during classpath add",e) ;
 			    }
 			}
+	    	//GuiUtils.logInfo("Classpath: "+classpathMementos) ;
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");

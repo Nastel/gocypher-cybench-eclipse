@@ -77,6 +77,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 			    	GuiUtils.logError ("Error during classpath add",e) ;
 			    }
 			}
+	    	//GuiUtils.logInfo("classpathMementos: "+classpathMementos) ;
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");

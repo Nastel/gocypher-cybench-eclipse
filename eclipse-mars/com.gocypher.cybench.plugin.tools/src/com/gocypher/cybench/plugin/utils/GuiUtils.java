@@ -115,8 +115,6 @@ public class GuiUtils {
 					IViewPart view = page.findView(CyBenchExplorerView.ID) ;
 		    		if (view instanceof ICybenchPartView) {
 		    			((ICybenchPartView)view).refreshView();
-		    		}else{
-		    			((ICybenchPartView) view).refreshView();
 		    		}
 //			    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportsDisplayView.ID) ; 
 		    	}catch (Exception e) {

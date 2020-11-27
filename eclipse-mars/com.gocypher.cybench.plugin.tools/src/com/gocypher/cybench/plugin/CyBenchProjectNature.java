@@ -3,27 +3,38 @@ package com.gocypher.cybench.plugin;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
+import org.eclipse.buildship.core.BuildConfiguration;
+import org.eclipse.buildship.core.GradleBuild;
+import org.eclipse.buildship.core.GradleCore;
+import org.eclipse.buildship.core.GradleWorkspace;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.apt.core.util.AptConfig;
 import org.eclipse.jdt.apt.core.util.IFactoryPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressService;
 
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
@@ -49,8 +60,8 @@ public class CyBenchProjectNature implements IProjectNature {
 		String cyBenchExternalsPath = LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID, false) ;
 		try {
 			this.updateDependenciesForNature(javaProject) ;
-			
-			if (!LauncherUtils.isMavenProject(javaProject.getProject())) {
+
+			if (!LauncherUtils.isMavenProject(javaProject.getProject()) &&  !LauncherUtils.isGradleProject(javaProject.getProject())) {
 				//Externals for real Eclipse test
 				this.addAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
 				//Externals for local tests
@@ -84,7 +95,7 @@ public class CyBenchProjectNature implements IProjectNature {
 			this.deconfigureAptSettings (javaProject,cyBenchExternalsPath) ;
 			//FIXME comment this for production usage Externals for local tests
 			//this.deconfigureAptSettings(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
-			if (!LauncherUtils.isMavenProject(javaProject.getProject())) {
+			if (!LauncherUtils.isMavenProject(javaProject.getProject()) && !LauncherUtils.isGradleProject(javaProject.getProject())) {
 				//FIXME uncomment this for production usage
 				this.removeAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
 				//FIXME comment this for production usage 
@@ -143,8 +154,9 @@ public class CyBenchProjectNature implements IProjectNature {
 	private void createBenchmarksSrcFolder (IJavaProject javaProject) throws Exception {
 		IClasspathEntry srcFolder = JavaCore.newSourceEntry(LauncherUtils.getSourceFolderForBenchmarks(javaProject.getProject())) ;
 		java.nio.file.Path path = FileSystems.getDefault().getPath(srcFolder.getPath().toPortableString());
-		if(LauncherUtils.isMavenProject(javaProject.getProject())){
-				path = FileSystems.getDefault().getPath(javaProject.getProject().getLocation().toPortableString()+"/src/test/java");
+
+		if (LauncherUtils.isMavenProject(javaProject.getProject()) || LauncherUtils.isGradleProject(javaProject.getProject())) {
+				path = FileSystems.getDefault().getPath(javaProject.getProject().getLocation().toPortableString()+LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_MVN);
 		}
 		if (!Files.exists(path)) {
 
@@ -166,7 +178,7 @@ public class CyBenchProjectNature implements IProjectNature {
 			GuiUtils.logInfo("SRC folder for benchmarks exist.");
 		}
 		IPath projectPath = javaProject.getProject().getLocation() ;
-		if (LauncherUtils.isMavenProject(javaProject.getProject())) {
+		if (LauncherUtils.isMavenProject(javaProject.getProject()) || LauncherUtils.isGradleProject(javaProject.getProject())) {
 			projectPath = projectPath.append(LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_MVN) ;
 		}
 		else {
@@ -206,6 +218,9 @@ public class CyBenchProjectNature implements IProjectNature {
 		if (LauncherUtils.isMavenProject(javaProject.getProject())) {
 			AptConfig.setGenSrcDir(javaProject, "target/jmh-generated");
 			AptConfig.setGenSrcDir(javaProject, "target/jmh-generated-tests");
+		}else if(LauncherUtils.isGradleProject(javaProject.getProject())) {
+			AptConfig.setGenSrcDir(javaProject, "jmh-generated");
+			AptConfig.setGenSrcDir(javaProject, "jmh-generated-tests");
 		}
 		else {
 			AptConfig.setGenSrcDir(javaProject, "jmh-generated");
@@ -238,10 +253,11 @@ public class CyBenchProjectNature implements IProjectNature {
 		
 	}
 	
-	private void updateDependenciesForNature (IJavaProject javaProject) throws Exception{
+private void updateDependenciesForNature (IJavaProject javaProject) throws Exception{
 		
 		if (LauncherUtils.isMavenProject(javaProject.getProject())) {
 			String projectLocation = javaProject.getProject().getLocation().toPortableString() ;
+			GuiUtils.logInfo("Selected maven project location:"+projectLocation);
 			List<File> files = CybenchUtils.listFilesInDirectory(projectLocation) ;
 			File pomXML = null ;
 			for (File file:files) {
@@ -250,18 +266,82 @@ public class CyBenchProjectNature implements IProjectNature {
 				}
 			}
 			if (pomXML != null) {
+				GuiUtils.logInfo("POM file found:"+pomXML.getAbsolutePath());
 				MavenXpp3Reader reader = new MavenXpp3Reader();
 				Model model = reader.read(new FileReader(pomXML)) ;
+				GuiUtils.logInfo("Pom model:"+model.getDependencies());
 								
 				for (Dependency dep:createCyBenchMvnDependencies(model.getDependencies())) {
+					GuiUtils.logInfo("will add new dependency:"+dep);
 					model.addDependency(dep);
 				}
-
+				
+				GuiUtils.logInfo("Will write model to file:"+pomXML.getAbsolutePath());
 				MavenXpp3Writer writer = new MavenXpp3Writer() ;
 				writer.write(new FileOutputStream(pomXML), model);
 				GuiUtils.logInfo("POM file updated successfully!");
 			}
+		} else if(LauncherUtils.isGradleProject(javaProject.getProject())) {
+		    String jmhDependency = LauncherUtils.GRADLE_JMH_DEPENDENCY;
+		    String jmhAnnotationDependency = LauncherUtils.GRADLE_JMH_ANNOTATION_DEPENDENCY;
+		    String projectLocation = javaProject.getProject().getLocation().toPortableString() ;
+			GuiUtils.logInfo("Selected gradle project location:"+projectLocation);
+			List<File> files = CybenchUtils.listFilesInDirectory(projectLocation) ;
+			File gradleBuild = null ;
+			String fileName ="build.gradle";
+			for (File file:files) {
+				if (fileName.equals(file.getName())){
+					gradleBuild = file ;
+				}
+			}
+			if (gradleBuild != null) { 
+				GuiUtils.logInfo("Gradle build file found:"+gradleBuild.getAbsolutePath());
+				String newBuildFile = "";
+			    Scanner myReader = new Scanner(gradleBuild);
+			    while (myReader.hasNextLine()) {
+					String data = myReader.nextLine();
+					if (data.contains("org.openjdk.jmh") && data.contains("jmh-core")){
+						jmhDependency = "";
+					}
+					if (data.contains("org.openjdk.jmh") && data.contains("jmh-generator-annprocess")){
+						jmhAnnotationDependency = "";
+					}
+			    }
+				myReader.close();
+			    myReader = new Scanner(gradleBuild);
+			    while (myReader.hasNextLine()) {
+					String data = myReader.nextLine();
+					newBuildFile += data + "\n";
+					if (data.contains("dependencies {")){
+						newBuildFile += jmhDependency + jmhAnnotationDependency;
+				    }
+				}
+				myReader.close();
+				FileWriter fw_build = new FileWriter(projectLocation+"\\"+fileName);
+				fw_build.write(newBuildFile);
+				fw_build.close();
+				Job job = new Job("Gradle dependency refresh") {
+				    @Override
+				    protected IStatus run(IProgressMonitor monitor) {
+			            IProgressService test = PlatformUI.getWorkbench().getProgressService();
+						BuildConfiguration configuration = BuildConfiguration
+								.forRootProjectDirectory(new File(projectLocation))
+							    .overrideWorkspaceConfiguration(true)
+							    .autoSync(true)
+							    .build();
+							GradleWorkspace workspace = GradleCore.getWorkspace();
+							GradleBuild newBuild = workspace.createBuild(configuration);
+							//TODO: get the progress monitor and set instead of null
+						newBuild.synchronize(monitor);
+				        return Status.OK_STATUS;
+				    }
+
+				};
+				job.schedule();
+			}
+			GuiUtils.logInfo("gradle.build file updated successfully!");
 		}
+		
 	}
 	
 	private List<Dependency>createCyBenchMvnDependencies (List<Dependency>currentDependencies){
