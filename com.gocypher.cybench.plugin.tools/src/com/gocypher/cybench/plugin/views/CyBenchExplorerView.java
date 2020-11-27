@@ -58,6 +58,7 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -96,6 +97,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	private List<Node<ReportFileEntry>>treeOfReports = new ArrayList<>() ;
 	
 	private Action refreshAction;
+	private Action openLocationView;
 	//private Action action2;
 	private Action openSelectedReportAction;
 	private Styler scoreStyler ;
@@ -145,6 +147,34 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 		
 	}
 	
+	private void loadData (String pathToProjectDirectory) {		
+		treeOfReports.clear();
+					
+		ReportFileEntry projectEntry = new ReportFileEntry() ;
+		projectEntry.setFullPathToFile(pathToProjectDirectory);
+		projectEntry.setName(pathToProjectDirectory.substring(pathToProjectDirectory.lastIndexOf('\\'),pathToProjectDirectory.length()));
+		Node<ReportFileEntry> projectNode = new Node<>(projectEntry) ;
+		
+		List<File>projectReportsFiles = CybenchUtils.listFilesInDirectory(pathToProjectDirectory) ;
+		
+		for (File file:projectReportsFiles) {
+			if (file.getName().endsWith(Constants.REPORT_FILE_EXTENSION)) {
+				ReportFileEntry entry = new ReportFileEntry() ;
+				entry.create(file);
+				Node<ReportFileEntry> reportNode = new Node<>(entry) ;
+				projectNode.addChild(reportNode) ;
+			}
+		}			
+		treeOfReports.add(projectNode) ;
+
+		this.projectsViewer.setInput(this.treeOfReports);
+		
+		for (TreeColumn col:this.projectsViewer.getTree().getColumns()) {
+			col.pack();
+		}
+		this.projectsViewer.refresh();
+		
+	}
 
 	@Override
 	public void createPartControl(Composite parent) {
@@ -226,6 +256,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(refreshAction);
+		manager.add(openLocationView);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -239,6 +270,25 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 		refreshAction.setToolTipText("Reload CyBench Explorer");
 		refreshAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 			getImageDescriptor(ISharedImages.IMG_ELCL_SYNCED));
+		
+		openLocationView = new Action() {
+			public void run() {
+				try {						
+ 					DirectoryDialog dialog = new DirectoryDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NULL);
+ 	                String path = dialog.open();
+ 	                if (path != null) {
+ 	                	GuiUtils.logInfo("Path selection: "+path);
+ 	                	loadData(path);
+ 	                }
+				} catch (Exception e) {
+					GuiUtils.logError("Error on open report link",e);
+				}
+				
+			}
+		};
+		openLocationView.setText("Open Selected Directory");
+		openLocationView.setToolTipText("Open Reports For Selected Directory");
+		openLocationView.setImageDescriptor(GuiUtils.getCustomImage("icons/open_file.png"));
 		
 		openSelectedReportAction = new Action() {
 			public void run() {
