@@ -19,12 +19,10 @@
 
 package com.gocypher.cybench.plugin;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -32,17 +30,13 @@ import java.util.Scanner;
 import org.eclipse.buildship.core.BuildConfiguration;
 import org.eclipse.buildship.core.GradleBuild;
 import org.eclipse.buildship.core.GradleCore;
-import org.eclipse.buildship.core.GradleDistribution;
 import org.eclipse.buildship.core.GradleWorkspace;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
-import org.eclipse.core.commands.Command;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -56,10 +50,6 @@ import org.eclipse.jdt.apt.core.util.IFactoryPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
-import org.eclipse.ui.progress.IProgressService;
-
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
@@ -353,8 +343,7 @@ public class CyBenchProjectNature implements IProjectNature {
 				Job job = new Job("Gradle dependency refresh") {
 				    @Override
 				    protected IStatus run(IProgressMonitor monitor) {
-			            IProgressService test = PlatformUI.getWorkbench().getProgressService();
-						BuildConfiguration configuration = BuildConfiguration
+			            BuildConfiguration configuration = BuildConfiguration
 								.forRootProjectDirectory(new File(projectLocation))
 							    .overrideWorkspaceConfiguration(true)
 							    .autoSync(true)

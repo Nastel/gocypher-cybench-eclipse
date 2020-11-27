@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2020, K2N.IO.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
+
 package com.gocypher.cybench.launcher;
 
 import java.math.BigDecimal;
@@ -17,9 +36,6 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-
 import com.gocypher.cybench.LauncherConfiguration;
 import com.gocypher.cybench.core.utils.JSONUtils;
 import com.gocypher.cybench.launcher.environment.model.HardwareProperties;
@@ -30,7 +46,6 @@ import com.gocypher.cybench.launcher.report.DeliveryService;
 import com.gocypher.cybench.launcher.report.ReportingService;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.launcher.utils.SecurityBuilder;
-import com.jcabi.manifests.Manifests;
 
 
 //import com.gocypher.cybench.launcher.utils.ComputationUtils;
@@ -42,7 +57,6 @@ public class CyBenchLauncher {
 		System.out.println("-----------------------------------------------------------------------------------------");
 		System.out.println("                                 Starting CyBench benchmarks                             ");
 		System.out.println("-----------------------------------------------------------------------------------------");
-//		System.out.println("Launcher classpath:"+System.getProperty("java.class.path"));
 		LauncherConfiguration launcherConfiguration = new LauncherConfiguration () ;
 		fillLaunchConfigurations(launcherConfiguration);
 		
@@ -61,16 +75,14 @@ public class CyBenchLauncher {
 		if(launcherConfiguration.isIncludeHardware()) {
 			System.out.println("Collecting hardware, software information...");
 	        hwProperties = CollectSystemInformation.getEnvironmentProperties();
-	        System.out.println("Collecting JVM properties...");
-	        jvmProperties = CollectSystemInformation.getJavaVirtualMachineProperties();
 		}
-		
+
+        System.out.println("Collecting JVM properties...");
+        jvmProperties = CollectSystemInformation.getJavaVirtualMachineProperties();
         SecurityBuilder securityBuilder = new SecurityBuilder();        
         Map<String, Object> benchmarkSettings = new HashMap<>();
 
         Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
-
-        checkAndConfigureCustomProperties(securityBuilder, benchmarkSettings, customBenchmarksMetadata);
 
         benchmarkSettings.put("benchThreadCount", launcherConfiguration.getThreads());
         benchmarkSettings.put("benchReportName", launcherConfiguration.getReportName());
@@ -83,14 +95,12 @@ public class CyBenchLauncher {
 		if(launcherConfiguration.getClassCalled().size() > 0) {
 			for(String classname : launcherConfiguration.getClassCalled()) {
 				System.out.println("Classes sellected to run: "+ classname);
-//				optBuild.include("src.main.java.com.local.demo.MyBenchmark\\b");
 				optBuild.include(classname+"\\b");
 			}
 		}
 		
 		Options opt = optBuild
 					.forks(launcherConfiguration.getForks())
-					//.include(DemoBenchmarks.class.getName())
 					.measurementIterations(launcherConfiguration.getMeasurementIterations())
 					.warmupIterations(launcherConfiguration.getWarmUpIterations())
 					.warmupTime(TimeValue.seconds(launcherConfiguration.getWarmUpSeconds()))
@@ -148,44 +158,7 @@ public class CyBenchLauncher {
         System.out.println("                                 Finished CyBench benchmarks                             ");
         System.out.println("-----------------------------------------------------------------------------------------");
 	}
-	private static void checkAndConfigureCustomProperties (SecurityBuilder securityBuilder
-            ,Map<String,Object>benchmarkSettings
-            ,Map<String,Map<String,String>>customBenchmarksMetadata){
-
-		Reflections reflections = new Reflections("com.gocypher.cybench.", new SubTypesScanner(false));
-		Set<Class<? extends Object>> allDefaultClasses = reflections.getSubTypesOf(Object.class);
-		String tempBenchmark = null;
-		for (Class<? extends Object> classObj : allDefaultClasses) {
-			try {
-			if (!classObj.getName().isEmpty() && classObj.getSimpleName().contains("Benchmarks")
-						&& !classObj.getSimpleName().contains("_")) {
-			// LOG.info("==>Default found:{}",classObj.getName());
-			// We do not include any class, because then JMH will discover all benchmarks
-			// automatically including custom ones.
-			// optBuild.include(classObj.getName());
-				tempBenchmark = classObj.getName();
-				securityBuilder.generateSecurityHashForClasses(classObj);
-			}
-			}catch (Throwable t) {
-				System.err.println ("Class not found:"+classObj) ;
-			}
-		}
-		if (tempBenchmark != null) {
-			String manifestData = null;
-			if (Manifests.exists("customBenchmarkMetadata")) {
-				manifestData = Manifests.read("customBenchmarkMetadata");
-			}
-			Map<String, Map<String, String>> benchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(manifestData);
-			Map<String, String> benchProps;
-			if (manifestData != null) {
-				benchProps = ReportingService.getInstance().prepareBenchmarkSettings(tempBenchmark, benchmarksMetadata);
-			} else {
-				benchProps = ReportingService.getInstance().prepareBenchmarkSettings(tempBenchmark, customBenchmarksMetadata);
-			}
-			benchmarkSettings.putAll(benchProps);
-		}
-
-	}
+	
 	private static Map<String, Object> customUserDefinedProperties(String customPropertiesStr) {
         Map<String, Object> customUserProperties = new HashMap<>();
         if (customPropertiesStr != null && !customPropertiesStr.isEmpty()){

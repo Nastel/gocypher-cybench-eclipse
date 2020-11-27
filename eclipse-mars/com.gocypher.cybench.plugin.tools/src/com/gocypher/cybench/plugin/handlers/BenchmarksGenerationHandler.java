@@ -1,7 +1,6 @@
 package com.gocypher.cybench.plugin.handlers;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,8 +14,6 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.ILog;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -43,7 +40,6 @@ import com.gocypher.cybench.plugin.model.BenchmarkMethodModel;
 import com.gocypher.cybench.plugin.model.RunSelectionEntry;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
-import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JMethod;

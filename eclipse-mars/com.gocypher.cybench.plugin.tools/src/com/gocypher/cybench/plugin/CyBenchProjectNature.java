@@ -33,9 +33,6 @@ import org.eclipse.jdt.apt.core.util.IFactoryPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.IProgressService;
-
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
@@ -323,8 +320,7 @@ private void updateDependenciesForNature (IJavaProject javaProject) throws Excep
 				Job job = new Job("Gradle dependency refresh") {
 				    @Override
 				    protected IStatus run(IProgressMonitor monitor) {
-			            IProgressService test = PlatformUI.getWorkbench().getProgressService();
-						BuildConfiguration configuration = BuildConfiguration
+			            BuildConfiguration configuration = BuildConfiguration
 								.forRootProjectDirectory(new File(projectLocation))
 							    .overrideWorkspaceConfiguration(true)
 							    .autoSync(true)
