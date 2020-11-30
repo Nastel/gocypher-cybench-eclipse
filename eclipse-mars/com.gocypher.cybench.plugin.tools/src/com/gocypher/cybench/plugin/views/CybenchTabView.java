@@ -17,18 +17,14 @@
  *
  */
 
-
 package com.gocypher.cybench.plugin.views;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -55,15 +51,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
-import com.gocypher.cybench.plugin.Activator;
+import com.gocypher.cybench.LauncherConfiguration;
 import com.gocypher.cybench.plugin.model.LaunchConfiguration;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
 
 
 public class CybenchTabView extends AbstractLaunchConfigurationTab {
-
-	ILog log = Activator.getDefault().getLog();
 	
 	private Group benchmarking;
 	private Group configuration;
@@ -85,15 +79,15 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private Spinner measurmentSeconds;
     
     private Spinner expectedScore;
-    
+
+    private Text jvmProperties;
     private Text userProperties;
     
 //    private Button shouldStoreReportToFileSystem;
     private Button shouldSendReportToCyBench;
     private Button shouldDoHardwareSnapshot;
 
-    Set<String> classPaths =  new HashSet<String>();
-	Map<String, String> paths =  new HashMap<>();
+	private Map<String, String> paths =  new HashMap<>();
 
     @Override
     public void createControl(Composite parent) {
@@ -238,6 +232,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        userPropertiesLabel.setText("User Properties:");
  	        userProperties = new Text(configuration, SWT.BORDER);
  	        
+ 	        Label  jvmPropertiesLabel = new Label(configuration, SWT.NONE);
+ 	        jvmPropertiesLabel.setText("JVM Properties:");
+	        jvmProperties = new Text(configuration, SWT.BORDER);
  	        /* User save to file send t CyBench choice buttons */
 // 	        Label storeReportsToFileSystemLabel = new Label(configuration, SWT.NONE);
 // 	        storeReportsToFileSystemLabel.setText("Store Report In File System:");
@@ -279,8 +276,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(reportNameLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(reportlaunchPathLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(benchmarkUploadStatusLabel);
- 	        GridDataFactory.swtDefaults().span(2,1).applyTo(userPropertiesLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(runOnlySelectedLabel);
+ 	        GridDataFactory.swtDefaults().span(2,1).applyTo(userPropertiesLabel);
+ 	        GridDataFactory.swtDefaults().span(2,1).applyTo(jvmPropertiesLabel);
  	        
  	       
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(emptyField);
@@ -293,7 +291,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(launchPath);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(reportUploadStatus);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(onlySelectedLaunch);
- 	        
+ 	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(userProperties);
+ 	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(jvmProperties);
+ 	       
  	        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(configuration);
  	        
 			return configuration;
@@ -329,13 +329,11 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 
 		@Override
 		public void widgetDefaultSelected(SelectionEvent arg0) {
-			// TODO Auto-generated method stub
-			
+				
 		}
 
 		@Override
 		public void widgetSelected(SelectionEvent arg0) {
-			// TODO Auto-generated method stub
 			setDirty(true);
 	    	updateLaunchConfigurationDialog();
 		}
@@ -354,6 +352,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             String reportNameDef = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "CyBench Report");
             String reportUploadStatusDef = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
             String pathToSourceSelectedDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");
+            String jvmArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "");
          
             int threadDef = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
             int forksDef  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
@@ -391,6 +390,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             expectedScore.addModifyListener(modifyListener);
 
             userProperties.addModifyListener(modifyListener);
+            jvmProperties.setText(jvmArguments);
+            jvmProperties.addModifyListener(modifyListener);
             
             onlySelectedLaunch.setText(pathToSourceSelectedDef);
             onlySelectedLaunch.addModifyListener(modifyListener);
@@ -404,7 +405,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             shouldDoHardwareSnapshot.addSelectionListener(selectionListener);
             
         } catch (CoreException e) {
-        	GuiUtils.logError("There was a problem on the run configuration initialization", e);
+        	GuiUtils.logError("There was a problem on the run configuration initialization: ", e);
         }
     }
     
@@ -424,6 +425,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         configuration.setAttribute(LaunchConfiguration.MEASURMENT_SECONDS, measurmentSeconds.getSelection());
 
         configuration.setAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, userProperties.getText());
+        configuration.setAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, jvmProperties.getText());
 //        configuration.setAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, shouldStoreReportToFileSystem.getSelection());
         configuration.setAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, shouldSendReportToCyBench.getSelection());
         configuration.setAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, shouldDoHardwareSnapshot.getSelection());
@@ -447,30 +449,24 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         return "CyBench properties";
     }
     
- 
+
     private Map<String, String> getProjectPaths(boolean addBuildPath) {
     	Map<String, String> projectPaths = new HashMap<>();
 
     	try {
     		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
 	    	for(IProject proj : projects) {
-	    		GuiUtils.logInfo( "proj: "+ proj.getLocation().toPortableString());
 	    		if(proj.isAccessible()) {
-	    			GuiUtils.logInfo("ACCESSABLE  - TRUE ");
 		    		String projectPackageFullPath = "";
 		    		String projectOutputPath = "";
 		    		if(proj.getLocation()!=null && LauncherUtils.isJavaProject(proj)) {
 		    			projectPackageFullPath = proj.getLocation().toPortableString();
-		    			GuiUtils.logInfo("ACCESSABLE  - LOCATION NOT NULL "+projectPackageFullPath);
 		    			if(addBuildPath) {
 				    		IJavaProject javaProject = JavaCore.create(proj);
-				    		GuiUtils.logInfo( "ACCESSABLE  - CAST TO JAVA PROJECT "+javaProject);
 			    			if(javaProject.getOutputLocation()!=null) {
-			    				GuiUtils.logInfo("ACCESSABLE  - JAVA PROJECT NOT NULL -"+ javaProject.getOutputLocation());
 			    				projectOutputPath = projectPackageFullPath.substring(0, projectPackageFullPath.lastIndexOf('/')) + javaProject.getOutputLocation().toPortableString();
 			    			}
 			    		}
-		    			GuiUtils.logInfo("INSERT INTO RETURN MAP: "+ projectPackageFullPath+ " : "+ projectOutputPath);
 		    			projectPaths.put(projectPackageFullPath, projectOutputPath);
 		    		}
 		    		

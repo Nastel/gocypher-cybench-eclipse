@@ -22,9 +22,7 @@ package com.gocypher.cybench.plugin.handlers;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -63,9 +61,9 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private boolean sendReportCybnech; 
 	private boolean includeHardware;
 	private String userProperties;
+	private String jvmProperties;
 	private int excutionScoreBoundary ;
-	String selectionFolderPath;
-	Set<String> classPaths = new LinkedHashSet<>();
+	private String selectionFolderPath;
     
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
@@ -82,19 +80,18 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			}
 			return pluginInstallDir ; 
 			
-		}catch (Exception e) {
-			e.printStackTrace();
+		}catch (Exception ex) {
+			GuiUtils.logError("Error during bundle location resolve",ex);
 		}
 		return "" ;
 	}
-
+	
 	@Override
 	public void launch(ILaunchConfiguration configuration, String arg1, ILaunch arg2, IProgressMonitor arg3)
 			throws CoreException {
 		try {
 			setRunConfigurationProperties(configuration);
 	    	selectionFolderPath = selectionFolderPath.replaceAll("\\s+","");
-	    	
 			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;
 			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;
 	
@@ -103,7 +100,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			final ILaunchConfigurationWorkingCopy config = launchType.newInstance(null, "CyBench plugin");
 			    
 			setEnvironmentProperties(config);
-			//launchPath
+			
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
 	    	String projectPath = reportFolder.substring(0, reportFolder.lastIndexOf('/'));
 	    	GuiUtils.logInfo("reportFolder: "+projectPath) ;
@@ -132,12 +129,11 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			    	GuiUtils.logError ("Error during classpath add",e) ;
 			    }
 			}
-			//GuiUtils.logInfo("Classpath:"+classpathMementos);
+	    	//GuiUtils.logInfo("Classpath: "+classpathMementos) ;
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "com.gocypher.cybench.launcher.CyBenchLauncher");
-			
 			
 			new Thread ( new Runnable() {
 				
@@ -155,12 +151,12 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 						GuiUtils.refreshCybenchExplorer();			
 						GuiUtils.openReportDisplayView(pathToTempReportPlainFile);		
 					} catch (CoreException e) {
-						GuiUtils.logError(e.getMessage());
+						GuiUtils.logError("Error during launch",e);
 					}
 				}
 			}).start();
 		}catch (Exception e) {
-			e.printStackTrace();
+			GuiUtils.logError("Error during launch",e);
 		}
 		
 	}
@@ -177,6 +173,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
 				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
 				" -DEXECUTION_SCORE="+excutionScoreBoundary+
+				"  "+jvmProperties+
 				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
 				" -DREPORT_CLASSES=\""+selectionFolderPath+"\"");
 		
@@ -192,6 +189,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
 				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
 				" -DEXECUTION_SCORE="+excutionScoreBoundary+
+				"  "+jvmProperties+
 				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
 				" -DREPORT_CLASSES=\""+selectionFolderPath+"\"");
 		
@@ -200,26 +198,19 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	   reportFolder = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, "/report");
        reportName = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "CyBench Report");
        reportUploadStatus = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
-      
        thread = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
        forks  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
        warmupIterations  = configuration.getAttribute(LaunchConfiguration.WARMUP_ITERATION, 1);
        measurmentIterations = configuration.getAttribute(LaunchConfiguration.MEASURMENT_ITERATIONS, 5);
        warmupSeconds = configuration.getAttribute(LaunchConfiguration.WARMUP_SECONDS, 10);
        mesurmentSeconds = configuration.getAttribute(LaunchConfiguration.MEASURMENT_SECONDS, 10);
-       
 //       storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
        sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
        includeHardware = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
-       
-       
        userProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, "");
+       jvmProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "");
    	   excutionScoreBoundary = configuration.getAttribute(LaunchConfiguration.EXECUTION_SCORE, -1);
-   	   
    	   launchPath = configuration.getAttribute(LaunchConfiguration.BUILD_PATH, "");
    	   selectionFolderPath =configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");
     }
-    
-    
-//	addClasses(folder.members(), selectionEntry);
 }

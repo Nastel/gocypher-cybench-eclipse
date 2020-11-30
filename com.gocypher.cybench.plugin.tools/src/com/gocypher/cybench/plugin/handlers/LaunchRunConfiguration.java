@@ -61,6 +61,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private boolean sendReportCybnech; 
 	private boolean includeHardware;
 	private String userProperties;
+	private String jvmProperties;
 	private int excutionScoreBoundary ;
 	private String selectionFolderPath;
     
@@ -134,7 +135,6 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "com.gocypher.cybench.launcher.CyBenchLauncher");
 			
-			
 			new Thread ( new Runnable() {
 				
 				@Override
@@ -173,6 +173,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
 				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
 				" -DEXECUTION_SCORE="+excutionScoreBoundary+
+				"  "+jvmProperties+
 				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
 				" -DREPORT_CLASSES=\""+selectionFolderPath+"\"");
 		
@@ -188,6 +189,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
 				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
 				" -DEXECUTION_SCORE="+excutionScoreBoundary+
+				"  "+jvmProperties+
 				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
 				" -DREPORT_CLASSES=\""+selectionFolderPath+"\"");
 		
@@ -206,6 +208,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
        sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
        includeHardware = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
        userProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, "");
+       jvmProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "");
    	   excutionScoreBoundary = configuration.getAttribute(LaunchConfiguration.EXECUTION_SCORE, -1);
    	   launchPath = configuration.getAttribute(LaunchConfiguration.BUILD_PATH, "");
    	   selectionFolderPath =configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");

@@ -37,6 +37,7 @@ public interface LaunchConfiguration {
 	public static final String INCLUDE_HARDWARE_PROPERTIES = "com.cybench.includeHardwareProperties";
 	public static final String SHOULD_SAVE_REPOT_TO_FILE = "com.cybench.ShouldSaveReportToFile";
 	public static final String CUSTOM_USER_PROPERTIES = "com.cybench.customUserProperties";
+	public static final String CUSTOM_JVM_PROPERTIES = "com.cybench.customJVMProperties";
 	
 
 	public static final String LAUNCH_SELECTED_PATH = "com.cybench.launchPathSetFolderFileSelection";
