@@ -90,36 +90,38 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 				File fileExists = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+"Benchmarks.java");
 				File fileExists2 = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+".java");
 				benchmarkMethods = new ArrayList<BenchmarkMethodModel>();
-				chooseMethodsToGenerateBenchmarks(selection, selectionEntry, packagePath);
-	    		if(fileExists!= null && !fileExists.exists() && fileExists2 != null && !fileExists2.exists() && generationMethodsSelected) { 
-	    			JDefinedClass generationClass;
-		    		generationClass = codeModelInstance._class(packagePath+"Benchmarks");
-		    		generationClass.annotate(codeModelInstance.ref(State.class)).param("value", Scope.Benchmark);
-		        	/*---------------- SET UP METHODS -------------------------*/
-		    		model.setMethodType(void.class);
-		    		model.setMethodName("setUp");
-		    		model.setMethodHint("//TODO Trial level: write code to be executed before each run of the benchmark");
-		    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 0);
-		    		model.setMethodName("setUpIteration");
-		    		model.setMethodHint("//TODO Iteration level: write code to be executed before each iteration of the benchmark.");
-		    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 2);
-		    		
-	
-		        	/*---------------- BENCHMARK METHODS -------------------------*/
-		        	for(BenchmarkMethodModel methodModelEntry : benchmarkMethods) {
-			    		generateBenchmarkMethod(generationClass, codeModelInstance, methodModelEntry);
-		        	}
-	
-		        	/*---------------- TEAR DOWN METHODS -------------------------*/
-		    		model.setMethodType(void.class);
-		        	model.setMethodName("cleanUp");
-		    		model.setMethodHint("//TODO Trial level: write code to be executed after each run of the benchmark");
-		    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 1);
-		    		model.setMethodName("cleanUpIteration");
-		    		model.setMethodHint("//TODO Iteration level: write code to be executed after each iteration of the benchmark.");
-		    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 3);
-	
-					codeModelInstance.build(file);
+	    		if(fileExists!= null && !fileExists.exists() && fileExists2 != null && !fileExists2.exists()) { 
+					chooseMethodsToGenerateBenchmarks(selection, selectionEntry, packagePath);
+					if(generationMethodsSelected) {
+		    			JDefinedClass generationClass;
+			    		generationClass = codeModelInstance._class(packagePath+"Benchmarks");
+			    		generationClass.annotate(codeModelInstance.ref(State.class)).param("value", Scope.Benchmark);
+			        	/*---------------- SET UP METHODS -------------------------*/
+			    		model.setMethodType(void.class);
+			    		model.setMethodName("setUp");
+			    		model.setMethodHint("//TODO Trial level: write code to be executed before each run of the benchmark");
+			    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 0);
+			    		model.setMethodName("setUpIteration");
+			    		model.setMethodHint("//TODO Iteration level: write code to be executed before each iteration of the benchmark.");
+			    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 2);
+			    		
+		
+			        	/*---------------- BENCHMARK METHODS -------------------------*/
+			        	for(BenchmarkMethodModel methodModelEntry : benchmarkMethods) {
+				    		generateBenchmarkMethod(generationClass, codeModelInstance, methodModelEntry);
+			        	}
+		
+			        	/*---------------- TEAR DOWN METHODS -------------------------*/
+			    		model.setMethodType(void.class);
+			        	model.setMethodName("cleanUp");
+			    		model.setMethodHint("//TODO Trial level: write code to be executed after each run of the benchmark");
+			    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 1);
+			    		model.setMethodName("cleanUpIteration");
+			    		model.setMethodHint("//TODO Iteration level: write code to be executed after each iteration of the benchmark.");
+			    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 3);
+		
+						codeModelInstance.build(file);
+					}
 	    		}
 	    		if(fileExists!= null && fileExists.exists()) {
 					IFileStore fileStore = EFS.getLocalFileSystem().getStore(fileExists.toURI());
@@ -226,11 +228,9 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		    		Shell generateMethods = new Shell();
 		    		MessageDialogView pop = new MessageDialogView(generateMethods, benchmarkMethods);
 					if (pop.open() == Window.OK) {
-						GuiUtils.logInfo("Popup Return CODE: "+0);
 						generationMethodsSelected = true;
 						benchmarkMethods = pop.getMethodsToGenerate();
 					}else {
-						GuiUtils.logInfo("Popup Return CODE: "+1);
 						generationMethodsSelected = false;
 					}
 		    	}catch (Exception e) {			    		
