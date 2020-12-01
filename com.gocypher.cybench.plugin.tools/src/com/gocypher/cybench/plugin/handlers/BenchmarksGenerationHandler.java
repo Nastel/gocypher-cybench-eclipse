@@ -22,6 +22,7 @@ package com.gocypher.cybench.plugin.handlers;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -84,13 +85,17 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	
     	try {
         	String outputPath= LauncherUtils.getRawSourceFolderForBenchmarks(selectionEntry.getProjectSelected());
+			GuiUtils.logInfo(String.valueOf("selectionEntry.getClassPaths(): "+selectionEntry.getClassPaths()));
     		for(String packagePath :  selectionEntry.getClassPaths()) {
+    			
+    			GuiUtils.logInfo(String.valueOf("packagePath "+packagePath));
     			IWorkbenchPage page = window.getActivePage();
 	    		File file = new File(outputPath);
 				File fileExists = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+"Benchmarks.java");
-				File fileExists2 = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+".java");
 				benchmarkMethods = new ArrayList<BenchmarkMethodModel>();
-	    		if(fileExists!= null && !fileExists.exists() && fileExists2 != null && !fileExists2.exists()) { 
+				GuiUtils.logInfo(String.valueOf("fileExists: "+fileExists));
+				GuiUtils.logInfo(String.valueOf("file: "+file));
+				if(shouldgenerateFile(fileExists, selectionEntry, outputPath, packagePath)) {
 					chooseMethodsToGenerateBenchmarks(selection, selectionEntry, packagePath);
 					if(generationMethodsSelected) {
 		    			JDefinedClass generationClass;
@@ -188,10 +193,9 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	        if(project != null) {
 	        	IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
 		    	IType itype = javaProject.findType(classPath);
-		    	if(itype != null) {
-			    	IMethod[] allMethods = itype.getMethods();
+		    	if(itype != null && itype.getChildren() != null) {
 			    	Set<String> methodNames = new HashSet<String>();
-			    	for(IMethod methodDataObject: allMethods) {
+			    	for(IMethod methodDataObject: itype.getMethods()) {
 			    		int flags = methodDataObject.getFlags();
 			    		if(Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPackageDefault(flags)) {
 				    		methodNames.add(methodDataObject.getElementName()+"Benchmark");
@@ -219,7 +223,26 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		return benchmarkMethods; 
 	}
 
-	
+	private boolean shouldgenerateFile(File fileExists, RunSelectionEntry selectionEntry, String outputPath, String packagePath) {
+		File fileExists2 = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+".java");
+		if(fileExists!= null && !fileExists.exists() && fileExists2 != null && !fileExists2.exists() && !isFileInJavaProjectGeneratedSource(fileExists, selectionEntry)) { 
+			return true;
+		}else {
+			return false;
+		}
+	}
+	private boolean isFileInJavaProjectGeneratedSource(File fileExists, RunSelectionEntry selectionEntry) {
+		try {
+			if(LauncherUtils.isJavaProject(selectionEntry.getProjectSelected())) {
+				if(fileExists.toString().split(LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_JAVA.substring(1)).length > 2) {
+					return  true;
+				}
+			}
+		} catch (Exception e) {
+    		GuiUtils.logError ("Error on view open",e) ;
+		}
+		return  false;
+	}
     public void chooseMethodsToGenerateBenchmarks (IStructuredSelection selection, RunSelectionEntry selectionEntry, String classPath) {
     	benchmarkMethods = methodDetection(selection, selectionEntry, classPath);
     	Display.getDefault().syncExec(new Runnable() {
