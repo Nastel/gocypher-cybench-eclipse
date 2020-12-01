@@ -200,6 +200,7 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 			    		if(Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPackageDefault(flags)) {
 				    		methodNames.add(methodDataObject.getElementName()+"Benchmark");
 			    		}
+//			    		methodDataObject.getAnnotations();
 //			    		GuiUtils.logInfo(String.valueOf("methodDataObject.getElementType(): "+methodDataObject.getElementType()));
 //			    		GuiUtils.logInfo(String.valueOf("methodDataObject.isReadOnly(): "+methodDataObject.isReadOnly()));
 //			    		GuiUtils.logInfo(String.valueOf("methodDataObject.getDeclaringType(): "+methodDataObject.getDeclaringType()));
