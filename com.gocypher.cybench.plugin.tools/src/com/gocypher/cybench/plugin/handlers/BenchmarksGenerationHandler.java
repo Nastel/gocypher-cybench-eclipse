@@ -22,7 +22,6 @@ package com.gocypher.cybench.plugin.handlers;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +32,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -41,15 +40,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -199,7 +190,15 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 			    	IMethod[] allMethods = itype.getMethods();
 			    	Set<String> methodNames = new HashSet<String>();
 			    	for(IMethod methodDataObject: allMethods) {
-			    		methodNames.add(methodDataObject.getElementName()+"Benchmark");
+			    		int flags = methodDataObject.getFlags();
+			    		if(Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPackageDefault(flags)) {
+				    		methodNames.add(methodDataObject.getElementName()+"Benchmark");
+			    		}
+//			    		GuiUtils.logInfo(String.valueOf("methodDataObject.getElementType(): "+methodDataObject.getElementType()));
+//			    		GuiUtils.logInfo(String.valueOf("methodDataObject.isReadOnly(): "+methodDataObject.isReadOnly()));
+//			    		GuiUtils.logInfo(String.valueOf("methodDataObject.getDeclaringType(): "+methodDataObject.getDeclaringType()));
+//			    		GuiUtils.logInfo(String.valueOf("methodDataObject.getElementType(): "+methodDataObject.getFlags()));
+//			    		GuiUtils.logInfo(String.valueOf("methodDataObject.getElementType(): "+methodDataObject.getParameters()));
 			    	}
 			    	for(String name : methodNames) {
 			    		BenchmarkMethodModel model = new BenchmarkMethodModel();
