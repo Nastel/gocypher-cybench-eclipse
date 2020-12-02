@@ -89,7 +89,8 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	 */
 	public static final String ID = "com.gocypher.cybench.plugin.views.CyBenchExplorerView";
 
-	@Inject IWorkbench workbench;
+	IWorkbench workbench = PlatformUI.getWorkbench();
+
 
 	private TreeViewer projectsViewer ;
 
