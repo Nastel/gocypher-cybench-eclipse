@@ -103,7 +103,26 @@
               		 		<reference definitionId="com.gocypher.cybench.project.projectSelection"/>
               		 		<not>              		 		              		 	
               		 			<reference definitionId="com.gocypher.cybench.project.hasNature"/>
-              		 		</not>              		 	
+              		 		</not>          		 	
+              		 	</iterate>
+              		 </visibleWhen>
+	            </command>
+	 	  </menuContribution>
+	 	  	 	  <menuContribution
+		        locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+		         <separator name="com.gocypher.cybench.converterhelper.separator" visible="true" />
+	            <command
+	                  id="com.gocypher.cybench.plugin.ProjectConfigureLaunchInner"
+	                  commandId="com.gocypher.cybench.plugin.handlers.AddNature"
+		        	  label="Add CyBench Nature"
+	                  icon="icons/cybench_symbol_small.png"                
+	                  tooltip="Add needed parts and configurations for CyBench"
+	                  style="push">
+	                  <visibleWhen>
+              		 	<iterate>
+              		 		<not>              		 		              		 	
+              		 			<reference definitionId="com.gocypher.cybench.project.hasNature"/>
+              		 		</not>          		 	
               		 	</iterate>
               		 </visibleWhen>
 	            </command>

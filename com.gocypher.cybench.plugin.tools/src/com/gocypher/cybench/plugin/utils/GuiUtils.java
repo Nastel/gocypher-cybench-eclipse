@@ -203,10 +203,13 @@ public class GuiUtils {
 		IJavaProject javaProject = null ;
 		if (selection instanceof IStructuredSelection) {
     		IStructuredSelection ss = (IStructuredSelection) selection;
-    		System.out.println(ss.getFirstElement());
     		for (Object elem : ss.toList()) {
     			if (elem instanceof IProject) {
+//        			GuiUtils.logInfo("--->instanceof IProject: "+ elem);
     				javaProject = (IJavaProject)JavaCore.create((IProject)elem);
+    			}else if (elem instanceof IJavaProject) {
+    				javaProject = (IJavaProject) elem;
+//        			GuiUtils.logInfo("--->instanceof IJavaProject: "+ elem);
     			}
     		}
 		}

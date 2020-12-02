@@ -201,18 +201,21 @@ public class GuiUtils {
 		
 	}
     public static IJavaProject resolveJavaProject (ISelection selection) {
-		IJavaProject javaProject = null ;
-		if (selection instanceof IStructuredSelection) {
-    		IStructuredSelection ss = (IStructuredSelection) selection;
-    		GuiUtils.logInfo(ss.getFirstElement().toString());
-    		for (Object elem : ss.toList()) {
-    			if (elem instanceof IProject) {
-    				javaProject = (IJavaProject)JavaCore.create((IProject)elem);
-    			}
-    		}
-		}
-		return javaProject;
-	}
+  		IJavaProject javaProject = null ;
+  		if (selection instanceof IStructuredSelection) {
+      		IStructuredSelection ss = (IStructuredSelection) selection;
+      		for (Object elem : ss.toList()) {
+      			if (elem instanceof IProject) {
+//          			GuiUtils.logInfo("--->instanceof IProject: "+ elem);
+      				javaProject = (IJavaProject)JavaCore.create((IProject)elem);
+      			}else if (elem instanceof IJavaProject) {
+      				javaProject = (IJavaProject) elem;
+//          			GuiUtils.logInfo("--->instanceof IJavaProject: "+ elem);
+      			}
+      		}
+  		}
+  		return javaProject;
+  	}
     public static void logInfo (String message) {
     	if (LOG != null) {
     		LOG.log(new Status(IStatus.INFO, Activator.PLUGIN_ID, message));
