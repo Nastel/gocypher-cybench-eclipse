@@ -302,7 +302,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 		};
 		openLocationView.setText("Select Directory And Open Reports");
 		openLocationView.setToolTipText("Select Directory And Open Reports");
-		//openLocationView.setImageDescriptor(GuiUtils.getCustomImage("icons/open_file.png"));
+		openLocationView.setImageDescriptor(GuiUtils.getCustomImage("icons/open_file.png"));
 		
 		openSelectedReportAction = new Action() {
 			public void run() {

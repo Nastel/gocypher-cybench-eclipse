@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -88,7 +89,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	 */
 	public static final String ID = "com.gocypher.cybench.plugin.views.CyBenchExplorerView";
 
-	IWorkbench workbench = PlatformUI.getWorkbench();
+	@Inject IWorkbench workbench;
 
 	private TreeViewer projectsViewer ;
 
@@ -97,9 +98,14 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	
 	private Action refreshAction;
 	private Action openLocationView;
+	private Action workspaceDirectory;
+	private Action fileSystemDirectory;
 	//private Action action2;
 	private Action openSelectedReportAction;
 	private Styler scoreStyler ;
+
+	private String filesSystemSelectedPath = null;
+	private boolean loadWorkspace = true;
 	
 	@PostConstruct
 	public void init ( ) {
@@ -118,7 +124,6 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	
 	private void loadData () {		
 		treeOfReports.clear();
-					
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects() ;
 		for (IProject item:projects) {
 			String pathToProjectDirectory = item.getLocation().toPortableString() ;
@@ -127,9 +132,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 				projectEntry.setFullPathToFile(pathToProjectDirectory);
 				projectEntry.setName(item.getName());
 				Node<ReportFileEntry> projectNode = new Node<>(projectEntry) ;
-				
 				List<File>projectReportsFiles = CybenchUtils.listFilesInDirectory(pathToProjectDirectory) ;
-				
 				for (File file:projectReportsFiles) {
 					if (file.getName().endsWith(Constants.REPORT_FILE_EXTENSION)) {
 						ReportFileEntry entry = new ReportFileEntry() ;
@@ -139,40 +142,30 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 					}
 				}			
 				treeOfReports.add(projectNode) ;
-						
 			}
-			
 		}
-		
 	}
 	
 	private void loadData (String pathToProjectDirectory) {		
-		treeOfReports.clear();
-					
-		ReportFileEntry projectEntry = new ReportFileEntry() ;
-		projectEntry.setFullPathToFile(pathToProjectDirectory);
-		projectEntry.setName(pathToProjectDirectory.substring(pathToProjectDirectory.lastIndexOf('\\'),pathToProjectDirectory.length()));
-		Node<ReportFileEntry> projectNode = new Node<>(projectEntry) ;
-		
-		List<File>projectReportsFiles = CybenchUtils.listFilesInDirectory(pathToProjectDirectory) ;
-		
-		for (File file:projectReportsFiles) {
-			if (file.getName().endsWith(Constants.REPORT_FILE_EXTENSION)) {
-				ReportFileEntry entry = new ReportFileEntry() ;
-				entry.create(file);
-				Node<ReportFileEntry> reportNode = new Node<>(entry) ;
-				projectNode.addChild(reportNode) ;
-			}
-		}			
-		treeOfReports.add(projectNode) ;
-
-		this.projectsViewer.setInput(this.treeOfReports);
-		
-		for (TreeColumn col:this.projectsViewer.getTree().getColumns()) {
-			col.pack();
+		if(loadWorkspace) {
+			loadData();
+		}else if(pathToProjectDirectory != null){
+			treeOfReports.clear();
+			ReportFileEntry projectEntry = new ReportFileEntry() ;
+			projectEntry.setFullPathToFile(pathToProjectDirectory);
+			projectEntry.setName(pathToProjectDirectory.substring(pathToProjectDirectory.lastIndexOf('\\'),pathToProjectDirectory.length()));
+			Node<ReportFileEntry> projectNode = new Node<>(projectEntry) ;
+			List<File>projectReportsFiles = CybenchUtils.listFilesInDirectory(pathToProjectDirectory) ;
+			for (File file:projectReportsFiles) {
+				if (file.getName().endsWith(Constants.REPORT_FILE_EXTENSION)) {
+					ReportFileEntry entry = new ReportFileEntry() ;
+					entry.create(file);
+					Node<ReportFileEntry> reportNode = new Node<>(entry) ;
+					projectNode.addChild(reportNode) ;
+				}
+			}			
+			treeOfReports.add(projectNode) ;
 		}
-		this.projectsViewer.refresh();
-		
 	}
 
 	@Override
@@ -244,22 +237,48 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
-		manager.add(refreshAction);
+		manager.add(workspaceDirectory);
+		manager.add(fileSystemDirectory);
 
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
 		manager.add(refreshAction);
+		manager.add(workspaceDirectory);
+		manager.add(fileSystemDirectory);
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
-		manager.add(refreshAction);
 		manager.add(openLocationView);
+		manager.add(refreshAction);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void makeActions() {
+		workspaceDirectory = new Action() {
+			public void run() {
+             	loadWorkspace = true;
+             	refreshView();
+			}
+		};
+		workspaceDirectory.setText("Open Workspace");
+		workspaceDirectory.setToolTipText("Open Workspace Reports");
+//		workspaceDirectory.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_ELCL_SYNCED));
+		
+		fileSystemDirectory = new Action() {
+			public void run() {
+             	loadWorkspace = false;
+             	if(filesSystemSelectedPath == null || filesSystemSelectedPath.equals("")) {
+             		setTheFilePathforFileSystemBrowsing();
+             	}
+             	refreshView();
+			}
+		};
+		fileSystemDirectory.setText("Open File System");
+		fileSystemDirectory.setToolTipText("Open File System Reports");
+		
+		
 		refreshAction = new Action() {
 			public void run() {
 				refreshView();
@@ -273,20 +292,16 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 		openLocationView = new Action() {
 			public void run() {
 				try {						
- 					DirectoryDialog dialog = new DirectoryDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NULL);
- 	                String path = dialog.open();
- 	                if (path != null) {
- 	                	GuiUtils.logInfo("Path selection: "+path);
- 	                	loadData(path);
- 	                }
+					setTheFilePathforFileSystemBrowsing();
+					refreshView();
 				} catch (Exception e) {
 					GuiUtils.logError("Error on open report link",e);
 				}
 				
 			}
 		};
-		openLocationView.setText("Open Selected Directory");
-		openLocationView.setToolTipText("Open Reports For Selected Directory");
+		openLocationView.setText("Select Directory And Open Reports");
+		openLocationView.setToolTipText("Select Directory And Open Reports");
 		openLocationView.setImageDescriptor(GuiUtils.getCustomImage("icons/open_file.png"));
 		
 		openSelectedReportAction = new Action() {
@@ -313,6 +328,15 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 		};
 	}
 
+	private void setTheFilePathforFileSystemBrowsing() {
+		DirectoryDialog dialog = new DirectoryDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NULL);
+			filesSystemSelectedPath = dialog.open();
+         if (filesSystemSelectedPath != null && filesSystemSelectedPath != "") {
+         	loadWorkspace = false;
+         	loadData(filesSystemSelectedPath);
+         }
+	}
+	
 	private void hookDoubleClickAction() {
 		
 		projectsViewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -329,14 +353,15 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 
 	@Override
 	public void refreshView() {
-		this.loadData();
+		GuiUtils.logInfo("filesSystemSelectedPath: "+filesSystemSelectedPath);
+		this.loadData(filesSystemSelectedPath);
+		
 		this.projectsViewer.setInput(this.treeOfReports);
 		
 		for (TreeColumn col:this.projectsViewer.getTree().getColumns()) {
 			col.pack();
 		}
 		this.projectsViewer.refresh();
-		
 	}
 	
 	class TreeViewContentProvider implements ITreeContentProvider {
