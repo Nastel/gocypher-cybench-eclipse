@@ -2,16 +2,24 @@
 
 ## Installation instructions
 
+**Deployment packages**
+
+* File `CybenchTools.zip` contains Eclipse update site for Eclipse 2020-09.
+* File `CyBenchToolsForEclipseMars.zip` contains Eclipse update site for Eclipse Mars 2.
+
 **Prerequisites**
-* Plugin is build and tested using (on lower JAVA or Eclipse version it won’t work)
+
+* Package `CybenchTools.zip` is built and tested using (on lower JAVA or Eclipse version it won’t work)
     * JAVA – JDK-14.0.2,
     * Eclipse Version: 2020-09 (4.17.0).
-
-**Deployment package**
-
-* File `CybenchTools.zip` contains Eclipse update site files structure.
+    
+* Package `CyBenchToolsForEclipseMars.zip` is built and tested using
+    * JAVA – JDK-1.8.0_201,
+    * Eclipse Version: Eclipse Mars 2 (4.5.2).
 
 ### Installation from local file system
+
+Installation process for both version of plugins is the same:
 
 * In Eclipse select menu “Help”→ “Install new software”.
 * In installation dialog window click button “Add”.
