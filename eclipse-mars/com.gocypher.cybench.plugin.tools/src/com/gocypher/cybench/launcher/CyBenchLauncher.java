@@ -52,6 +52,7 @@ import com.gocypher.cybench.launcher.utils.SecurityBuilder;
 
 public class CyBenchLauncher {
 	public static Map<String,String> resultsMap = new HashMap<>() ;
+	private static final  String benchSource = "Eclipse Mars plugin";
 	
 	public static void main(String[] args) throws Exception{
 		System.out.println("-----------------------------------------------------------------------------------------");
@@ -83,6 +84,7 @@ public class CyBenchLauncher {
         Map<String, Object> benchmarkSettings = new HashMap<>();
 
         Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
+        benchmarkSettings.put("benchSource", benchSource);
         benchmarkSettings.put("benchWarmUpIteration", launcherConfiguration.getWarmUpIterations());
         benchmarkSettings.put("benchWarmUpSeconds", launcherConfiguration.getWarmUpSeconds());
         benchmarkSettings.put("benchMeasurementIteration", launcherConfiguration.getMeasurementIterations());
