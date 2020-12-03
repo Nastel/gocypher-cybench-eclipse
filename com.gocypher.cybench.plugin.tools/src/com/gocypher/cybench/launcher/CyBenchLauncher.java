@@ -83,7 +83,11 @@ public class CyBenchLauncher {
         Map<String, Object> benchmarkSettings = new HashMap<>();
 
         Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
-
+        benchmarkSettings.put("benchWarmUpIteration", launcherConfiguration.getWarmUpIterations());
+        benchmarkSettings.put("benchWarmUpSeconds", launcherConfiguration.getWarmUpSeconds());
+        benchmarkSettings.put("benchMeasurementIteration", launcherConfiguration.getMeasurementIterations());
+        benchmarkSettings.put("benchMeasurementSeconds", launcherConfiguration.getMeasurmentSeconds());
+        benchmarkSettings.put("benchForkCount", launcherConfiguration.getForks());
         benchmarkSettings.put("benchThreadCount", launcherConfiguration.getThreads());
         benchmarkSettings.put("benchReportName", launcherConfiguration.getReportName());
 
