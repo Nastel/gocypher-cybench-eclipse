@@ -166,14 +166,14 @@ Launches all JMH benchmarks which are found under selected JAVA file. Quick laun
 
 **Steps:**
 
-* Right click on the JAVA file which contains JMH Benchmarks.
+* Right click on the JAVA file or project which contains JMH Benchmarks.
 * Select “Run As”→ “Run on CyBench”. 
 
 ![](./docs/images/image17.png)
 
 * CyBench launcher will start display messages in the console view.
 * After launcher finishes its work:
-    * report file is created under `<selected project/reports>` folder, 
+    * report file is created under `<selected project>/reports` folder, 
     * report is displayed under “Report Details View”,
     * report entry appears in “CyBench Explorer”.
 
