@@ -43,11 +43,15 @@
 	            <enablement>
 	                <with variable="selection">
 	                  <count value="+"/>
-                      <iterate operator="and">
-                      	<and>
+                      <iterate>  
+	                    <or>
+	          		 		<reference definitionId="com.gocypher.cybench.project.projectSelection"/>
+      		 				<reference definitionId="com.gocypher.cybench.project.hasNature"/>
+          		 		</or>
+                      	<or>
                       		<reference definitionId="com.gocypher.cybench.project.CompilationUnitSelection"/>
-				        </and>
-      		 			<reference definitionId="com.gocypher.cybench.project.hasNature"/>
+      		 				<reference definitionId="com.gocypher.cybench.project.hasNature"/>
+				        </or>
 				      </iterate>
 	                </with>
 	            </enablement>

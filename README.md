@@ -2,7 +2,7 @@
 
 ## Installation instructions
 
-**Deployment packages**
+**Deployment packages from [release page](https://github.com/K2NIO/gocypher-cybench-eclipse/releases)**
 
 * File `CybenchTools.zip` contains Eclipse update site for Eclipse 2020-09.
 * File `CyBenchToolsForEclipseMars.zip` contains Eclipse update site for Eclipse Mars 2.
@@ -37,7 +37,7 @@ Installation process for both version of plugins is the same:
 * Check “CyBench” entry in the features table.
 * Click button “Next”.
 * Installation details window appears. Click button “Next”.
-* Licenses review window appears, select “I accept the terms of the license agreement”, click button “Finish”.
+* Licenses review window appears, review and select “I accept the terms of the license agreement”, click button “Finish”.
 * Warning box appears, click button “Install anyway”.
 
 ![](./docs/images/image3.png)
@@ -78,7 +78,7 @@ CyBench project nature applies settings to the project that benchmarks are compi
 **Steps:**
 
 * Right click mouse button on the project.
-* Select “CyBench” → “Add CyBench Nature”.
+* Select “Add CyBench Nature”.
 * CyBench nature shall be added.
 
 ![](./docs/images/image8.png)
@@ -90,6 +90,7 @@ Adding CyBench nature will make the following changes to the project settings:
 
 * Will add external dependencies to JMH framework
     * If project is JAVA project then will set build path to point to CyBench plugin as external library link.
+    * If project is Gradle project then will add dependencies to JMH into build.gradle file.
     * If project is Maven project then will add dependencies to JMH into POM file.
 * Will update compiler settings in order to use annotation processing during file compilation:
     * Enables annotation processing and sets extra source folders for processed files.
@@ -128,7 +129,9 @@ View displays selected or generated during launch report details.
 
 ## Generate Benchmarks
 
-Feature generates benchmark class stubs, adds necessary annotations and methods for a selected JAVA file. Benchmark method is generated for each public method found in the class.
+Feature generates benchmark class stubs, adds necessary annotations and methods for a selected JAVA file.
+
+![](./docs/images/image15.png)
 
 **Pre-conditions**
 
@@ -139,14 +142,18 @@ Feature generates benchmark class stubs, adds necessary annotations and methods 
 **Steps:**
 
 * Select any JAVA class file in the project explorer which meets pre-conditions.
-* Right click mouse button on it.
-* Select CyBench→CyBench Generate.
+* Right click mouse button on it and Select `CyBench Generate` or click CTRL+7.
 
 ![](./docs/images/image15.png)
 
+* A popup will be displayed that shows all the available public methods inside the class. Check the checkboxes on the right side to select the methods for which to generate the benchmark methods.
+**Notice**: If the file have been already generated previously and still exists its contents will not be overwritten. 
+
+![](./docs/images/image19.png)
+
 * New JAVA classes with benchmark test stubs shall be generated under new src folder:
     * for JAVA projects - `src-benchmarks`,
-    * for Maven projects – `src/test/java` (default folder for tests).
+    * for Maven and Gradle projects – `src/test/java` (default folder for tests).
 * Newly generated classes shall be immediately pre-processed using JMH annotation processors and places under folders defined in a project annotation processing settings.
 
 ![](./docs/images/image16.png)
@@ -186,7 +193,7 @@ Launch configuration view which allows to create a custom launch settings for a 
         * “Reports Folder” - folder where CyBench reports are stored, default is the location of the “Run Project” option plus “/reports” subdirectory.
         * “Send Report To CyBench” - flag which defines that either report should be sent to CyBench repository or not.
 
-![](./docs/images/image17.png)
+![](./docs/images/image18.png)
 
 * Click “Apply” → “Run” to start execution of the selected project benchmarks  .      
 * CyBench launcher will start display messages in the console view.
