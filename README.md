@@ -131,8 +131,6 @@ View displays selected or generated during launch report details.
 
 Feature generates benchmark class stubs, adds necessary annotations and methods for a selected JAVA file.
 
-![](./docs/images/image15.png)
-
 **Pre-conditions**
 
 * `CyBench Nature` for a project,
