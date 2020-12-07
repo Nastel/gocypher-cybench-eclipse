@@ -24,9 +24,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.gocypher.cybench.core.utils.SecurityUtils;
+import com.gocypher.cybench.launcher.model.BenchmarkReport;
 import org.openjdk.jmh.profile.GCProfiler;
 import org.openjdk.jmh.profile.HotspotRuntimeProfiler;
 import org.openjdk.jmh.profile.HotspotThreadProfiler;
@@ -37,6 +41,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 import com.gocypher.cybench.LauncherConfiguration;
+import com.gocypher.cybench.core.utils.JMHUtils;
 import com.gocypher.cybench.core.utils.JSONUtils;
 import com.gocypher.cybench.launcher.environment.model.HardwareProperties;
 import com.gocypher.cybench.launcher.environment.model.JVMProperties;
@@ -84,6 +89,7 @@ public class CyBenchLauncher {
         Map<String, Object> benchmarkSettings = new HashMap<>();
 
         Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
+        
         benchmarkSettings.put("benchSource", benchSource);
         benchmarkSettings.put("benchWarmUpIteration", launcherConfiguration.getWarmUpIterations());
         benchmarkSettings.put("benchWarmUpSeconds", launcherConfiguration.getWarmUpSeconds());
@@ -100,7 +106,7 @@ public class CyBenchLauncher {
 
 		if(launcherConfiguration.getClassCalled().size() > 0) {
 			for(String classname : launcherConfiguration.getClassCalled()) {
-				System.out.println("Classes sellected to run: "+ classname);
+				System.out.println("Classes selected to run: "+ classname);
 				optBuild.include(classname+"\\b");
 			}
 		}
@@ -121,6 +127,24 @@ public class CyBenchLauncher {
 					.build();
 	
 		Runner runner = new Runner(opt);
+
+        Map<String, String> generatedFingerprints = new HashMap<>();
+        Map<String, String> manualFingerprints = new HashMap<>();
+        Map<String, String> classFingerprints = new HashMap<>();
+
+        List<String> benchmarkNames = JMHUtils.getAllBenchmarkClasses();
+        for (String benchmarkClass : benchmarkNames) {
+            try {
+                Class<?> classObj = Class.forName(benchmarkClass);
+                SecurityUtils.generateMethodFingerprints(classObj, manualFingerprints, classFingerprints);
+                SecurityUtils.computeClassHashForMethods(classObj, generatedFingerprints);
+            } catch (ClassNotFoundException exc) {
+            	System.out.println("Class not found in the classpath for execution");
+            	exc.printStackTrace();
+            }
+
+
+        }
 	
 		Collection<RunResult> results = runner.run() ;
 		
@@ -135,6 +159,14 @@ public class CyBenchLauncher {
         report.getEnvironmentSettings().put("userDefinedProperties", customUserDefinedProperties(launcherConfiguration.getUserProperties()));
         report.setBenchmarkSettings(benchmarkSettings);
 
+        List<BenchmarkReport> custom = report.getBenchmarks().get("CUSTOM").stream().collect(Collectors.toList());
+        custom.stream().forEach(benchmarkReport -> {
+            String name = benchmarkReport.getName();
+            benchmarkReport.setClassFingerprint(classFingerprints.get(name));
+            benchmarkReport.setGeneratedFingerprint(generatedFingerprints.get(name));
+            benchmarkReport.setManualFingerprint(manualFingerprints.get(name));
+
+        });
         //FIXME add all missing custom properties including public/private flag
 
         System.out.println("-----------------------------------------------------------------------------------------");
