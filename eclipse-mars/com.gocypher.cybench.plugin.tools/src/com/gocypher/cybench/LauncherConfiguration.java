@@ -45,6 +45,7 @@ public class LauncherConfiguration {
 	private Set<String> classCalled = new LinkedHashSet<String>();
 	
 	private double executionScore = -1.0d;
+	private boolean useCyBenchBenchmarkSettings = false;
 	
 	public LauncherConfiguration() {
 	
@@ -202,6 +203,15 @@ public class LauncherConfiguration {
 	public void setClassCalled(Set<String> classCalled) {
 		this.classCalled = classCalled;
 	}
-	
+
+	public boolean isUseCyBenchBenchmarkSettings() {
+		return useCyBenchBenchmarkSettings;
+	}
+
+
+
+	public void setUseCyBenchBenchmarkSettings(boolean useCyBenchBenchmarkSettings) {
+		this.useCyBenchBenchmarkSettings = useCyBenchBenchmarkSettings;
+	}
 
 }

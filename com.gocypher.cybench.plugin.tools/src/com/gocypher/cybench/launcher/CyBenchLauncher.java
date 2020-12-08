@@ -110,8 +110,9 @@ public class CyBenchLauncher {
 				optBuild.include(classname+"\\b");
 			}
 		}
-		
-		Options opt = optBuild
+		Options opt;
+		if(launcherConfiguration.isUseCyBenchBenchmarkSettings()){
+			opt = optBuild
 					.forks(launcherConfiguration.getForks())
 					.measurementIterations(launcherConfiguration.getMeasurementIterations())
 					.warmupIterations(launcherConfiguration.getWarmUpIterations())
@@ -125,6 +126,16 @@ public class CyBenchLauncher {
                     .addProfiler(HotspotRuntimeProfiler.class)
                     .addProfiler(SafepointsProfiler.class)
 					.build();
+		}else {
+			opt = optBuild
+					.shouldDoGC(true)
+					.detectJvmArgs()
+					.addProfiler(GCProfiler.class)
+                    .addProfiler(HotspotThreadProfiler.class)
+                    .addProfiler(HotspotRuntimeProfiler.class)
+                    .addProfiler(SafepointsProfiler.class)
+					.build();
+		}
 	
 		Runner runner = new Runner(opt);
 
@@ -228,6 +239,7 @@ public class CyBenchLauncher {
 		launcherConfiguration.setUserProperties(checkNullAndReturnString("CUSTOM_USER_PROPERTIES"));
 		   
 
+		launcherConfiguration.setUseCyBenchBenchmarkSettings(checkNullAndReturnBoolean("USE_CYBNECH_BENCHMARK_SETTINGS"));
 		launcherConfiguration.setClassCalled(checkNullAndReturnSet("REPORT_CLASSES"));
 		launcherConfiguration.setMeasurmentSeconds(checkNullAndReturnInt("MEASURMENT_SECONDS"));
 		launcherConfiguration.setExecutionScore(checkNullAndReturnInt("DEXECUTION_SCORE"));

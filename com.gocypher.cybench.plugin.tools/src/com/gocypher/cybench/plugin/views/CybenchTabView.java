@@ -82,6 +82,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 
     private Text jvmProperties;
     private Text userProperties;
+    private Button useCyBenchBenchmarkSettings;
     
 //    private Button shouldStoreReportToFileSystem;
     private Button shouldSendReportToCyBench;
@@ -113,6 +114,11 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         benchmarking.setText("Benchmarking settings");
         benchmarking.setLayout(new GridLayout(10, false));
         
+	        Label useCyBenchBenchmarkSettingsLabel = new Label(benchmarking, SWT.NONE);
+	        useCyBenchBenchmarkSettingsLabel.setText("Use CyBench Benchmark Settings:");
+	        useCyBenchBenchmarkSettings = new Button(benchmarking, SWT.CHECK);
+	        useCyBenchBenchmarkSettings.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 8, 1)); 
+
 	        /* Report execution number of forks */
 	        Label executionForkCountLabel = new Label(benchmarking, SWT.NONE);
 	        executionForkCountLabel.setText("Forks:");
@@ -142,6 +148,13 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 	        Label executionMeasurmentsSecondsLabel = new Label(benchmarking, SWT.NONE);
 	        executionMeasurmentsSecondsLabel.setText("Measurment time (s):");
 	        measurmentSeconds = new Spinner(benchmarking, SWT.BORDER);
+	        
+ 	        useCyBenchBenchmarkSettings.addSelectionListener(new SelectionAdapter() {
+ 	            public void widgetSelected(SelectionEvent e) {
+ 	            	useCybenchEnableDisable();
+ 	            }
+	        });
+ 	    
 
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(executionForkCountLabel);
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(executionThreadsCountLabel);
@@ -161,7 +174,23 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 	        
 			return benchmarking;
     }
-
+    private void useCybenchEnableDisable() {
+    	if(!useCyBenchBenchmarkSettings.getSelection()) {
+    		forks.setEnabled(false);
+    		threads.setEnabled(false);
+    		warmupIterations.setEnabled(false);
+    		warmupSeconds.setEnabled(false);
+    		measurmentIterations.setEnabled(false);
+    		measurmentSeconds.setEnabled(false);
+    	}else {
+    		forks.setEnabled(true);
+    		threads.setEnabled(true);
+    		warmupIterations.setEnabled(true);
+    		warmupSeconds.setEnabled(true);
+    		measurmentIterations.setEnabled(true);
+    		measurmentSeconds.setEnabled(true);
+    	}
+    }
     private Group  prepareCyBenchConfigurations(Composite comp, String[] itemsArray) {
     	  
     	 configuration = new Group(comp, SWT.NONE);
@@ -246,28 +275,16 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        shouldSendReportToCyBench = new Button(configuration, SWT.CHECK);
  	        shouldSendReportToCyBench.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 4, 1)); 
 
- 	       
 
  	        Label doHardwarePropertiesSnapshotLabel = new Label(configuration, SWT.NONE);
  	        doHardwarePropertiesSnapshotLabel.setText("Include Hardware Propeties");
  	        shouldDoHardwareSnapshot = new Button(configuration, SWT.CHECK);
  	        shouldDoHardwareSnapshot.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 4, 1)); 
-    		shouldDoHardwareSnapshot.setEnabled(false);
-//    		shouldDoHardwareSnapshot.setVisible(false);
-//    		doHardwarePropertiesSnapshotLabel.setVisible(false);
+        	shouldSendReportEnableDisable();
  	        
  	        shouldSendReportToCyBench.addSelectionListener(new SelectionAdapter() {
 	            public void widgetSelected(SelectionEvent e) {
-	            	if(shouldSendReportToCyBench.getSelection()) {
-	            		shouldDoHardwareSnapshot.setSelection(true);
-	            		shouldDoHardwareSnapshot.setEnabled(false);
-//	            		shouldDoHardwareSnapshot.setVisible(false);
-//	            		doHardwarePropertiesSnapshotLabel.setVisible(false);
-	            	}else {
-	            		shouldDoHardwareSnapshot.setEnabled(true);
-//	            		shouldDoHardwareSnapshot.setVisible(true);
-//	            		doHardwarePropertiesSnapshotLabel.setVisible(true);
-	            	}
+	            	shouldSendReportEnableDisable();
 	            }
 	
 	        });
@@ -299,7 +316,14 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 			return configuration;
  	        
     }
-    
+    private void shouldSendReportEnableDisable() {
+    	if(shouldSendReportToCyBench.getSelection()) {
+    		shouldDoHardwareSnapshot.setSelection(true);
+    		shouldDoHardwareSnapshot.setEnabled(false);
+    	}else {
+    		shouldDoHardwareSnapshot.setEnabled(true);
+    	}
+    }
     private Group prepareConditionGroup(Composite comp) {
     	  conditions = new Group(comp, SWT.NONE);
           conditions.setText("Execution Conditions");
@@ -364,6 +388,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 //            boolean storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
             boolean sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
             boolean includehardwarePropeties = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
+            boolean useCybenchbenchmarkSettingsDef = configuration.getAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, true);
             
             reportsFolder.setText(reportFolderDef);
             reportsFolder.addModifyListener(modifyListener);
@@ -404,6 +429,11 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             shouldDoHardwareSnapshot.setSelection(includehardwarePropeties);
             shouldDoHardwareSnapshot.addSelectionListener(selectionListener);
             
+            useCyBenchBenchmarkSettings.setSelection(useCybenchbenchmarkSettingsDef);
+            useCyBenchBenchmarkSettings.addSelectionListener(selectionListener);
+            shouldSendReportEnableDisable();
+            useCybenchEnableDisable();
+            
         } catch (CoreException e) {
         	GuiUtils.logError("There was a problem on the run configuration initialization: ", e);
         }
@@ -429,6 +459,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 //        configuration.setAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, shouldStoreReportToFileSystem.getSelection());
         configuration.setAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, shouldSendReportToCyBench.getSelection());
         configuration.setAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, shouldDoHardwareSnapshot.getSelection());
+        
+        configuration.setAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, useCyBenchBenchmarkSettings.getSelection());
         
         configuration.setAttribute(LaunchConfiguration.EXECUTION_SCORE, expectedScore.getSelection());
         
