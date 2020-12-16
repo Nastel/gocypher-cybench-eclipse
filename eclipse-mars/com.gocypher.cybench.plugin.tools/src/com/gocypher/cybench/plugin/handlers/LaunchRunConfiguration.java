@@ -120,16 +120,8 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			classPaths.addAll(Arrays.asList(launchPath.split(",")));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) );
-			List<String> classpathMementos = new ArrayList<String>();
-			for (int i = 0; i < classPaths.size(); i++) {
-			    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classPaths.get(i)));
-			    cpEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-			    try {
-			        classpathMementos.add(cpEntry.getMemento());
-			    } catch (CoreException e) {
-			    	GuiUtils.logError ("Error during classpath add",e) ;
-			    }
-			}
+
+			List<String> classpathMementos = LauncherUtils.getNeededClassPaths(project, classPaths);
 	    	//GuiUtils.logInfo("Classpath: "+classpathMementos) ;
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);

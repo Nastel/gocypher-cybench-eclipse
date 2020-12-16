@@ -19,8 +19,11 @@
 
 package com.gocypher.cybench.plugin.utils;
 
+import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.commands.ExecutionEvent;
@@ -33,14 +36,21 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.m2e.jdt.IClasspathManager;
+import org.eclipse.m2e.jdt.MavenJdtPlugin;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -56,6 +66,10 @@ public class LauncherUtils {
 	public static String SRC_FOLDER_FOR_BENCHMARKS_MVN="/src/test/java" ;
 	public static String GRADLE_JMH_DEPENDENCY="	implementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.26'"+ "\n";
 	public static String GRADLE_JMH_ANNOTATION_DEPENDENCY="	annotationProcessor  group: 'org.openjdk.jmh', name:'jmh-generator-annprocess', version:'1.26'"+ "\n";
+
+	static IProgressMonitor monitor = new NullProgressMonitor(); 
+    private static final int CLASSPATH_SCOPE = IClasspathManager.CLASSPATH_RUNTIME; 
+    
 	
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
@@ -178,6 +192,7 @@ public class LauncherUtils {
 	    			}
 
  					javaProject = (IJavaProject)JavaCore.create((IProject)project);
+ 					selectionEntry.setJavaProjectSelected(javaProject);
 					selectionEntry.setProjectSelected(project);
 	 				runSelectionClassesInformation(project, javaProject, selectionEntry);
 		    		selectionEntry.setProjectName(selectionEntry.getProjectPath().substring(selectionEntry.getProjectPath().lastIndexOf('/') + 1));
@@ -210,40 +225,87 @@ public class LauncherUtils {
 	  
 	public static void runSelectionClassesInformation(IProject project, IJavaProject javaProject, RunSelectionEntry selectionEntry ) {
 		try {
-	    			if(javaProject!=null && javaProject.getOutputLocation()!=null) {
-//	    				System.out.println("javaProject.getOutputLocation():"+javaProject.getOutputLocation());
-//	    				System.out.println("selectionEntry.getProjectPath():"+selectionEntry.getProjectPath());
-	    				String outputLocation = javaProject.getOutputLocation().toPortableString();
-	    				String classPathOutput = selectionEntry.getProjectPath().substring(0, selectionEntry.getProjectPath().lastIndexOf('/')) + outputLocation;
-		    			if (isMavenProject(project)) {
-		    				String testPath = classPathOutput.substring(0, classPathOutput.lastIndexOf('/'))+ "/test-"+outputLocation.substring(outputLocation.lastIndexOf('/') + 1);
-	    					selectionEntry.setOutputPath(classPathOutput+","+testPath);
-    					}else if(isGradleProject(project)) {
-    						String testPath = classPathOutput.substring(0, classPathOutput.lastIndexOf('/'))+ "/test";
-	    					selectionEntry.setOutputPath(classPathOutput+","+testPath);
-	    					
-	    				}else {
-	    					selectionEntry.setOutputPath(classPathOutput);
-	    				}
-	    				IPackageFragmentRoot[] fragmetnRootsTest = javaProject.getAllPackageFragmentRoots();
-//	    				System.out.println("selectionEntry.getOutputPath():"+selectionEntry.getOutputPath());
-	    				Set<String> tempClassSet = new HashSet<String>();
-	    				for(IPackageFragmentRoot root : fragmetnRootsTest) {
-	    					if(root.getKind() == IPackageFragmentRoot.K_SOURCE) {
-	    						for(String classPath : selectionEntry.getClassPaths()) {
-		    						if(classPath.contains(root.getPath().toPortableString())){
-		    							selectionEntry.addSourcePathsWithClasses(root.getPath().toPortableString());
-		    							tempClassSet.add(classPath.replace(root.getPath().toPortableString()+"/", "").replace("/", "."));
-		    						}
-	    						}
-	    					}
-	    				}
-	    				selectionEntry.setClassPaths(tempClassSet);
-	    			}  
+			String classPaths = "";
+			if(javaProject!=null && javaProject.getOutputLocation()!=null && selectionEntry.getProjectPath().lastIndexOf('/') != -1) {
+				String outputLocation = javaProject.getOutputLocation().toPortableString();
+				String classPathOutput = selectionEntry.getProjectPath().substring(0, selectionEntry.getProjectPath().lastIndexOf('/')) + outputLocation;
+    			if (isMavenProject(project)) {
+    				String testPath = classPathOutput.substring(0, classPathOutput.lastIndexOf('/'))+ "/test-"+outputLocation.substring(outputLocation.lastIndexOf('/') + 1);
+					selectionEntry.setOutputPath(classPaths+classPathOutput+","+testPath);
+				}else if(isGradleProject(project)) {
+					String testPath = classPathOutput.substring(0, classPathOutput.lastIndexOf('/'))+ "/test";
+					selectionEntry.setOutputPath(classPaths+classPathOutput+","+testPath);
+					
+				}else {
+					selectionEntry.setOutputPath(classPaths+classPathOutput);
+				}
+				IPackageFragmentRoot[] fragmetnRootsTest = javaProject.getAllPackageFragmentRoots();
+				Set<String> tempClassSet = new HashSet<String>();
+				for(IPackageFragmentRoot root : fragmetnRootsTest) {
+					if(root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+						for(String classPath : selectionEntry.getClassPaths()) {
+    						if(classPath.contains(root.getPath().toPortableString())){
+    							selectionEntry.addSourcePathsWithClasses(root.getPath().toPortableString());
+    							tempClassSet.add(classPath.replace(root.getPath().toPortableString()+"/", "").replace("/", "."));
+    						}
+						}
+					}
+				}
+				selectionEntry.setClassPaths(tempClassSet);
+			}  
 		
 		} catch (Exception e) {			
 			GuiUtils.logError ("Error on class information ",e) ;
 		}
+	}
+	
+	public static List<String> getNeededClassPaths(IProject project, List<String> classPaths ){
+		List<String> classpathMementos = new ArrayList<String>();
+		for (int i = 0; i < classPaths.size(); i++) {
+		    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classPaths.get(i)));
+		    cpEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+		    try {
+		        classpathMementos.add(cpEntry.getMemento());
+		    } catch (CoreException e) {
+		    	GuiUtils.logError ("Error during classpath add",e) ;
+		    }
+		}
+		IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
+		try {
+			if(isMavenProject(project)) {
+				IClasspathEntry[] mavenClasspathEntries = resolveMavenClasspath(javaProject, monitor);
+				for(IClasspathEntry mavenEntry : mavenClasspathEntries) {
+				    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(mavenEntry.getPath().toOSString()));
+					classpathMementos.add(cpEntry.getMemento());
+				}
+			}else if(isJavaProject(project)){
+				IClasspathEntry[] javaClasspaths = javaProject.getRawClasspath();
+				for(IClasspathEntry mavenEntry : javaClasspaths) {
+					if(new File(mavenEntry.getPath().toOSString()).isAbsolute()) {
+						IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(mavenEntry.getPath().toOSString()));
+						classpathMementos.add(cpEntry.getMemento());
+			        }
+				}
+			}else {
+				
+			}
+		} catch (Exception e) { 
+			GuiUtils.logError("Could not resolve maven/java/gradle dependencies classpath container for project.",e);
+		}
+		return classpathMementos;
+	}
+	
+	protected static IClasspathEntry[] resolveMavenClasspath(IJavaProject javaProject,IProgressMonitor monitor){
+	  IProject project=javaProject.getProject();
+	  try {
+	    MavenJdtPlugin plugin=MavenJdtPlugin.getDefault();
+	    IClasspathManager buildpathManager=plugin.getBuildpathManager();
+	    return buildpathManager.getClasspath(project,CLASSPATH_SCOPE,false,monitor);
+	  }
+	 catch (  CoreException e) {
+		 GuiUtils.logError("Could not resolve maven dependencies classpath container for project.",e);
+	  }
+	  return null;
 	}
 	
 	public static IPath getSourceFolderForBenchmarks (IProject project) throws Exception{

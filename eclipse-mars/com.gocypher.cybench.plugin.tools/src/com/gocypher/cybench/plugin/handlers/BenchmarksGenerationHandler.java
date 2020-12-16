@@ -20,6 +20,7 @@
 package com.gocypher.cybench.plugin.handlers;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,7 +33,10 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -43,10 +47,13 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorDescriptor;
+import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.part.FileEditorInput;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Level;
@@ -129,21 +136,37 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 					}
 	    		}
 	    		if(fileExists!= null && fileExists.exists()) {
-					IFileStore fileStore = EFS.getLocalFileSystem().getStore(fileExists.toURI());
-					IDE.openEditorOnFileStore(page, fileStore);
+	    			IProject project = selectionEntry.getProjectSelected();
+	  		        if(project != null) {
+	  		        	IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
+	  		        	GuiUtils.refreshProject(javaProject);
+	  		        }
+					URI uri = fileExists.toURI();
+					IEditorDescriptor desc = getEditorDescriptor(uri);
+					String editorId = (desc == null) ? IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID : desc.getId();
+					String projectPath = selectionEntry.getProjectPath().replace("/", "\\");
+					String pathToOpen = fileExists.toString().replace(projectPath, "").substring(1);
+	    			IPath path = new Path(pathToOpen);
+	    			IFile fileToUse = selectionEntry.getProjectSelected().getFile(path);
+					page.openEditor(new FileEditorInput(fileToUse), editorId);
 	    		}
-    		}
-		    IProject project = selectionEntry.getProjectSelected();
-	        if(project != null) {
-	        	IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
-	        	GuiUtils.refreshProject(javaProject);
-	        }		
+    		}		
 		} catch (Exception e) {
 			GuiUtils.logError ("JAVA Code generation error",e);
 		}
 		return null;
 	}
-	
+	public static IEditorDescriptor getEditorDescriptor(URI uri)
+	{
+		// NOTE: Moved from PHP's EditorUtils
+		String uriPath = uri.getPath();
+		if (uriPath.isEmpty()|| uriPath.equals("/")) //$NON-NLS-1$
+		{
+			return null;
+		}
+		IPath path = new Path(uriPath);
+		return PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(path.lastSegment());
+	}
 	private JMethod generateBenchmarkMethod(JDefinedClass generationClass, JCodeModel codeModelInstance, BenchmarkMethodModel model) {
 		JMethod benchmark = generationClass.method(1, model.getMethodType(), model.getMethodName());
 		benchmark.param(Blackhole.class, "bh");

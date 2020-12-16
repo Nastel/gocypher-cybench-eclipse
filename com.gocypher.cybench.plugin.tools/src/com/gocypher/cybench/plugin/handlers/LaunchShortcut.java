@@ -23,7 +23,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -32,10 +35,14 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.ILaunchShortcut;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.m2e.jdt.IClasspathManager;
+import org.eclipse.m2e.jdt.MavenJdtPlugin;
 import org.eclipse.ui.IEditorPart;
 
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
@@ -46,8 +53,34 @@ import com.gocypher.cybench.plugin.utils.LauncherUtils;
 
 public class LaunchShortcut implements ILaunchShortcut {
 
+	/**
+	* @component
+	*/
+//	private ArtifactResolver artifactResolver;
+//	/**
+//	*
+//	* @component
+//	*/
+//	private ArtifactFactory artifactFactory;
+//	/**
+//	*
+//	* @component
+//	*/
+//	private ArtifactMetadataSource metadataSource;
+//	/**
+//	*
+//	* @parameter expression="${localRepository}"
+//	*/
+//	private ArtifactRepository localRepository;
+//	/**
+//	*
+//	* @parameter expression="${project.remoteArtifactRepositories}"
+//	*/
+//	private List remoteRepositories;
 
-
+	IProgressMonitor monitor = new NullProgressMonitor(); 
+    private static final int CLASSPATH_SCOPE = IClasspathManager.CLASSPATH_RUNTIME; 
+    
 	@Override
 	public void launch(ISelection selection, String mode) {
 		try {
@@ -67,17 +100,8 @@ public class LaunchShortcut implements ILaunchShortcut {
 			classPaths.addAll(Arrays.asList(selectionEntry.getOutputPath().split(",")));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) );
-			List<String> classpathMementos = new ArrayList<String>();
-			for (int i = 0; i < classPaths.size(); i++) {
-			    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classPaths.get(i)));
-			    cpEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-			    try {
-			        classpathMementos.add(cpEntry.getMemento());
-			    } catch (CoreException e) {
-			    	GuiUtils.logError ("Error during classpath add",e) ;
-			    }
-			}
-	    	//GuiUtils.logInfo("Classpath: "+classpathMementos) ;
+			List<String> classpathMementos = LauncherUtils.getNeededClassPaths(selectionEntry.getProjectSelected(), classPaths);
+//	    	GuiUtils.logInfo("Classpath: "+classpathMementos) ;
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
@@ -112,7 +136,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 		}
 		
 	}
-
+	
     private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config, RunSelectionEntry selection) {
 		System.out.println(
 				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\""

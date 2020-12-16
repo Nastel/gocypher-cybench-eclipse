@@ -10,6 +10,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
@@ -17,6 +18,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -29,8 +31,11 @@ public class MessageDialogView  extends Dialog {
 
     private List<BenchmarkMethodModel> methodsExist;
     private List<BenchmarkMethodModel> methodsToGenerate = new ArrayList<BenchmarkMethodModel>();;
-	List<Label> methodLabels = new ArrayList<Label>();
     List<Button> methodSelections =  new ArrayList<Button>();
+    Button checkALL;
+    Button uncheckAll;
+    private Combo modeChoice;
+    
     private ScrolledComposite scrolledComposite;
     Label hintText;
     private final String textForHint = "HINT: if no method is selected only the stub will be generated";
@@ -47,20 +52,52 @@ public class MessageDialogView  extends Dialog {
 
     @Override
     protected Control createDialogArea(Composite parent) {
+	    Composite popupViewPort = (Composite) super.createDialogArea(parent);
+	    popupViewPort.setLayout(new GridLayout(6, false));
+	    popupViewPort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+	     
+    	 String[] methodModeTypes = {"Throughput", "AverageTime", "SampleTime", "SingleShotTime"};
+         modeChoice = new Combo(popupViewPort, SWT.BORDER); 
+         modeChoice.setItems(methodModeTypes);
+//         modeChoice.setLayout(new GridLayout(6, false));
+         modeChoice.setText(methodModeTypes[0]);
+         modeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 6, 1));
+         
+         checkALL = new Button(popupViewPort, SWT.BUTTON1);
+         checkALL.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, true, false, 3,1)); 
+         checkALL.setText("Select All");
+         checkALL.addSelectionListener(selectAll);
+ 	        
+         uncheckAll = new Button(popupViewPort, SWT.BUTTON1);
+         uncheckAll.setLayoutData(new GridData(SWT.LEFT, SWT.NONE, true, false, 3,1)); 
+         uncheckAll.setText("Select None");
+         uncheckAll.addSelectionListener(selectNone);
+         
         Composite content = (Composite) super.createDialogArea(parent);
         content.setLayout(new FillLayout());
+        content.setSize(new Point(420, 300));
+
+        
         scrolledComposite = new ScrolledComposite(content, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-        Composite container = new Composite(scrolledComposite, SWT.NONE);
-        container.setLayout(new GridLayout(10, false));
+        scrolledComposite.setLayout(new GridLayout());
+        scrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//        scrolledComposite.setAlwaysShowScrollBars(true);
+
+//        GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+//        data.heightHint = 200;
+//        scrolledComposite.setLayoutData(data);
+        
+        Composite container = new Composite(scrolledComposite, SWT.MULTI);
+        container.setLayout(new GridLayout(6, false));
+
+
+        
         int i = 0;
         for(BenchmarkMethodModel method : methodsExist) {
-        	methodLabels.add(new Label(container, SWT.NONE));
-        	methodLabels.get(i).setText(method.getMethodName()+"() : "+method.getMethodType());
-        	methodLabels.get(i).setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 7, 1)); 
- 	        
  	        methodSelections.add(new Button(container, SWT.CHECK));
- 	        methodSelections.get(i).setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 3, 1)); 
+ 	        methodSelections.get(i).setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 3,1)); 
  	        methodSelections.get(i).addSelectionListener(selectionListener);
+ 	        methodSelections.get(i).setText(method.getMethodName()+"() : "+method.getMethodType());
         	i++;
         }
         
@@ -74,6 +111,29 @@ public class MessageDialogView  extends Dialog {
         return parent;
     }
     
+    private SelectionListener selectAll = new SelectionListener() {
+    	@Override
+  		public void widgetSelected(SelectionEvent arg0) {
+  	        for(Button checkBox : methodSelections) {
+  	        	checkBox.setSelection(true);
+  	        }
+  		}
+		@Override
+		public void widgetDefaultSelected(SelectionEvent arg0) {
+		}
+    };
+    private SelectionListener selectNone = new SelectionListener() {
+    	@Override
+  		public void widgetSelected(SelectionEvent arg0) {
+  	        for(Button checkBox : methodSelections) {
+  	        	checkBox.setSelection(false);
+  	        }
+  		}
+		@Override
+		public void widgetDefaultSelected(SelectionEvent arg0) {
+		}
+    };
+    
     private SelectionListener selectionListener = new SelectionListener() {
 
   		@Override
@@ -85,7 +145,6 @@ public class MessageDialogView  extends Dialog {
   		public void widgetSelected(SelectionEvent arg0) {
   			boolean buttonChecked = false;
   	        for(Button checkBox : methodSelections) {
-  	        	GuiUtils.logInfo(checkBox.getSelection()+"");
   	        	if(checkBox.getSelection()) {
   	        		buttonChecked = checkBox.getSelection();
 		  	 	    break;
@@ -114,17 +173,28 @@ public class MessageDialogView  extends Dialog {
         newShell.setText("Select Methods To Generate Benchmarks");
      
     }
-
+    @Override
+    protected boolean isResizable() {
+        return true;
+    }
     @Override
     protected Point getInitialSize() {
-        return new Point(450, 300);
+        return new Point(550, 380);
     }
 
 	@Override
     public void okPressed() {
 		int i = 0;
+    	List<String> selectedMethodNames = new ArrayList<String>();
         for(Button checkBox : methodSelections) {
         	if(checkBox.getSelection()) {
+        		methodsExist.get(i).setMethodBenchmarkMode(modeChoice.getText());
+        		if(!selectedMethodNames.contains(methodsExist.get(i).getMethodName())) {
+        			selectedMethodNames.add(methodsExist.get(i).getMethodName());
+            		methodsExist.get(i).setMethodName(methodsExist.get(i).getMethodName()+"Benchmark");
+        		}else {
+            		methodsExist.get(i).setMethodName(methodsExist.get(i).getMethodName()+"Benchmark1");
+        		}
         		methodsToGenerate.add(methodsExist.get(i));
         	}
         	i++;
@@ -160,6 +230,10 @@ public class MessageDialogView  extends Dialog {
     }
 
 
+	public String becnhmarkingMethodChoice() {
+		return modeChoice.getText();
+	}
+	
 	public List<BenchmarkMethodModel> getMethodsToGenerate() {
 		return methodsToGenerate;
 	}

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaProject;
 
 public class RunSelectionEntry {
 
@@ -35,6 +36,7 @@ public class RunSelectionEntry {
 		private Set<String> classPaths = new LinkedHashSet<>();
 		private String projectReportsPath;
 		private IProject projectSelected;
+		private IJavaProject javaProjectSelected;
 		
 		public String getProjectReportsPath() {
 			return projectReportsPath;
@@ -89,6 +91,12 @@ public class RunSelectionEntry {
 		}
 		public void setProjectSelected(IProject projectSelected) {
 			this.projectSelected = projectSelected;
+		}
+		public IJavaProject getJavaProjectSelected() {
+			return javaProjectSelected;
+		}
+		public void setJavaProjectSelected(IJavaProject javaProjectSelected) {
+			this.javaProjectSelected = javaProjectSelected;
 		}
 }
 

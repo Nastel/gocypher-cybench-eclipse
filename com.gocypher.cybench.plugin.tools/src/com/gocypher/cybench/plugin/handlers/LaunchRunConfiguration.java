@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
@@ -36,9 +37,14 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.m2e.jdt.IClasspathManager;
+import org.eclipse.m2e.jdt.MavenJdtPlugin;
 
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
@@ -65,7 +71,8 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private int excutionScoreBoundary ;
 	private String selectionFolderPath;
 	private boolean useCyBenchBenchmarkSettings;
-    
+	
+
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
 			URL pluginURL = FileLocator.resolve(Platform.getBundle(bundleSymbolicName).getEntry("/"));
@@ -120,17 +127,8 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			classPaths.addAll(Arrays.asList(launchPath.split(",")));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) );
-			List<String> classpathMementos = new ArrayList<String>();
-			for (int i = 0; i < classPaths.size(); i++) {
-			    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classPaths.get(i)));
-			    cpEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-			    try {
-			        classpathMementos.add(cpEntry.getMemento());
-			    } catch (CoreException e) {
-			    	GuiUtils.logError ("Error during classpath add",e) ;
-			    }
-			}
-	    	//GuiUtils.logInfo("Classpath: "+classpathMementos) ;
+			List<String> classpathMementos = LauncherUtils.getNeededClassPaths(project, classPaths);
+//	    	GuiUtils.logInfo("Classpath: "+classpathMementos) ;
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
@@ -161,6 +159,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		}
 		
 	}
+	
     private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config) {
     	GuiUtils.logInfo("-DFORKS_COUNT="+forks+
 				" -DTHREADS_COUNT="+thread+
