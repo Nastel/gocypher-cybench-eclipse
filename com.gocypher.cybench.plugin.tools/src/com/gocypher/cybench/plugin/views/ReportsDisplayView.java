@@ -24,6 +24,8 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.net.URL;
+import java.util.Enumeration;
+import java.util.ResourceBundle;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -413,9 +415,25 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	}
 	
 	private String getTextFromSelectedRows(TableViewer reportViewer) {
+		String copyText= "";
 		ISelection selectedRowtext = reportViewer.getSelection();
-		GuiUtils.logInfo("test: "+ selectedRowtext);
-		return selectedRowtext.toString();
+		if(selectedRowtext.toString()!=null) {
+		  copyText = selectedRowtext.toString().substring(1, selectedRowtext.toString().length()-1);
+		  ResourceBundle titles = GuiUtils.titles;
+		  Enumeration<String> keys = titles.getKeys();
+		  	while (keys.hasMoreElements()) {
+				String key = keys.nextElement();
+				if (!titles.containsKey(key)) {
+					continue;
+				}
+				String val = titles.getString(key);
+				if (val != null && !val.isEmpty()) {
+				    GuiUtils.logInfo("copyText - val: "+copyText +" - "+ val.trim());
+				    copyText = copyText.replace(val.trim(), "");
+				}
+		  	}
+		}
+		return copyText;
 	}
 
 	private void createSummaryDetailsViewer (Composite parent) {

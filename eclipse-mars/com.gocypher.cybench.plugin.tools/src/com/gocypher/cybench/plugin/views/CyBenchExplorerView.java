@@ -121,6 +121,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 		        textStyle.font = boldFont;		
 			}
 		};
+		this.refreshView();
 	}
 	
 	private void loadData () {		
@@ -215,7 +216,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 		hookDoubleClickAction();
 		contributeToActionBars();
 		
-		
+		refreshView();
 	}
 
 	private void hookContextMenu() {

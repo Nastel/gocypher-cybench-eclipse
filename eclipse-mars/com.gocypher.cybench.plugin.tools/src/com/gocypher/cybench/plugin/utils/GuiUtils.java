@@ -56,7 +56,7 @@ import com.gocypher.cybench.plugin.views.ReportsDisplayView;
 
 public class GuiUtils {
 	public static ILog LOG = Activator.getDefault().getLog();
-	private static ResourceBundle titles = ResourceBundle.getBundle("titles");
+	public static ResourceBundle titles = ResourceBundle.getBundle("titles");
 	
 	public static String getKeyName(String key) {
 		if (titles.containsKey(key)) {
