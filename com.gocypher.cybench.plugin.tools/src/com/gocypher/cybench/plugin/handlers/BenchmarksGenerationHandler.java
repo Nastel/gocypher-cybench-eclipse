@@ -20,12 +20,10 @@
 package com.gocypher.cybench.plugin.handlers;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -66,7 +64,6 @@ import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
-import com.gocypher.cybench.core.annotation.BenchmarkTag;
 import com.gocypher.cybench.plugin.model.BenchmarkMethodModel;
 import com.gocypher.cybench.plugin.model.RunSelectionEntry;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
@@ -81,7 +78,6 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	
 	List<BenchmarkMethodModel> benchmarkMethods = new ArrayList<BenchmarkMethodModel>();
 	boolean generationMethodsSelected = false;
-	private String tag;
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -168,7 +164,7 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		return PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(path.lastSegment());
 	}
 	
-	private JMethod generateBenchmarkMethod(JDefinedClass generationClass, JCodeModel codeModelInstance, BenchmarkMethodModel model) {
+	private JMethod generateBenchmarkMethod(JDefinedClass generationClass, JCodeModel codeModelInstance, BenchmarkMethodModel model) throws ClassNotFoundException, FileNotFoundException {
 		JMethod benchmark = generationClass.method(1, model.getMethodType(), model.getMethodName());
 		benchmark.param(Blackhole.class, "bh");
 		benchmark.annotate(codeModelInstance.ref(Benchmark.class));
@@ -180,6 +176,16 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		benchmark.annotate(codeModelInstance.ref(Measurement.class)).param("iterations", 2).param("time", 5).param("timeUnit", TimeUnit.SECONDS);
 		benchmark.annotate(codeModelInstance.ref(Warmup.class)).param("iterations", 1).param("time", 5).param("timeUnit", TimeUnit.SECONDS);
 		
+		if(model.getExceptionTypes().length>0) {
+			benchmark._throws(Exception.class);
+		}else {
+	//		for(String exceptionType : model.getExceptionTypes()) {
+	//			JClass exceptionClass =codeModelInstance.ref(exceptionType.substring(1, exceptionType.length()-1));
+	//			Class c = Class.forName(exceptionType.substring(1, exceptionType.length()-1));
+	//			GuiUtils.logInfo("codeModelInstance.ref(exceptionType); :   "+exceptionClass);
+	//			benchmark._throws(Mode.deepValueOf(exceptionType));
+	//		}
+		}
 //		benchmark.annotate(codeModelInstance.ref(BenchmarkTag.class)).param("tag", UUID.randomUUID().toString());
 		benchmark.body().directStatement(model.getMethodHint());
 		return benchmark;
@@ -210,7 +216,7 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 			method.annotate(codeModelInstance.ref(TearDown.class)).param("value", Level.Iteration);
 		break;
 		default:
-			System.out.println("Method type not recognized, will skip");
+			GuiUtils.logInfo("Method type not recognized, will skip");
 			return null;
 		}
 		
@@ -238,8 +244,14 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		}
 	}
 	
-	private void fillBenchmarkMethodInformation(IMethod methodDataObject) {
+	private void fillBenchmarkMethodInformation(IMethod methodDataObject) throws JavaModelException {
+		String[] exceptionTypes = methodDataObject.getExceptionTypes();
+		String[] parameterTypes = methodDataObject.getParameterTypes();
+//		String[] parameterNames = methodDataObject.getParameterNames();
+
 		BenchmarkMethodModel model = new BenchmarkMethodModel();
+		model.setExceptionTypes(exceptionTypes);
+		model.setParameterTypes(parameterTypes);
 		model.setMethodName(methodDataObject.getElementName());
 		model.setMethodBenchmarkMode("Throughput");
 		model.setMethodType(void.class);

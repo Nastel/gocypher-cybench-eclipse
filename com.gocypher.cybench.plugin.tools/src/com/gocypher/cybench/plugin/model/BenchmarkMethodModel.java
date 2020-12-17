@@ -25,6 +25,8 @@ public class BenchmarkMethodModel {
 	private Class<?> methodType;
 	private String methodBenchmarkMode;
 	private String methodHint;
+	private String[] exceptionTypes;
+	private String[] parameterTypes;
 	
 	public BenchmarkMethodModel(){
 		
@@ -52,6 +54,18 @@ public class BenchmarkMethodModel {
 	}
 	public void setMethodHint(String methodHint) {
 		this.methodHint = methodHint;
+	}
+	public String[] getExceptionTypes() {
+		return exceptionTypes;
+	}
+	public void setExceptionTypes(String[] exceptionTypes) {
+		this.exceptionTypes = exceptionTypes;
+	}
+	public String[] getParameterTypes() {
+		return parameterTypes;
+	}
+	public void setParameterTypes(String[] parameterTypes) {
+		this.parameterTypes = parameterTypes;
 	}
 
 }

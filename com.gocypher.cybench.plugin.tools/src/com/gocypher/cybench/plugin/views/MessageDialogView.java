@@ -56,27 +56,26 @@ public class MessageDialogView  extends Dialog {
 	    popupViewPort.setLayout(new GridLayout(6, false));
 	    popupViewPort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 	     
-    	 String[] methodModeTypes = {"Throughput", "AverageTime", "SampleTime", "SingleShotTime"};
-         modeChoice = new Combo(popupViewPort, SWT.BORDER); 
-         modeChoice.setItems(methodModeTypes);
+    	String[] methodModeTypes = {"Throughput", "AverageTime", "SampleTime", "SingleShotTime"};
+        modeChoice = new Combo(popupViewPort, SWT.BORDER); 
+        modeChoice.setItems(methodModeTypes);
 //         modeChoice.setLayout(new GridLayout(6, false));
-         modeChoice.setText(methodModeTypes[0]);
-         modeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 6, 1));
-         
-         checkALL = new Button(popupViewPort, SWT.BUTTON1);
-         checkALL.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, true, false, 3,1)); 
-         checkALL.setText("Select All");
-         checkALL.addSelectionListener(selectAll);
+        modeChoice.setText(methodModeTypes[0]);
+        modeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 6, 1));
+        
+        checkALL = new Button(popupViewPort, SWT.BUTTON1);
+        checkALL.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, true, false, 3,1)); 
+        checkALL.setText("Select All");
+        checkALL.addSelectionListener(selectAll);
  	        
-         uncheckAll = new Button(popupViewPort, SWT.BUTTON1);
-         uncheckAll.setLayoutData(new GridData(SWT.LEFT, SWT.NONE, true, false, 3,1)); 
-         uncheckAll.setText("Select None");
-         uncheckAll.addSelectionListener(selectNone);
+        uncheckAll = new Button(popupViewPort, SWT.BUTTON1);
+        uncheckAll.setLayoutData(new GridData(SWT.LEFT, SWT.NONE, true, false, 3,1)); 
+        uncheckAll.setText("Select None");
+        uncheckAll.addSelectionListener(selectNone);
          
         Composite content = (Composite) super.createDialogArea(parent);
         content.setLayout(new FillLayout());
         content.setSize(new Point(420, 300));
-
         
         scrolledComposite = new ScrolledComposite(content, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
         scrolledComposite.setLayout(new GridLayout());
@@ -89,8 +88,6 @@ public class MessageDialogView  extends Dialog {
         
         Composite container = new Composite(scrolledComposite, SWT.MULTI);
         container.setLayout(new GridLayout(6, false));
-
-
         
         int i = 0;
         for(BenchmarkMethodModel method : methodsExist) {
@@ -193,7 +190,12 @@ public class MessageDialogView  extends Dialog {
         			selectedMethodNames.add(methodsExist.get(i).getMethodName());
             		methodsExist.get(i).setMethodName(methodsExist.get(i).getMethodName()+"Benchmark");
         		}else {
-            		methodsExist.get(i).setMethodName(methodsExist.get(i).getMethodName()+"Benchmark1");
+        			String allParamsTypes = String.join("",  methodsExist.get(i).getParameterTypes());
+        			String[] stringArray = allParamsTypes.split("\\W+");
+        			allParamsTypes = String.join("",stringArray);
+        			allParamsTypes =allParamsTypes.replace("Q", "");
+        			GuiUtils.logInfo("Merged parameters types: "+allParamsTypes);
+            		methodsExist.get(i).setMethodName(methodsExist.get(i).getMethodName()+"Benchmark"+allParamsTypes);
         		}
         		methodsToGenerate.add(methodsExist.get(i));
         	}
