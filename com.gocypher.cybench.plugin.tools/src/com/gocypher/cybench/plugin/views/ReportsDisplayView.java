@@ -20,6 +20,9 @@
 package com.gocypher.cybench.plugin.views;
 
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.net.URL;
 
 import javax.annotation.PostConstruct;
@@ -33,12 +36,14 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.FontDescriptor;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -46,14 +51,19 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -367,6 +377,47 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 			}
 		}
 	}
+
+	private void copyTableValuePopupDetails(TableViewer reportViewer) {
+		MenuManager manager = new MenuManager();
+		reportViewer.getControl().setMenu(manager.createContextMenu(reportViewer.getControl()));
+
+		manager.add(new Action("Copy selected row", GuiUtils.getCustomImage("icons/cybench_symbol_small.png")) {
+		    @Override
+		    public void run() {
+		    	reportViewer.getSelection();
+		        Toolkit toolkit = Toolkit.getDefaultToolkit();
+				Clipboard clipboard = toolkit.getSystemClipboard();
+				StringSelection strSel = new StringSelection(getTextFromSelectedRows(reportViewer));
+				clipboard.setContents(strSel, null);
+		    }
+		});
+	}
+	
+	private KeyListener copyKeyListener(TableViewer reportViewer) {
+	    KeyListener copyKeyListenerDetails = new KeyListener() {
+			@Override
+			public void keyPressed(org.eclipse.swt.events.KeyEvent e) {
+				 if (e.stateMask == SWT.CTRL && (e.keyCode == 'c' || e.keyCode == 'C')) {
+					Toolkit toolkit = Toolkit.getDefaultToolkit();
+					Clipboard clipboard = toolkit.getSystemClipboard();
+					StringSelection strSel = new StringSelection(getTextFromSelectedRows(reportViewer));
+					clipboard.setContents(strSel, null);
+		        }
+			}
+			@Override
+			public void keyReleased(org.eclipse.swt.events.KeyEvent arg0) {
+			}
+		};
+		return copyKeyListenerDetails;
+	}
+	
+	private String getTextFromSelectedRows(TableViewer reportViewer) {
+		ISelection selectedRowtext = reportViewer.getSelection();
+		GuiUtils.logInfo("test: "+ selectedRowtext);
+		return selectedRowtext.toString();
+	}
+
 	private void createSummaryDetailsViewer (Composite parent) {
 		this.overviewAttributesViewer =  new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION  );
 		
@@ -375,10 +426,10 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 		final Table table = overviewAttributesViewer.getTable();
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
-        table.setHeaderBackground(colorGray);       
-        
-        overviewAttributesViewer.setContentProvider(new ArrayContentProvider());
-		
+        table.setHeaderBackground(colorGray);     
+        overviewAttributesViewer.setContentProvider(new ArrayContentProvider());  
+		table.addKeyListener(copyKeyListener(overviewAttributesViewer));
+		copyTableValuePopupDetails(overviewAttributesViewer);
         
      // Layout the viewer
         GridData gridData = new GridData();
@@ -398,10 +449,9 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
         table.setHeaderBackground(colorGray);
-        
-        
         reportDetailsViewer.setContentProvider(new ArrayContentProvider());
-		
+		table.addKeyListener(copyKeyListener(reportDetailsViewer));
+		copyTableValuePopupDetails(reportDetailsViewer);
         
      // Layout the viewer
         GridData gridData = new GridData();
@@ -413,7 +463,6 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
         reportDetailsViewer.getControl().setLayoutData(gridData);
         
 	}
-	
 	private void createJVMAttributesViewer (Composite parent) {
 		jvmAttributesViewer = new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION  );
 		createColumns(parent, jvmAttributesViewer);
@@ -422,8 +471,10 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
         table.setHeaderBackground(colorGray);
-                
         jvmAttributesViewer.setContentProvider(new ArrayContentProvider());
+		table.addKeyListener(copyKeyListener(jvmAttributesViewer));
+		copyTableValuePopupDetails(jvmAttributesViewer);
+		
         // Layout the viewer
         GridData gridData = new GridData();
         gridData.verticalAlignment = GridData.FILL;
@@ -435,7 +486,6 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
         jvmAttributesViewer.getControl().setLayoutData(gridData);
         
 	}
-	
 	private void createHWAttributesViewer (Composite parent) {
 		hwAttributesViewer = new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION  );
 		createColumns(parent, hwAttributesViewer);
@@ -445,8 +495,10 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
         table.setHeaderBackground(colorGray);
-                
         hwAttributesViewer.setContentProvider(new ArrayContentProvider());
+		table.addKeyListener(copyKeyListener(hwAttributesViewer));
+		copyTableValuePopupDetails(hwAttributesViewer);
+		
         // Layout the viewer
         GridData gridData = new GridData();
         gridData.verticalAlignment = GridData.FILL;

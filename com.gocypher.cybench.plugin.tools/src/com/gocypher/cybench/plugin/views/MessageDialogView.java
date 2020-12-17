@@ -10,7 +10,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
@@ -25,7 +24,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import com.gocypher.cybench.plugin.model.BenchmarkMethodModel;
-import com.gocypher.cybench.plugin.utils.GuiUtils;
 
 public class MessageDialogView  extends Dialog {
 
@@ -78,13 +76,6 @@ public class MessageDialogView  extends Dialog {
         content.setSize(new Point(420, 300));
         
         scrolledComposite = new ScrolledComposite(content, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-        scrolledComposite.setLayout(new GridLayout());
-        scrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//        scrolledComposite.setAlwaysShowScrollBars(true);
-
-//        GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
-//        data.heightHint = 200;
-//        scrolledComposite.setLayoutData(data);
         
         Composite container = new Composite(scrolledComposite, SWT.MULTI);
         container.setLayout(new GridLayout(6, false));
@@ -194,7 +185,6 @@ public class MessageDialogView  extends Dialog {
         			String[] stringArray = allParamsTypes.split("\\W+");
         			allParamsTypes = String.join("",stringArray);
         			allParamsTypes =allParamsTypes.replace("Q", "");
-        			GuiUtils.logInfo("Merged parameters types: "+allParamsTypes);
             		methodsExist.get(i).setMethodName(methodsExist.get(i).getMethodName()+"Benchmark"+allParamsTypes);
         		}
         		methodsToGenerate.add(methodsExist.get(i));

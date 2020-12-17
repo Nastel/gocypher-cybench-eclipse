@@ -20,19 +20,15 @@
 package com.gocypher.cybench.plugin.handlers;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
@@ -52,17 +48,20 @@ import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.Threads;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
 import com.gocypher.cybench.plugin.model.BenchmarkMethodModel;
@@ -85,23 +84,17 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		
 		JCodeModel codeModelInstance = new JCodeModel();
 		BenchmarkMethodModel model =  new BenchmarkMethodModel();
-		
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
 		RunSelectionEntry selectionEntry = LauncherUtils.fillRunselectionData(selection);
-	
+		
     	try {
         	String outputPath= LauncherUtils.getRawSourceFolderForBenchmarks(selectionEntry.getProjectSelected());
-			GuiUtils.logInfo(String.valueOf("selectionEntry.getClassPaths(): "+selectionEntry.getClassPaths()));
     		for(String packagePath :  selectionEntry.getClassPaths()) {
-    			
-    			GuiUtils.logInfo(String.valueOf("packagePath "+packagePath));
     			IWorkbenchPage page = window.getActivePage();
 	    		File file = new File(outputPath);
 				File fileExists = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+"Benchmarks.java");
 				benchmarkMethods = new ArrayList<BenchmarkMethodModel>();
-				GuiUtils.logInfo(String.valueOf("fileExists: "+fileExists));
-				GuiUtils.logInfo(String.valueOf("file: "+file));
 				if(shouldgenerateFile(fileExists, selectionEntry, outputPath, packagePath)) {
 					chooseMethodsToGenerateBenchmarks(selection, selectionEntry, packagePath);
 					if(generationMethodsSelected) {
@@ -135,6 +128,7 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 						codeModelInstance.build(file);
 					}
 	    		}
+				
 	    		if(fileExists!= null && fileExists.exists()) {
 	    			IProject project = selectionEntry.getProjectSelected();
 	  		        if(project != null) {
@@ -150,12 +144,14 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	    			IFile fileToUse = selectionEntry.getProjectSelected().getFile(path);
 					page.openEditor(new FileEditorInput(fileToUse), editorId);
 	    		}
-    		}		
+    		}
+		  	
 		} catch (Exception e) {
 			GuiUtils.logError ("JAVA Code generation error",e);
 		}
 		return null;
 	}
+	
 	public static IEditorDescriptor getEditorDescriptor(URI uri)
 	{
 		// NOTE: Moved from PHP's EditorUtils
@@ -167,12 +163,30 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		IPath path = new Path(uriPath);
 		return PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(path.lastSegment());
 	}
-	private JMethod generateBenchmarkMethod(JDefinedClass generationClass, JCodeModel codeModelInstance, BenchmarkMethodModel model) {
+	
+	private JMethod generateBenchmarkMethod(JDefinedClass generationClass, JCodeModel codeModelInstance, BenchmarkMethodModel model) throws ClassNotFoundException, FileNotFoundException {
 		JMethod benchmark = generationClass.method(1, model.getMethodType(), model.getMethodName());
 		benchmark.param(Blackhole.class, "bh");
 		benchmark.annotate(codeModelInstance.ref(Benchmark.class));
 		benchmark.annotate(codeModelInstance.ref(BenchmarkMode.class)).param("value", Mode.deepValueOf(model.getMethodBenchmarkMode()));
 		benchmark.annotate(codeModelInstance.ref(OutputTimeUnit.class)).param("value", TimeUnit.SECONDS);
+
+		benchmark.annotate(codeModelInstance.ref(Fork.class)).param("value", 1);
+		benchmark.annotate(codeModelInstance.ref(Threads.class)).param("value", 1);
+		benchmark.annotate(codeModelInstance.ref(Measurement.class)).param("iterations", 2).param("time", 5).param("timeUnit", TimeUnit.SECONDS);
+		benchmark.annotate(codeModelInstance.ref(Warmup.class)).param("iterations", 1).param("time", 5).param("timeUnit", TimeUnit.SECONDS);
+		
+		if(model.getExceptionTypes().length>0) {
+			benchmark._throws(Exception.class);
+		}else {
+	//		for(String exceptionType : model.getExceptionTypes()) {
+	//			JClass exceptionClass =codeModelInstance.ref(exceptionType.substring(1, exceptionType.length()-1));
+	//			Class c = Class.forName(exceptionType.substring(1, exceptionType.length()-1));
+	//			GuiUtils.logInfo("codeModelInstance.ref(exceptionType); :   "+exceptionClass);
+	//			benchmark._throws(Mode.deepValueOf(exceptionType));
+	//		}
+		}
+//		benchmark.annotate(codeModelInstance.ref(BenchmarkTag.class)).param("tag", UUID.randomUUID().toString());
 		benchmark.body().directStatement(model.getMethodHint());
 		return benchmark;
 	}
@@ -202,7 +216,7 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 			method.annotate(codeModelInstance.ref(TearDown.class)).param("value", Level.Iteration);
 		break;
 		default:
-			System.out.println("Method type not recognized, will skip");
+			GuiUtils.logInfo("Method type not recognized, will skip");
 			return null;
 		}
 		
@@ -210,41 +224,41 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 	} 
 
 	
-	private List<BenchmarkMethodModel> methodDetection(IStructuredSelection selection, RunSelectionEntry selectionEntry, String classPath) {
+	private void methodDetection(IStructuredSelection selection, RunSelectionEntry selectionEntry, String classPath) {
 		try {
 	        IProject project = selectionEntry.getProjectSelected();
 	        if(project != null) {
 	        	IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
 		    	IType itype = javaProject.findType(classPath);
 		    	if(itype != null && itype.getChildren() != null) {
-			    	Set<String> methodNames = new HashSet<String>();
 			    	for(IMethod methodDataObject: itype.getMethods()) {
 			    		int flags = methodDataObject.getFlags();
 			    		if(Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPackageDefault(flags)) {
-				    		methodNames.add(methodDataObject.getElementName()+"Benchmark");
+			    			fillBenchmarkMethodInformation(methodDataObject);
 			    		}
-//			    		GuiUtils.logInfo(String.valueOf("methodDataObject.getElementType(): "+methodDataObject.getElementType()));
-//			    		GuiUtils.logInfo(String.valueOf("methodDataObject.isReadOnly(): "+methodDataObject.isReadOnly()));
-//			    		GuiUtils.logInfo(String.valueOf("methodDataObject.getDeclaringType(): "+methodDataObject.getDeclaringType()));
-//			    		GuiUtils.logInfo(String.valueOf("methodDataObject.getElementType(): "+methodDataObject.getFlags()));
-//			    		GuiUtils.logInfo(String.valueOf("methodDataObject.getElementType(): "+methodDataObject.getParameters()));
-			    	}
-			    	for(String name : methodNames) {
-			    		BenchmarkMethodModel model = new BenchmarkMethodModel();
-			    		model.setMethodName(name);
-			    		model.setMethodBenchmarkMode("Throughput");
-			    		model.setMethodType(void.class);
-			    		model.setMethodHint("//TODO fill up benchmark method with logic");
-			    		benchmarkMethods.add(model);
 			    	}
 		    	}
 	        }
-			
 		} catch (JavaModelException e) {		
-			GuiUtils.logError ("JAVA Code generation error, method detection problem",e);
+			GuiUtils.logError ("JAVA Code generation error, there was a problem while detecting methods to generate. ",e);
 		}
-		return benchmarkMethods; 
 	}
+	
+	private void fillBenchmarkMethodInformation(IMethod methodDataObject) throws JavaModelException {
+		String[] exceptionTypes = methodDataObject.getExceptionTypes();
+		String[] parameterTypes = methodDataObject.getParameterTypes();
+//		String[] parameterNames = methodDataObject.getParameterNames();
+
+		BenchmarkMethodModel model = new BenchmarkMethodModel();
+		model.setExceptionTypes(exceptionTypes);
+		model.setParameterTypes(parameterTypes);
+		model.setMethodName(methodDataObject.getElementName());
+		model.setMethodBenchmarkMode("Throughput");
+		model.setMethodType(void.class);
+		model.setMethodHint("//TODO fill up benchmark method with logic");
+		benchmarkMethods.add(model);
+	}
+	
 
 	private boolean shouldgenerateFile(File fileExists, RunSelectionEntry selectionEntry, String outputPath, String packagePath) {
 		File fileExists2 = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+".java");
@@ -267,7 +281,7 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		return  false;
 	}
     public void chooseMethodsToGenerateBenchmarks (IStructuredSelection selection, RunSelectionEntry selectionEntry, String classPath) {
-    	benchmarkMethods = methodDetection(selection, selectionEntry, classPath);
+    	methodDetection(selection, selectionEntry, classPath);
     	Display.getDefault().syncExec(new Runnable() {
 		    public void run() {
 		    	try {
