@@ -428,7 +428,6 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 				}
 				String val = titles.getString(key);
 				if (val != null && !val.isEmpty()) {
-				    GuiUtils.logInfo("copyText - val: "+copyText +" - "+ val.trim());
 				    copyText = copyText.replace(val.trim(), "");
 				}
 		  	}
