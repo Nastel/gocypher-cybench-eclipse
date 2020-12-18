@@ -9,13 +9,15 @@
 
 **Prerequisites**
 
-* Package `CybenchTools.zip` is built and tested using (on lower JAVA or Eclipse version it won’t work)
-    * JAVA – JDK-14.0.2,
+* Package `CybenchTools.zip` is built and tested using
+    * JAVA – JDK-11.0.9,
     * Eclipse Version: 2020-09 (4.17.0).
     
 * Package `CyBenchToolsForEclipseMars.zip` is built and tested using
     * JAVA – JDK-1.8.0_201,
     * Eclipse Version: Eclipse Mars 2 (4.5.2).
+    
+**Note:** on lower JAVA or Eclipse versions the plugin will not work.
 
 ### Installation from local file system
 
@@ -30,11 +32,11 @@ Installation process for both version of plugins is the same:
 ![](./docs/images/image1.png)
 
 * Click button "Add".
-* In installation dialog window deselect check box “Group items by category”, then list of features shall appear in the table.
+* Then list of categories/features shall appear in the table.
 
 ![](./docs/images/image2.png)
 
-* Check “CyBench” entry in the features table.
+* Check “CyBench” entry in the table.
 * Click button “Next”.
 * Installation details window appears. Click button “Next”.
 * Licenses review window appears, review and select “I accept the terms of the license agreement”, click button “Finish”.
@@ -52,22 +54,6 @@ Installation process for both version of plugins is the same:
 ![](./docs/images/image5.png)
 
 ![](./docs/images/image6.png)
-
-
-## Uninstall
-
-* Applicable if CyBench tools were used in developer mode:
-    * Stop the Eclipse.
-    * Navigate to drop ins directory of the Eclipse IDE (for example: `c:\eclipses\eclipse-2020-09-R\dropins\`).
-    * Delete files which contains word `cybench` in their file name.
-    * Start Eclipse again.
-* Applicable if CyBench tools were installed using update site package:
-    * Select Eclipse menu Help→ About Eclipse IDE → Click Installation Details.
-    * In the `Installed Software` tab select table item which has name `CyBench` 
-    * Click button `Uninstall`.
-    * Restart Eclipse when requested.
-
-![](./docs/images/image7.png)
 
 ## Usage Instructions
 
@@ -104,29 +90,6 @@ This configuration triggers, any JMH benchmarks implementing class recompile and
 
 Configuration allows to run CyBench launcher without any other specific rebuild and this does not depend on project nature. Also this allows to use JMH framework in Eclipse for generic Eclipse JAVA project without Maven usage.
 
-## CyBench Explorer View
-
-View displays all CyBench reports found in the workspace projects.
-* To open this view navigate “Window”→”Show View” → “Other” → “CyBench Tools” → “CyBench Explorer”. If Java perspective is active then it opens on the right side of the screen otherwise opens at the bottom, and can place it anywhere.
-
-![](./docs/images/image12.png)
-
-* Double click with mouse on the report entry and it will open a view with report details.
-
-![](./docs/images/image13.png)
-
-## Report Details View
-
-View displays selected or generated during launch report details.
-* Displays a list of benchmark tests on the right.    
-* View open position is at the bottom of the screen, either when report is selected via “CyBench Explorer” or after launch benchmarks using “CyBench launcher”
-
-![](./docs/images/image14.png)
-
-* Double click mouse on “Available Benchmarks” entries on the left size of the view and it will display selected benchmark details in the right sideof the view, tab “Benchmark Details”.
-* Also can navigate thorough other report attributes by clicking on the appropriate “tab” - “Summary”, “JVM Properties”, “HW Properties”.
-* Chrome icon at the top-right view side allows to open the report using default system Web browser (which is defined in Eclipse settings) i.e. navigate to CyBench website to particular report details page (if the report was sent to CyBench Repository).
-
 ## Generate Benchmarks
 
 Feature generates benchmark class stubs, adds necessary annotations and methods for a selected JAVA file.
@@ -144,7 +107,10 @@ Feature generates benchmark class stubs, adds necessary annotations and methods 
 
 ![](./docs/images/image15.png)
 
-* A popup will be displayed that shows all the available public methods inside the class. Check the checkboxes on the right side to select the methods for which to generate the benchmark methods.
+* A popup will be displayed that shows all the available public methods inside the class. 
+* Check the checkboxes on the right side to select the methods for which to generate the benchmark methods.
+* Select the benchmarking mode from the dropdown list.
+
 **Notice**: If the file have been already generated previously and still exists its contents will not be overwritten. 
 
 ![](./docs/images/image19.png)
@@ -166,7 +132,7 @@ Launches all JMH benchmarks which are found under selected JAVA file. Quick laun
 
 **Steps:**
 
-* Right click on the JAVA file or project which contains JMH Benchmarks.
+* Right click on the JAVA file or project (quick launch projects does not work in java perspective) which contains JMH Benchmarks.
 * Select “Run As”→ “Run on CyBench”. 
 
 ![](./docs/images/image17.png)
@@ -200,7 +166,49 @@ Launch configuration view which allows to create a custom launch settings for a 
     * report is displayed under “Report Details View”, 
     * report entry appears in “CyBench Explorer”.
 
+
+## CyBench Explorer View
+
+View displays all CyBench reports found in the workspace projects.
+* To open this view navigate “Window”→”Show View” → “Other” → “CyBench Tools” → “CyBench Explorer”. If Java perspective is active then it opens on the right side of the screen otherwise opens at the bottom, and can place it anywhere.
+
+![](./docs/images/image12.png)
+
+* Double click with mouse on the report entry and it will open a view with report details.
+
+![](./docs/images/image13.png)
+
+## Report Details View
+
+View displays selected or generated during launch report details.
+* Displays a list of benchmark tests on the right.    
+* View open position is at the bottom of the screen, either when report is selected via “CyBench Explorer” or after launch benchmarks using “CyBench launcher”
+
+![](./docs/images/image14.png)
+
+* Double click mouse on “Available Benchmarks” entries on the left size of the view and it will display selected benchmark details in the right sideof the view, tab “Benchmark Details”.
+* Also can navigate thorough other report attributes by clicking on the appropriate “tab” - “Summary”, “JVM Properties”, “HW Properties”.
+* Chrome icon at the top-right view side allows to open the report using default system Web browser (which is defined in Eclipse settings) i.e. navigate to CyBench website to particular report details page (if the report was sent to CyBench Repository).
+
 ## Logging
 
 Plugin logs message to Eclipse default log file which is located in `<Path to workspace>\.metadata\.plugins\org.eclipse.ui.workbench\log` or `<Path to workspace>\.metadata\.log`.
 Log messages are also displayed in `Error Log` view, which is accessible via `Menu bar → Window → Show View → Error Log`   
+
+## Uninstall
+
+* Applicable if CyBench tools were installed using update site package:
+    * Select Eclipse menu Help→ About Eclipse IDE → Click Installation Details.
+    * In the `Installed Software` tab select table item which has name `CyBench` 
+    * Click button `Uninstall`.
+    * Restart Eclipse when requested.
+
+![](./docs/images/image7.png)
+
+
+## More information on benchmarking your code
+* [CyBench Benchmark samples](https://github.com/K2NIO/gocypher-cybench-java-core/tree/main/gocypher-cybench-jvm/src/main/java/com/gocypher/cybench/jmh/jvm/client/tests)
+* [Avoiding Benchmarking Pitfalls on the JVM](https://www.oracle.com/technical-resources/articles/java/architect-benchmarking.html#:~:text=JMH%20is%20a%20Java%20harness,to%20unwanted%20virtual%20machine%20optimizations)
+* [JMH - Java Microbenchmark Harness](http://tutorials.jenkov.com/java-performance/jmh.html)
+* [Java Benchmarks with JMH](https://medium.com/swlh/java-benchmarks-with-jmh-a-preamble-285510a77dd2)
+* [Microbenchmarking with Java](https://www.baeldung.com/java-microbenchmark-harness)
