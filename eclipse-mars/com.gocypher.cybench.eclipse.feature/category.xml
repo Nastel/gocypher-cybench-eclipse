@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/com.gocypher.cybench.eclipse.feature_1.0.0.qualifier.jar" id="com.gocypher.cybench.eclipse.feature" version="1.0.0.qualifier">
+      <category name="CyBench"/>
+   </feature>
+   <category-def name="CyBench" label="CyBench Tools">
+      <description>
+         The group contains the needed libriaries and execution components to create, run and analyze results of your own benchmarks with ease.
+      </description>
+   </category-def>
+</site>

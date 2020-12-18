@@ -33,10 +33,10 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
-import org.eclipse.buildship.core.BuildConfiguration;
-import org.eclipse.buildship.core.GradleBuild;
-import org.eclipse.buildship.core.GradleCore;
-import org.eclipse.buildship.core.GradleWorkspace;
+//import org.eclipse.buildship.core.BuildConfiguration;
+//import org.eclipse.buildship.core.GradleBuild;
+//import org.eclipse.buildship.core.GradleCore;
+//import org.eclipse.buildship.core.GradleWorkspace;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
@@ -339,15 +339,15 @@ private void updateDependenciesForNature (IJavaProject javaProject) throws Excep
 				Job job = new Job("Gradle dependency refresh") {
 				    @Override
 				    protected IStatus run(IProgressMonitor monitor) {
-			            BuildConfiguration configuration = BuildConfiguration
-								.forRootProjectDirectory(new File(projectLocation))
-							    .overrideWorkspaceConfiguration(true)
-							    .autoSync(true)
-							    .build();
-							GradleWorkspace workspace = GradleCore.getWorkspace();
-							GradleBuild newBuild = workspace.createBuild(configuration);
-							//TODO: get the progress monitor and set instead of null
-						newBuild.synchronize(monitor);
+//			            BuildConfiguration configuration = BuildConfiguration
+//								.forRootProjectDirectory(new File(projectLocation))
+//							    .overrideWorkspaceConfiguration(true)
+//							    .autoSync(true)
+//							    .build();
+//							GradleWorkspace workspace = GradleCore.getWorkspace();
+//							GradleBuild newBuild = workspace.createBuild(configuration);
+//							//TODO: get the progress monitor and set instead of null
+//						newBuild.synchronize(monitor);
 				        return Status.OK_STATUS;
 				    }
 
