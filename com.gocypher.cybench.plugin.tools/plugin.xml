@@ -104,15 +104,17 @@
 	                  style="push">
 	                  <visibleWhen>
               		 	<iterate>
-              		 		<reference definitionId="com.gocypher.cybench.project.projectSelection"/>
-              		 		<not>              		 		              		 	
-              		 			<reference definitionId="com.gocypher.cybench.project.hasNature"/>
-              		 		</not>          		 	
+                      		<and>
+	              		 		<reference definitionId="com.gocypher.cybench.project.projectSelection"/>
+	              		 		<not>              		 		              		 	
+	              		 			<reference definitionId="com.gocypher.cybench.project.hasNature"/>
+	              		 		</not>  
+                      		</and>        		 	
               		 	</iterate>
               		 </visibleWhen>
 	            </command>
 	 	  </menuContribution>
-	 	  	 	  <menuContribution
+  	 	  <menuContribution
 		        locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
 		         <separator name="com.gocypher.cybench.converterhelper.separator" visible="true" />
 	            <command
@@ -124,9 +126,52 @@
 	                  style="push">
 	                  <visibleWhen>
               		 	<iterate>
-              		 		<not>              		 		              		 	
+                      		<and>
+	              		 		<reference definitionId="com.gocypher.cybench.project.javaProjectSelection"/>	
+	              		 		<not>              	 		              		 	
+	              		 			<reference definitionId="com.gocypher.cybench.project.hasNature"/>
+	              		 		</not>  
+                      		</and>           		 	
+              		 	</iterate>
+              		 </visibleWhen>
+	            </command>
+	 	  </menuContribution>
+	 	  <menuContribution
+		        locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+		         <separator name="com.gocypher.cybench.converterhelper.separator" visible="true" />
+	            <command
+	                  id="com.gocypher.cybench.plugin.ProjectConfigureLaunchInner"
+	                  commandId="com.gocypher.cybench.plugin.handlers.UpdateDependencies"
+		        	  label="Update CyBench Nature"
+	                  icon="icons/cybench_symbol_small.png"                
+	                  tooltip="Remove old nature dependencies and leave only the latest version"
+	                  style="push">
+	                  <visibleWhen>
+              		 	<iterate>
+                      		<and>
+	              		 		<reference definitionId="com.gocypher.cybench.project.projectSelection"/>              		 		              		 	
               		 			<reference definitionId="com.gocypher.cybench.project.hasNature"/>
-              		 		</not>          		 	
+                      		</and>        		 	
+              		 	</iterate>
+              		 </visibleWhen>
+	            </command>
+	 	  </menuContribution>
+	 	  <menuContribution
+		        locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+		         <separator name="com.gocypher.cybench.converterhelper.separator" visible="true" />
+	            <command
+	                  id="com.gocypher.cybench.plugin.ProjectConfigureLaunchInner"
+	                  commandId="com.gocypher.cybench.plugin.handlers.UpdateDependencies"
+		        	  label="Update CyBench Nature"
+	                  icon="icons/cybench_symbol_small.png"                
+	                  tooltip="Remove old nature dependencies and leave only the latest version"
+	                  style="push">
+	                  <visibleWhen>
+              		 	<iterate>
+                      		<and>
+	              		 		<reference definitionId="com.gocypher.cybench.project.javaProjectSelection"/>              		 		              		 	
+              		 			<reference definitionId="com.gocypher.cybench.project.hasNature"/>
+                      		</and>        		 	
               		 	</iterate>
               		 </visibleWhen>
 	            </command>
@@ -171,6 +216,11 @@
             name="Generate Benchmark Classes"
             id="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks">
       </command>
+      <command
+            categoryId="com.gocypher.cybench.plugin.handlers.commands.category"
+            name="Update CyBench Dependencies"
+            id="com.gocypher.cybench.plugin.handlers.UpdateDependencies">
+      </command>
    </extension>
    
    <extension
@@ -184,6 +234,11 @@
         	id="com.gocypher.cybench.plugin.handlers.BenchmarksGenerationHandler"
             class="com.gocypher.cybench.plugin.handlers.BenchmarksGenerationHandler"
             commandId="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks">
+      </handler>
+       <handler
+        	id="com.gocypher.cybench.plugin.handlers.CyBenchUpdateHandler"
+            class="com.gocypher.cybench.plugin.handlers.CyBenchUpdateDependencies"
+            commandId="com.gocypher.cybench.plugin.handlers.UpdateDependencies">
       </handler>
    </extension>
    
@@ -200,6 +255,12 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             contextId="org.eclipse.ui.contexts.window"
             sequence="M1+7">
+      </key>
+       <key
+            commandId="com.gocypher.cybench.plugin.handlers.UpdateDependencies"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+8">
       </key>
    </extension>
    <extension
@@ -269,13 +330,16 @@
 	        </run>
 	    </runtime>
 	</extension>
-   <extension
+    <extension
          point="org.eclipse.core.expressions.definitions">
           <definition id="com.gocypher.cybench.project.CompilationUnitSelection">
            <adapt type="org.eclipse.jdt.internal.core.CompilationUnit"></adapt>
          </definition>
        	 <definition id="com.gocypher.cybench.project.projectSelection">
            	 <instanceof value="org.eclipse.core.resources.IProject"/>
+         </definition>
+          <definition id="com.gocypher.cybench.project.javaProjectSelection">
+           	 <instanceof value="org.eclipse.jdt.core.IJavaProject"/>
          </definition>
          <definition id="com.gocypher.cybench.project.hasNature">
            	<adapt type="org.eclipse.core.resources.IResource">

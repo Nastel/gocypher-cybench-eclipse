@@ -44,7 +44,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.apt.core.util.AptConfig;
@@ -79,7 +78,7 @@ public class CyBenchProjectNature implements IProjectNature {
 
 			if (!LauncherUtils.isMavenProject(javaProject.getProject()) &&  !LauncherUtils.isGradleProject(javaProject.getProject())) {
 				//Externals for real Eclipse test
-				this.addAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
+				GuiUtils.addAndSaveClassPathEntry(javaProject, cyBenchExternalsPath);
 				//Externals for local tests
 				//this.addAndSaveClassPathEntry(javaProject, fullPathHardcodedCore,fullPathHardcodedAnnotations);
 			}
@@ -136,37 +135,7 @@ public class CyBenchProjectNature implements IProjectNature {
 		this.project = project;
 		
 	}
-	
-	private void addAndSaveClassPathEntry (IJavaProject javaProject, String ...fullPathToExternalLibraries) throws Exception {
-		for (String pathToExternalLib:fullPathToExternalLibraries) {
-			
-			IClasspathEntry externalJar = JavaCore.newLibraryEntry(new Path(pathToExternalLib), null, null) ;
 
-//			if (javaProject.getClasspathEntryFor(externalJar.getPath()) == null) { 
-			
-				List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
-				
-				for (IClasspathEntry entry :javaProject.getRawClasspath()) {			
-					classPathEntries.add (entry) ;
-				}
-				classPathEntries.add(externalJar);
-				
-				int i = 0 ;
-				IClasspathEntry[] classPathRaw = new IClasspathEntry[classPathEntries.size()] ;
-				for (IClasspathEntry item: classPathEntries) {
-					classPathRaw[i] = item ;
-					i++ ;
-				}
-							
-				javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());
-//										
-//			}
-//			else {
-//				GuiUtils.logError("Class path entry pointing to external lib exists:"+pathToExternalLib);
-//			}
-		}
-		
-	}
 	private void createBenchmarksSrcFolder (IJavaProject javaProject) throws Exception {
 		IClasspathEntry srcFolder = JavaCore.newSourceEntry(LauncherUtils.getSourceFolderForBenchmarks(javaProject.getProject())) ;
 		java.nio.file.Path path = FileSystems.getDefault().getPath(srcFolder.getPath().toPortableString());

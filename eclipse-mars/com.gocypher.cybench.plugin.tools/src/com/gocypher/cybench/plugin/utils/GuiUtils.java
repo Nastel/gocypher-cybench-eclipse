@@ -22,7 +22,9 @@ package com.gocypher.cybench.plugin.utils;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -37,6 +39,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -216,6 +219,36 @@ public class GuiUtils {
   		}
   		return javaProject;
   	}
+	public static void addAndSaveClassPathEntry (IJavaProject javaProject, String ...fullPathToExternalLibraries) throws Exception {
+		for (String pathToExternalLib:fullPathToExternalLibraries) {
+			
+			IClasspathEntry externalJar = JavaCore.newLibraryEntry(new Path(pathToExternalLib), null, null) ;
+
+//			if (javaProject.getClasspathEntryFor(externalJar.getPath()) == null) { 
+			
+				List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
+				
+				for (IClasspathEntry entry :javaProject.getRawClasspath()) {			
+					classPathEntries.add (entry) ;
+				}
+				classPathEntries.add(externalJar);
+				
+				int i = 0 ;
+				IClasspathEntry[] classPathRaw = new IClasspathEntry[classPathEntries.size()] ;
+				for (IClasspathEntry item: classPathEntries) {
+					classPathRaw[i] = item ;
+					i++ ;
+				}
+							
+				javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());
+//										
+//			}
+//			else {
+//				GuiUtils.logError("Class path entry pointing to external lib exists:"+pathToExternalLib);
+//			}
+		}
+		
+	}
     public static void logInfo (String message) {
     	if (LOG != null) {
     		LOG.log(new Status(IStatus.INFO, Activator.PLUGIN_ID, message));
