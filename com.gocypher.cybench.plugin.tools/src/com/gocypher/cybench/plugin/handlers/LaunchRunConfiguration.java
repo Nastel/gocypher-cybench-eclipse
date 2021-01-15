@@ -125,12 +125,11 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 					classPaths.add(classPathTest.getPath().toOSString());
 				}
 			}
-	    	GuiUtils.logInfo("launchPath(): "+launchPath) ;
 			classPaths.addAll(Arrays.asList(launchPath.split(",")));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) );
 			List<String> classpathMementos = LauncherUtils.getNeededClassPaths(project, classPaths);
-	    	GuiUtils.logInfo("Classpath full:  "+classpathMementos) ;
+//	    	GuiUtils.logInfo("Classpath full:  "+classpathMementos) ;
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");

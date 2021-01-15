@@ -87,12 +87,14 @@ public class LaunchShortcut implements ILaunchShortcut {
 			    
 			setEnvironmentProperties(config, selectionEntry);
 			List<String> classPaths = new ArrayList<String>();
-			
-			IJavaProject javaProject = selectionEntry.getJavaProjectSelected();
-			IClasspathEntry[] resolvedClasspath= javaProject.getResolvedClasspath(false);
-			for(IClasspathEntry classPathTest : resolvedClasspath) {
-//				GuiUtils.logInfo("classPathTest.getPath().toOSString(): "+classPathTest.getPath().toOSString());
-				classPaths.add(classPathTest.getPath().toOSString());
+
+			if(LauncherUtils.isJavaProject(selectionEntry.getProjectSelected())) {
+				IJavaProject javaProject = selectionEntry.getJavaProjectSelected();
+				IClasspathEntry[] resolvedClasspath= javaProject.getResolvedClasspath(false);
+				for(IClasspathEntry classPathTest : resolvedClasspath) {
+	//				GuiUtils.logInfo("classPathTest.getPath().toOSString(): "+classPathTest.getPath().toOSString());
+					classPaths.add(classPathTest.getPath().toOSString());
+				}
 			}
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
 			classPaths.addAll(Arrays.asList(selectionEntry.getOutputPath().split(",")));

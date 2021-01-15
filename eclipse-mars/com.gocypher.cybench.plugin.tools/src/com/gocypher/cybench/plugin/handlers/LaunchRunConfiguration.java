@@ -35,6 +35,9 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
@@ -113,6 +116,14 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				}
 	    	}
 			List<String> classPaths = new ArrayList<String>();
+			if(LauncherUtils.isJavaProject(project)) {
+				IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
+				IClasspathEntry[] resolvedClasspath= javaProject.getResolvedClasspath(false);
+				for(IClasspathEntry classPathTest : resolvedClasspath) {
+	//				GuiUtils.logInfo("classPathTest.getPath().toOSString(): "+classPathTest.getPath().toOSString());
+					classPaths.add(classPathTest.getPath().toOSString());
+				}
+			}
 			classPaths.addAll(Arrays.asList(launchPath.split(",")));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) );
