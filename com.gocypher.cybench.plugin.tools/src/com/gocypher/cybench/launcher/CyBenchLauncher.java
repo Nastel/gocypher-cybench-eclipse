@@ -19,6 +19,7 @@
 
 package com.gocypher.cybench.launcher;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +28,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,6 +45,8 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 import com.gocypher.cybench.LauncherConfiguration;
+import com.gocypher.cybench.core.annotation.BenchmarkMetaData;
+import com.gocypher.cybench.core.annotation.CyBenchMetadataList;
 import com.gocypher.cybench.core.utils.JMHUtils;
 import com.gocypher.cybench.core.utils.JSONUtils;
 import com.gocypher.cybench.launcher.environment.model.HardwareProperties;
@@ -50,6 +55,7 @@ import com.gocypher.cybench.launcher.environment.services.CollectSystemInformati
 import com.gocypher.cybench.launcher.model.BenchmarkOverviewReport;
 import com.gocypher.cybench.launcher.report.DeliveryService;
 import com.gocypher.cybench.launcher.report.ReportingService;
+import com.gocypher.cybench.launcher.utils.Constants;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.launcher.utils.SecurityBuilder;
 
@@ -59,7 +65,8 @@ import com.gocypher.cybench.launcher.utils.SecurityBuilder;
 public class CyBenchLauncher {
 	public static Map<String,String> resultsMap = new HashMap<>() ;
 	private static final  String benchSource = "Eclipse plugin";
-	
+    static Properties cfg = new Properties();
+    
 	public static void main(String[] args) throws Exception{
 		System.out.println("-----------------------------------------------------------------------------------------");
 		System.out.println("                                 Starting CyBench benchmarks                             ");
@@ -86,10 +93,12 @@ public class CyBenchLauncher {
 
         System.out.println("Collecting JVM properties...");
         jvmProperties = CollectSystemInformation.getJavaVirtualMachineProperties();
-        SecurityBuilder securityBuilder = new SecurityBuilder();        
+        SecurityBuilder securityBuilder = new SecurityBuilder();    
+		OptionsBuilder optBuild = new OptionsBuilder();    
         Map<String, Object> benchmarkSettings = new HashMap<>();
 
         Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
+        System.out.println("_______________________ BENCHMARK TESTS FOUND _________________________________");
         
         benchmarkSettings.put("benchSource", benchSource);
         benchmarkSettings.put("benchWarmUpIteration", launcherConfiguration.getWarmUpIterations());
@@ -103,7 +112,6 @@ public class CyBenchLauncher {
         System.out.println("Executing benchmarks...");
         
 		
-		OptionsBuilder optBuild = new OptionsBuilder();
 
 		if(launcherConfiguration.getClassCalled().size() > 0) {
 			for(String classname : launcherConfiguration.getClassCalled()) {
@@ -180,9 +188,30 @@ public class CyBenchLauncher {
                 benchmarkReport.setClassFingerprint(classFingerprints.get(name));
                 benchmarkReport.setGeneratedFingerprint(generatedFingerprints.get(name));
                 benchmarkReport.setManualFingerprint(manualFingerprints.get(name));
+                try {
+                	JMHUtils test = new JMHUtils();
+                    JMHUtils.ClassAndMethod classAndMethod = new JMHUtils.ClassAndMethod(name).invoke();
+                    String clazz = classAndMethod.getClazz();
+                    String method = classAndMethod.getMethod();
+                    System.out.println("Adding metadata for benchamrk: " + clazz + " test: " + method);
+                    Class<?> aClass = Class.forName(clazz);
+                    Optional<Method> benchmarkMethod = JMHUtils.getBenchmarkMethod(method, aClass);
+                    appendMetadataFromMethod(benchmarkMethod, benchmarkReport);
+                    appendMetadataFromClass(aClass, benchmarkReport);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
 
             });
         }
+        
+        List<BenchmarkReport> customBenchmarksCategoryCheck = report.getBenchmarks().get("CUSTOM");
+        report.getBenchmarks().remove("CUSTOM");
+        for(BenchmarkReport benchReport : customBenchmarksCategoryCheck) {
+            report.addToBenchmarks(benchReport);
+        }
+        report.computeScores();
+        getReportUploadStatus(report);
         //FIXME add all missing custom properties including public/private flag
 
         System.out.println("-----------------------------------------------------------------------------------------");
@@ -212,7 +241,19 @@ public class CyBenchLauncher {
         System.out.println("                                 Finished CyBench benchmarks                             ");
         System.out.println("-----------------------------------------------------------------------------------------");
 	}
-	
+    private static void getReportUploadStatus(BenchmarkOverviewReport report) {
+        String reportUploadStatus = getProperty(Constants.REPORT_UPLOAD_STATUS);
+        if (Constants.REPORT_PUBLIC.equals(reportUploadStatus)) {
+            report.setUploadStatus(reportUploadStatus);
+        } else if (Constants.REPORT_PRIVATE.equals(reportUploadStatus)) {
+            report.setUploadStatus(reportUploadStatus);
+        } else {
+            report.setUploadStatus(Constants.REPORT_PUBLIC);
+        }
+    }
+    public static String getProperty(String key) {
+        return System.getProperty(key, cfg.getProperty(key));
+    }
 	private static Map<String, Object> customUserDefinedProperties(String customPropertiesStr) {
         Map<String, Object> customUserProperties = new HashMap<>();
         if (customPropertiesStr != null && !customPropertiesStr.isEmpty()){
@@ -226,8 +267,39 @@ public class CyBenchLauncher {
         }
         return customUserProperties;
     }
-	
+	private static void appendMetadataFromClass(Class<?> aClass, BenchmarkReport benchmarkReport) {
+        CyBenchMetadataList annotation = aClass.getDeclaredAnnotation(CyBenchMetadataList.class);
+        if (annotation != null) {
+            Arrays.stream(annotation.value()).forEach(annot -> {
+                checkSetOldMetadataProps(annot.key(), annot.value(), benchmarkReport);
+                benchmarkReport.addMetadata(annot.key(), annot.value());
+//                System.out.println("added metadata " + annot.key() + "=" + annot.value());
+            });
+        }
+        BenchmarkMetaData singleAnnotation = aClass.getDeclaredAnnotation(BenchmarkMetaData.class);
+        if (singleAnnotation != null) {
+            checkSetOldMetadataProps(singleAnnotation.key(), singleAnnotation.value(), benchmarkReport);
+            benchmarkReport.addMetadata(singleAnnotation.key(), singleAnnotation.value());
+//            System.out.println("added metadata " + singleAnnotation.key() + "=" + singleAnnotation.value());
+        }
+    }
+	 private static void appendMetadataFromMethod(Optional<Method> benchmarkMethod, BenchmarkReport benchmarkReport) {
+	        CyBenchMetadataList annotation = benchmarkMethod.get().getDeclaredAnnotation(CyBenchMetadataList.class);
+	        if (annotation != null) {
+	            Arrays.stream(annotation.value()).forEach(annot -> {
+	                checkSetOldMetadataProps(annot.key(), annot.value(), benchmarkReport);
+	                benchmarkReport.addMetadata(annot.key(), annot.value());
+//	                System.out.println("added metadata " + annot.key() + "=" + annot.value());
+	            });
+	        }
+	        BenchmarkMetaData singleAnnotation = benchmarkMethod.get().getDeclaredAnnotation(BenchmarkMetaData.class);
+	        if (singleAnnotation != null) {
+	            checkSetOldMetadataProps(singleAnnotation.key(), singleAnnotation.value(), benchmarkReport);
+	            benchmarkReport.addMetadata(singleAnnotation.key(), singleAnnotation.value());
+//	            System.out.println("added metadata " + singleAnnotation.key() + "=" + singleAnnotation.value());
+	        }
 
+	    }
 	
 	private static void fillLaunchConfigurations(LauncherConfiguration launcherConfiguration) {
 		launcherConfiguration.setReportName(checkNullAndReturnString("REPORT_NAME"));
@@ -279,4 +351,16 @@ public class CyBenchLauncher {
 		}
 		return classesToInclude;
 	}
+	
+    private static void checkSetOldMetadataProps(String key,String value, BenchmarkReport benchmarkReport){
+        if(key.equals("api")){
+            benchmarkReport.setCategory(value);
+        }
+        if(key.equals("context")){
+            benchmarkReport.setContext(value);
+        }
+        if(key.equals("version")){
+            benchmarkReport.setVersion(value);
+        }
+    }
 }
