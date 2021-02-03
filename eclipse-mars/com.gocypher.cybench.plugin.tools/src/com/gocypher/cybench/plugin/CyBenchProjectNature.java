@@ -89,7 +89,6 @@ public class CyBenchProjectNature implements IProjectNature {
 		}catch (Exception e) {
 			GuiUtils.logError("Error during configure of CyBench nature:"+e.getMessage());
 			e.printStackTrace();
-			throw new CoreException(null);
 		}
 			
 	}

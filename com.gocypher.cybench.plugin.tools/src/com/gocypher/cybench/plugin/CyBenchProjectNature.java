@@ -92,7 +92,6 @@ public class CyBenchProjectNature implements IProjectNature {
 			//this.configureProjectAPTSettings (javaProject,fullPathHardcodedCore,fullPathHardcodedAnnotations) ;
 		}catch (Exception e) {
 			GuiUtils.logError ("Error during configure of CyBench nature:",e) ;
-			throw new CoreException(null);
 		}
 			
 	}
