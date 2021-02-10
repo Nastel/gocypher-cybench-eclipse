@@ -140,15 +140,20 @@ public class CyBenchProjectNature implements IProjectNature {
 		java.nio.file.Path path = FileSystems.getDefault().getPath(srcFolder.getPath().toPortableString());
 
 		if (LauncherUtils.isMavenProject(javaProject.getProject()) || LauncherUtils.isGradleProject(javaProject.getProject())) {
-				path = FileSystems.getDefault().getPath(javaProject.getProject().getLocation().toPortableString()+LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_MVN);
+			path = FileSystems.getDefault().getPath(javaProject.getProject().getLocation().toPortableString()+LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_MVN);
 		}
 		if (!Files.exists(path)) {
-
+			boolean occurenceFound = false;
 			List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
-			for (IClasspathEntry entry :javaProject.getRawClasspath()) {			
+			for (IClasspathEntry entry :javaProject.getRawClasspath()) {	
 				classPathEntries.add (entry) ;
+				if(entry.getPath().equals(srcFolder.getPath())){
+					occurenceFound = true;
+				}
 			}
-			classPathEntries.add(srcFolder);
+			if(!occurenceFound){
+				classPathEntries.add(srcFolder);
+			}
 			int i = 0 ;
 			IClasspathEntry[] classPathRaw = new IClasspathEntry[classPathEntries.size()] ;
 			for (IClasspathEntry item: classPathEntries) {
@@ -156,17 +161,16 @@ public class CyBenchProjectNature implements IProjectNature {
 				i++ ;
 			}
 			javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());
-
 		}
 		else {
 			GuiUtils.logInfo("SRC folder for benchmarks exist.");
 		}
 		IPath projectPath = javaProject.getProject().getLocation() ;
 		if (LauncherUtils.isMavenProject(javaProject.getProject()) || LauncherUtils.isGradleProject(javaProject.getProject())) {
-			projectPath = projectPath.append(LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_MVN) ;
+				projectPath = projectPath.append(LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_MVN) ;
 		}
 		else {
-			projectPath = projectPath.append(LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_JAVA) ;
+				projectPath = projectPath.append(LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_JAVA) ;
 		}
 		File rawFolder = new File(projectPath.toPortableString()) ;
 		GuiUtils.logInfo("-->Raw path on FS:"+projectPath.toPortableString()+"; Existence on FS:"+rawFolder.exists());
