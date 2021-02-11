@@ -23,6 +23,7 @@
 hs_err_pid*
 bin/
 target/
+.metadata
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
