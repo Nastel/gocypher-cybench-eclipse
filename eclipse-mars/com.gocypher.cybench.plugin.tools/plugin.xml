@@ -182,7 +182,7 @@
 	            <command
 	                  id="com.gocypher.cybench.plugin.ProjectGeneratebenchmarks"
 	                  commandId="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks"
-		        	  label="CyBench Generate"
+		        	  label="CyBench Generate Benchmark Stubs"
 	                  icon="icons/cybench_symbol_small.png"                
 	                  tooltip="Generate benchmarks"
 	                  style="push">

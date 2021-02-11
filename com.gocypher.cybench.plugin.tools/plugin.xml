@@ -182,7 +182,7 @@
 	            <command
 	                  id="com.gocypher.cybench.plugin.ProjectGeneratebenchmarks"
 	                  commandId="com.gocypher.cybench.plugin.handlers.GenerateBenchmarks"
-		        	  label="CyBench Generate"
+		        	  label="CyBench Generate Benchmark Stubs"
 	                  icon="icons/cybench_symbol_small.png"                
 	                  tooltip="Generate benchmarks"
 	                  style="push">
@@ -292,7 +292,6 @@
             targetID="org.eclipse.jdt.ui.JavaPerspective">
          <view
                id="com.gocypher.cybench.plugin.views.ReportsDisplayView"
-               ratio="0.5"
                relationship="stack"
                relative="org.eclipse.jdt.ui.JavadocView"
                visible="false"
@@ -303,13 +302,63 @@
             targetID="org.eclipse.jdt.ui.JavaPerspective">
          <view
                id="com.gocypher.cybench.plugin.views.CyBenchExplorerView"
-               ratio="0.5"
                relationship="stack"
                relative="org.eclipse.jdt.ui.PackageExplorer"
                visible="true"
                >
          </view>
       </perspectiveExtension>
+       <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         <view
+               id="com.gocypher.cybench.plugin.views.CyBenchExplorerView"
+               relationship="stack"
+               relative="org.eclipse.jdt.internal.ui.browsing.PackagesView"
+               visible="true"
+               >
+         </view>
+      </perspectiveExtension>
+       <perspectiveExtension
+            targetID="org.eclipse.ui.resourcePerspective">
+         <view
+               id="com.gocypher.cybench.plugin.views.CyBenchExplorerView"
+               relationship="stack"
+               relative="org.eclipse.ui.navigator.resources.ProjectExplorer"
+               visible="true"
+               >
+         </view>
+      </perspectiveExtension>
+             <perspectiveExtension
+            targetID="org.eclipse.mylyn.tasks.ui.perspectives.planning">
+         <view
+               id="com.gocypher.cybench.plugin.views.CyBenchExplorerView"
+               relationship="stack"
+               relative="org.eclipse.ui.views.ContentOutline"
+               visible="true"
+               >
+         </view>
+      </perspectiveExtension>
+     <perspectiveExtension
+            targetID="org.eclipse.team.cvs.ui.cvsPerspective">
+         <view
+               id="com.gocypher.cybench.plugin.views.CyBenchExplorerView"
+               relationship="stack"
+               relative="org.eclipse.ui.views.ContentOutline"
+               visible="true"
+               >
+         </view>
+      </perspectiveExtension>
+       <perspectiveExtension
+            targetID="org.eclipse.team.ui.TeamSynchronizingPerspective">
+         <view
+               id="com.gocypher.cybench.plugin.views.CyBenchExplorerView"
+               relationship="stack"
+               relative="org.eclipse.ui.views.ContentOutline"
+               visible="true"
+               >
+         </view>
+      </perspectiveExtension>
+         <!--  relationship="stack"   relative="org.eclipse.ui.views.ContentOutline"-->
    </extension>
    <extension
          point="org.eclipse.help.contexts">
