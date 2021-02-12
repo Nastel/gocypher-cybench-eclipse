@@ -189,8 +189,7 @@ public class CyBenchLauncher {
                 benchmarkReport.setGeneratedFingerprint(generatedFingerprints.get(name));
                 benchmarkReport.setManualFingerprint(manualFingerprints.get(name));
                 try {
-                	JMHUtils test = new JMHUtils();
-                    JMHUtils.ClassAndMethod classAndMethod = new JMHUtils.ClassAndMethod(name).invoke();
+                	JMHUtils.ClassAndMethod classAndMethod = new JMHUtils.ClassAndMethod(name).invoke();
                     String clazz = classAndMethod.getClazz();
                     String method = classAndMethod.getMethod();
                     System.out.println("Adding metadata for benchamrk: " + clazz + " test: " + method);
@@ -224,8 +223,23 @@ public class CyBenchLauncher {
         
         if (report.isEligibleForStoringExternally() && launcherConfiguration.isShouldSendReportToCyBench()) {
             responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted);
-            report.setReportURL(responseWithUrl);
-        }
+
+            String deviceReports = JSONUtils.parseJsonIntoMap(responseWithUrl).get(Constants.REPORT_USER_URL).toString();
+            String resultURL = JSONUtils.parseJsonIntoMap(responseWithUrl).get(Constants.REPORT_URL).toString();
+            System.out.println("Benchmark report submitted successfully to "+ Constants.REPORT_URL);
+            System.out.println("You can find all device benchmarks on "+ deviceReports);
+            System.out.println("Your report is available at "+ resultURL);
+            System.out.println("NOTE: It may take a few minutes for your report to appear online");
+
+            report.setDeviceReports(deviceReports);
+            report.setReportURL(resultURL);
+        	
+        	
+//            responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted);
+//            report.setReportURL(responseWithUrl);
+        } else {
+        	 System.out.println("You may submit your report manually at {}"+ responseWithUrl);
+	     }
         BigDecimal reportScore = report.getTotalScore();
         if(reportScore == null) {
         	reportScore = new BigDecimal(0);

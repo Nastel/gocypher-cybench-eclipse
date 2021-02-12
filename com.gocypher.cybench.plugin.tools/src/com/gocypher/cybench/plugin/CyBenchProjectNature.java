@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -140,23 +142,30 @@ public class CyBenchProjectNature implements IProjectNature {
 	private void createBenchmarksSrcFolder (IJavaProject javaProject) throws Exception {
 		
 		IClasspathEntry srcFolder = JavaCore.newSourceEntry(LauncherUtils.getSourceFolderForBenchmarks(javaProject.getProject())) ;
-		
-		if (javaProject.getClasspathEntryFor(srcFolder.getPath()) == null) {
+		java.nio.file.Path path = FileSystems.getDefault().getPath(srcFolder.getPath().toPortableString());
+
+		if (LauncherUtils.isMavenProject(javaProject.getProject()) || LauncherUtils.isGradleProject(javaProject.getProject())) {
+			path = FileSystems.getDefault().getPath(javaProject.getProject().getLocation().toPortableString()+LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_MVN);
+		}
+		if (!Files.exists(path)) {
 			GuiUtils.logInfo("SRC folder for benchmarks does not exist, will add new one.");
+			boolean occurenceFound = false;
 			List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
-			
-			for (IClasspathEntry entry :javaProject.getRawClasspath()) {			
+			for (IClasspathEntry entry :javaProject.getRawClasspath()) {	
 				classPathEntries.add (entry) ;
+				if(entry.getPath().equals(srcFolder.getPath())){
+					occurenceFound = true;
+				}
 			}
-			classPathEntries.add(srcFolder);
-			
+			if(!occurenceFound){
+				classPathEntries.add(srcFolder);
+			}
 			int i = 0 ;
 			IClasspathEntry[] classPathRaw = new IClasspathEntry[classPathEntries.size()] ;
 			for (IClasspathEntry item: classPathEntries) {
 				classPathRaw[i] = item ;
 				i++ ;
 			}
-						
 			javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());
 		}
 		else {

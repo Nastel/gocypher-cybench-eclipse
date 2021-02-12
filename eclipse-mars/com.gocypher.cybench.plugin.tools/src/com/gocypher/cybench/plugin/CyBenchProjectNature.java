@@ -143,6 +143,7 @@ public class CyBenchProjectNature implements IProjectNature {
 			path = FileSystems.getDefault().getPath(javaProject.getProject().getLocation().toPortableString()+LauncherUtils.SRC_FOLDER_FOR_BENCHMARKS_MVN);
 		}
 		if (!Files.exists(path)) {
+			GuiUtils.logInfo("SRC folder for benchmarks does not exist, will add new one.");
 			boolean occurenceFound = false;
 			List<IClasspathEntry>classPathEntries = new ArrayList<>() ;
 			for (IClasspathEntry entry :javaProject.getRawClasspath()) {	
