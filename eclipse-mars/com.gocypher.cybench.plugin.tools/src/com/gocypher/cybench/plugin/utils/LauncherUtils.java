@@ -262,10 +262,24 @@ public class LauncherUtils {
 	public static List<String> getNeededClassPaths(IProject project, List<String> classPaths ){
 		List<String> classpathMementos = new ArrayList<String>();
 		for (int i = 0; i < classPaths.size(); i++) {
-		    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(classPaths.get(i)));
-		    cpEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
 		    try {
-		        classpathMementos.add(cpEntry.getMemento());
+		    	/**
+		    	 * The paths are converted into XML memento from List<Srting> during conversion the start of path for .jar files 
+		    	 * inside the gets deleted and the path is converted into a relative path that does not get found by Eclipse.
+		    	 *
+		    	 * Therefore constructions for .jar memento is done in a hardcoded way.
+		    	 */
+				IRuntimeClasspathEntry cpEntry = null;
+				String path = classPaths.get(i).toLowerCase().trim();
+
+				if(path.endsWith(".jar")){
+					String userDefinedClassPath = "<?xml version='1.0' encoding='UTF-8' standalone='no'?> <runtimeClasspathEntry externalArchive='"+path+"' path='3' type='2'/>";
+			        classpathMementos.add(userDefinedClassPath);
+				}else{
+				    cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(path).makeAbsolute());
+				    cpEntry.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+			        classpathMementos.add(cpEntry.getMemento());
+				}
 		    } catch (CoreException e) {
 		    	GuiUtils.logError ("Error during classpath add",e) ;
 		    }

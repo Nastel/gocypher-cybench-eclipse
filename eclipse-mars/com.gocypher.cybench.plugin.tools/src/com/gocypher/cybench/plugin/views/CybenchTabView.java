@@ -82,7 +82,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private Text jvmProperties;
     private Text userProperties;
     private Button useCyBenchBenchmarkSettings;
-    
+
+    private Text classPathProperties;
 //    private Button shouldStoreReportToFileSystem;
     private Button shouldSendReportToCyBench;
     private Button shouldDoHardwareSnapshot;
@@ -263,6 +264,12 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        Label  jvmPropertiesLabel = new Label(configuration, SWT.NONE);
  	        jvmPropertiesLabel.setText("JVM Properties:");
 	        jvmProperties = new Text(configuration, SWT.BORDER);
+	        
+	        Label  classPathPropertiesLabel = new Label(configuration, SWT.NONE);
+	        classPathPropertiesLabel.setText("Classpath arguments:");
+	        
+	        classPathProperties = new Text(configuration, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+
  	        /* User save to file send t CyBench choice buttons */
 // 	        Label storeReportsToFileSystemLabel = new Label(configuration, SWT.NONE);
 // 	        storeReportsToFileSystemLabel.setText("Store Report In File System:");
@@ -295,6 +302,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(runOnlySelectedLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(userPropertiesLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(jvmPropertiesLabel);
+ 	        GridDataFactory.swtDefaults().span(2,1).applyTo(classPathPropertiesLabel);
  	        
  	       
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(emptyField);
@@ -309,7 +317,15 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(onlySelectedLaunch);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(userProperties);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(jvmProperties);
- 	       
+ 	        
+ 	        
+ 	        // Class-paths layout
+ 	        GridData classPathGrid = new GridData();
+ 	        classPathGrid.horizontalSpan = 10;
+ 	        classPathGrid.widthHint = GridData.FILL_HORIZONTAL;
+  	        classPathGrid.heightHint = 100;
+  	       	GridDataFactory.createFrom(classPathGrid).applyTo(classPathProperties);
+  	       
  	        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(configuration);
  	        
 			return configuration;
@@ -389,6 +405,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             boolean includehardwarePropeties = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
             boolean useCybenchbenchmarkSettingsDef = configuration.getAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, true);
             
+            String classPathArguments = configuration.getAttribute(LaunchConfiguration.ADD_CUSTOM_CLASS_PATH, "");
+            
             reportsFolder.setText(reportFolderDef);
             reportsFolder.addModifyListener(modifyListener);
             reportName.setText(reportNameDef);
@@ -430,6 +448,10 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             
             useCyBenchBenchmarkSettings.setSelection(useCybenchbenchmarkSettingsDef);
             useCyBenchBenchmarkSettings.addSelectionListener(selectionListener);
+            
+            classPathProperties.setText(classPathArguments);
+            classPathProperties.addModifyListener(modifyListener);
+            
             shouldSendReportEnableDisable();
             useCybenchEnableDisable();
             
@@ -463,6 +485,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         
         configuration.setAttribute(LaunchConfiguration.EXECUTION_SCORE, expectedScore.getSelection());
         
+        configuration.setAttribute(LaunchConfiguration.ADD_CUSTOM_CLASS_PATH,  classPathProperties.getText());    
         String buildPath = getBuildPath(launchPath.getText());
     	configuration.setAttribute(LaunchConfiguration.BUILD_PATH,  buildPath);
     }

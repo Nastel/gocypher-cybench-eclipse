@@ -46,4 +46,5 @@ public interface LaunchConfiguration {
 	
 	public static final String USE_CYBNECH_BENCHMARK_SETTINGS = "com.cybench.useCyBenchBenchmarkSettings";
 	
+	public static final String ADD_CUSTOM_CLASS_PATH ="com.cybench.useCustomClassPath";
 }

@@ -206,8 +206,10 @@ public class CyBenchLauncher {
         
         List<BenchmarkReport> customBenchmarksCategoryCheck = report.getBenchmarks().get("CUSTOM");
         report.getBenchmarks().remove("CUSTOM");
-        for(BenchmarkReport benchReport : customBenchmarksCategoryCheck) {
-            report.addToBenchmarks(benchReport);
+        if(customBenchmarksCategoryCheck != null) {
+	        for(BenchmarkReport benchReport : customBenchmarksCategoryCheck) {
+	            report.addToBenchmarks(benchReport);
+	        }
         }
         report.computeScores();
         getReportUploadStatus(report);

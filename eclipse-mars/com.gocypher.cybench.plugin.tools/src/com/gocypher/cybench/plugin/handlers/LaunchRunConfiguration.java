@@ -61,6 +61,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private boolean includeHardware;
 	private String userProperties;
 	private String jvmProperties;
+	private String classPathFromUser;
 	private int excutionScoreBoundary ;
 	private String selectionFolderPath;
 	private boolean useCyBenchBenchmarkSettings;
@@ -124,10 +125,13 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 					classPaths.add(classPathTest.getPath().toOSString());
 				}
 			}
+			if(classPathFromUser != null && !classPathFromUser.equals("")){
+				classPaths.addAll(Arrays.asList(classPathFromUser.split(",")));
+	    	}
 			classPaths.addAll(Arrays.asList(launchPath.split(",")));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) );
-
+		
 			List<String> classpathMementos = LauncherUtils.getNeededClassPaths(project, classPaths);
 	    	//GuiUtils.logInfo("Classpath: "+classpathMementos) ;
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
@@ -215,5 +219,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
    	   launchPath = configuration.getAttribute(LaunchConfiguration.BUILD_PATH, "");
    	   selectionFolderPath =configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");  
    	   useCyBenchBenchmarkSettings = configuration.getAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, false);
+   	   
+   	   classPathFromUser = configuration.getAttribute(LaunchConfiguration.ADD_CUSTOM_CLASS_PATH, "");
     }
 }

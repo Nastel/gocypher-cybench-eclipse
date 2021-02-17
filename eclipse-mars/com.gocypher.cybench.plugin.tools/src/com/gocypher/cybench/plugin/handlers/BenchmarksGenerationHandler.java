@@ -101,12 +101,12 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		    			JDefinedClass generationClass;
 			    		generationClass = codeModelInstance._class(packagePath+"Benchmarks");
 			    		generationClass.annotate(codeModelInstance.ref(State.class)).param("value", Scope.Benchmark);
-			        	/*---------------- SET UP METHODS -------------------------*/
+			        	/*---------------- SETUP METHODS -------------------------*/
 			    		model.setMethodType(void.class);
-			    		model.setMethodName("setUp");
+			    		model.setMethodName("setup");
 			    		model.setMethodHint("//TODO Trial level: write code to be executed before each run of the benchmark");
 			    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 0);
-			    		model.setMethodName("setUpIteration");
+			    		model.setMethodName("setupIteration");
 			    		model.setMethodHint("//TODO Iteration level: write code to be executed before each iteration of the benchmark.");
 			    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 2);
 			    		
@@ -116,12 +116,12 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 				    		generateBenchmarkMethod(generationClass, codeModelInstance, methodModelEntry);
 			        	}
 		
-			        	/*---------------- TEAR DOWN METHODS -------------------------*/
+			        	/*---------------- TEARDOWN METHODS -------------------------*/
 			    		model.setMethodType(void.class);
-			        	model.setMethodName("cleanUp");
+			        	model.setMethodName("teardown");
 			    		model.setMethodHint("//TODO Trial level: write code to be executed after each run of the benchmark");
 			    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 1);
-			    		model.setMethodName("cleanUpIteration");
+			    		model.setMethodName("teardownIteration");
 			    		model.setMethodHint("//TODO Iteration level: write code to be executed after each iteration of the benchmark.");
 			    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 3);
 		
