@@ -97,7 +97,8 @@ public class CyBenchLauncher {
 		OptionsBuilder optBuild = new OptionsBuilder();    
         Map<String, Object> benchmarkSettings = new HashMap<>();
 
-        Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
+//        Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
+
         System.out.println("_______________________ BENCHMARK TESTS FOUND _________________________________");
         
         benchmarkSettings.put("benchSource", benchSource);
@@ -168,7 +169,7 @@ public class CyBenchLauncher {
 	
 		Collection<RunResult> results = runner.run() ;
 		
-		BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results, customBenchmarksMetadata);
+		BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results, null);
 
 		report.updateUploadStatus(launcherConfiguration.getReportUploadStatus());
 		if(launcherConfiguration.isIncludeHardware()) {
@@ -233,14 +234,15 @@ public class CyBenchLauncher {
             System.out.println("Your report is available at "+ resultURL);
             System.out.println("NOTE: It may take a few minutes for your report to appear online");
 
-            report.setDeviceReports(deviceReports);
+            report.setDeviceReportsURL(deviceReports);
             report.setReportURL(resultURL);
         	
         	
-//            responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted);
-//            report.setReportURL(responseWithUrl);
+  
         } else {
-        	 System.out.println("You may submit your report manually at {}"+ responseWithUrl);
+//			responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted);
+//			report.setReportURL(responseWithUrl);
+			System.out.println("You may submit your report manually at {}"+ responseWithUrl);
 	     }
         BigDecimal reportScore = report.getTotalScore();
         if(reportScore == null) {

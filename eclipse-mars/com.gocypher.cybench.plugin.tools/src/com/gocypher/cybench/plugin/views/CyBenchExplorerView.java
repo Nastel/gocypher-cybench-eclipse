@@ -137,8 +137,10 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 					if (file.getName().endsWith(Constants.REPORT_FILE_EXTENSION)) {
 						ReportFileEntry entry = new ReportFileEntry() ;
 						entry.create(file);
-						Node<ReportFileEntry> reportNode = new Node<>(entry) ;
-						projectNode.addChild(reportNode) ;
+						if(checkForExistance(entry)) {
+							Node<ReportFileEntry> reportNode = new Node<>(entry) ;
+							projectNode.addChild(reportNode) ;
+						}
 					}
 				}			
 				treeOfReports.add(projectNode) ;
@@ -167,7 +169,27 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 			treeOfReports.add(projectNode) ;
 		}
 	}
-
+	private boolean checkForExistance(ReportFileEntry entry) {
+		if(treeOfReports.size()>1) {
+			for(int i=0; i<treeOfReports.size(); i++) {
+			List<Node<ReportFileEntry>> temp = treeOfReports.get(i).getChildren();
+				for(int k=0; k<temp.size(); k++) {
+				
+					if(temp.get(k).getData().getTimestamp() == entry.getTimestamp()) {
+						if(temp.get(k).getData().getFullPathToFile().length() == entry.getFullPathToFile().length()) {
+							treeOfReports.get(i).getChildren().remove(k);
+							return true;
+						}else {
+							return false;
+						}
+					}
+				
+				}
+				
+			}
+		}
+		return true;
+	}
 	@Override
 	public void createPartControl(Composite parent) {
 		// Create the help context id for the viewer's control

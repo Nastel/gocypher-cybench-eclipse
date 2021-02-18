@@ -32,11 +32,11 @@ public interface LaunchConfiguration {
 	public static final String WARMUP_SECONDS = "com.cybench.warmupSeconds";
 	public static final String MEASURMENT_SECONDS = "com.cybench.measurmentSeconds";
 
-	public static final String EXECUTION_SCORE = "com.cybench.executionScore";
+//	public static final String EXECUTION_SCORE = "com.cybench.executionScore";
 	public static final String SHOULD_SEND_REPORT_CYBENCH = "com.cybench.shouldSendReportToCyBench";
 	public static final String INCLUDE_HARDWARE_PROPERTIES = "com.cybench.includeHardwareProperties";
 	public static final String SHOULD_SAVE_REPOT_TO_FILE = "com.cybench.ShouldSaveReportToFile";
-	public static final String CUSTOM_USER_PROPERTIES = "com.cybench.customUserProperties";
+//	public static final String CUSTOM_USER_PROPERTIES = "com.cybench.customUserProperties";
 	public static final String CUSTOM_JVM_PROPERTIES = "com.cybench.customJVMProperties";
 	
 

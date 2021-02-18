@@ -96,7 +96,7 @@ public class CyBenchLauncher {
         SecurityBuilder securityBuilder = new SecurityBuilder();        
         Map<String, Object> benchmarkSettings = new HashMap<>();
 
-        Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
+//        Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
         
         benchmarkSettings.put("benchSource", benchSource);
         benchmarkSettings.put("benchWarmUpIteration", launcherConfiguration.getWarmUpIterations());
@@ -169,7 +169,7 @@ public class CyBenchLauncher {
 	
 		Collection<RunResult> results = runner.run() ;
 		
-		BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results, customBenchmarksMetadata);
+		BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results, null);
 
 		report.updateUploadStatus(launcherConfiguration.getReportUploadStatus());
 		if(launcherConfiguration.isIncludeHardware()) {
@@ -230,7 +230,7 @@ public class CyBenchLauncher {
             System.out.println("Your report is available at "+ resultURL);
             System.out.println("NOTE: It may take a few minutes for your report to appear online");
 
-            report.setDeviceReports(deviceReports);
+            report.setDeviceReportsURL(deviceReports);
             report.setReportURL(resultURL);
         	
         	

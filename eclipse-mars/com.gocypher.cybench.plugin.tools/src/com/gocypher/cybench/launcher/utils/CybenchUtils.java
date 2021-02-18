@@ -29,13 +29,12 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.gocypher.cybench.plugin.utils.Constants;
+import com.gocypher.cybench.plugin.utils.GuiUtils;
 
 public class CybenchUtils {
 	
@@ -83,9 +82,7 @@ public class CybenchUtils {
 			file.write(content);
 			file.flush();
 		} catch (Exception e) {
-			//FIXME handle logging in an eclipse way
-			//LOG.error("Error on saving to file={}", fileName, e);
-			e.printStackTrace();
+			GuiUtils.logError("Error on storing results t file",e);
 		} finally {
 			close(file);
 		}
@@ -96,9 +93,7 @@ public class CybenchUtils {
 				obj.close();
 			}
 		} catch (Throwable e) {
-			//FIXME handle logging in an eclipse way
-			//LOG.error("Error on close: obj={}", obj,e);
-			e.printStackTrace();
+			GuiUtils.logError("Error on close",e);
 		}		
 	}
 	
@@ -157,42 +152,5 @@ public class CybenchUtils {
         return String.format("%02d:%02d:%02d.%03d", hr, min, sec, ms);
     }
 	
-	public static Map<String, Map<String, String>> parseCustomBenchmarkMetadata(String configuration) {
-        Map<String, Map<String, String>> benchConfiguration = new HashMap<>();
-        if (configuration != null && !configuration.isEmpty()) {
-            for (String item : configuration.split(";")) {
-                String[] testCfg = item.split("=");
-                if (testCfg != null && testCfg.length == 2) {
-                    String name = testCfg[0];
-                    if (benchConfiguration.get(name) == null) {
-                        benchConfiguration.put(name, new HashMap<>());
-                    }
-                    String value = testCfg[1];
-                    for (String cfgItem : value.split(",")) {
-                        String[] values = cfgItem.split(":");
-                        if (values != null && values.length == 2) {
-                            String key = values[0];
-                            String val = values[1];
-                            benchConfiguration.get(name).put(key, val);
-                        }
-                    }
-                }
-            }
-        }
-        return benchConfiguration;
-    }
-	/*public static List<File> walkAndFindReports (List<String>pathsToDirectories) {
-		List<File> reports = new ArrayList<>() ;
-		for (String pathToDirectory:pathsToDirectories) {
-			List<File>files = listFilesInDirectory(pathToDirectory) ;
-			for (File file:files) {
-				if (file.getName().endsWith(Constants.REPORT_FILE_EXTENSION)) {
-					reports.add(file) ;
-				}
-			}
-		}
-		return reports;
-	}
-	*/
    
 }

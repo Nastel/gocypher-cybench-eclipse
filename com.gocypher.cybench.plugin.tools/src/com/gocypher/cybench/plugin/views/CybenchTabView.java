@@ -77,10 +77,10 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private Spinner warmupSeconds;
     private Spinner measurmentSeconds;
     
-    private Spinner expectedScore;
+//    private Spinner expectedScore;
 
     private Text jvmProperties;
-    private Text userProperties;
+//    private Text userProperties;
     private Button useCyBenchBenchmarkSettings;
     
 //    private Button shouldStoreReportToFileSystem;
@@ -106,7 +106,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         configuration = prepareCyBenchConfigurations(comp, itemsArray);
 	        
         /* Execution Conditions GROUP */
-        conditions = prepareConditionGroup(comp);
+//        conditions = prepareConditionGroup(comp);
      
     }
     
@@ -258,9 +258,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        });
  	        
  	        /* User properties input */
- 	        Label userPropertiesLabel = new Label(configuration, SWT.NONE);
- 	        userPropertiesLabel.setText("User Properties:");
- 	        userProperties = new Text(configuration, SWT.BORDER);
+// 	        Label userPropertiesLabel = new Label(configuration, SWT.NONE);
+// 	        userPropertiesLabel.setText("User Properties:");
+// 	        userProperties = new Text(configuration, SWT.BORDER);
  	        
  	        Label  jvmPropertiesLabel = new Label(configuration, SWT.NONE);
  	        jvmPropertiesLabel.setText("JVM Properties:");
@@ -300,7 +300,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(reportlaunchPathLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(benchmarkUploadStatusLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(runOnlySelectedLabel);
- 	        GridDataFactory.swtDefaults().span(2,1).applyTo(userPropertiesLabel);
+// 	        GridDataFactory.swtDefaults().span(2,1).applyTo(userPropertiesLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(jvmPropertiesLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(classPathPropertiesLabel);
  	        
@@ -310,12 +310,11 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	       
  	        
  	        GridDataFactory.fillDefaults().grab(true, false).span(7,1).applyTo(reportsFolder);
- 	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(userProperties);
+// 	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(userProperties);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(reportName);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(launchPath);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(reportUploadStatus);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(onlySelectedLaunch);
- 	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(userProperties);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(jvmProperties);
  	        
  	       
@@ -338,19 +337,19 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     		shouldDoHardwareSnapshot.setEnabled(true);
     	}
     }
-    private Group prepareConditionGroup(Composite comp) {
-    	  conditions = new Group(comp, SWT.NONE);
-          conditions.setText("Execution Conditions");
-          conditions.setLayout(new GridLayout(10, false));
-  	        /* Report expected score input */
-  	        Label expectedScoreLabel = new Label(conditions, SWT.NONE);
-  	        expectedScoreLabel.setText("Score Less Then:");
-  	        expectedScore = new Spinner(conditions, SWT.BORDER);
-  	        GridDataFactory.swtDefaults().span(2,1).applyTo(expectedScoreLabel);
-  	        GridDataFactory.fillDefaults().grab(true, false).span(7,1).applyTo(expectedScore);
-  	        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(conditions);
-			return conditions;
-    }
+//    private Group prepareConditionGroup(Composite comp) {
+//    	  conditions = new Group(comp, SWT.NONE);
+//          conditions.setText("Execution Conditions");
+//          conditions.setLayout(new GridLayout(10, false));
+//  	        /* Report expected score input */
+//  	        Label expectedScoreLabel = new Label(conditions, SWT.NONE);
+//  	        expectedScoreLabel.setText("Score Less Then:");
+//  	        expectedScore = new Spinner(conditions, SWT.BORDER);
+//  	        GridDataFactory.swtDefaults().span(2,1).applyTo(expectedScoreLabel);
+//  	        GridDataFactory.fillDefaults().grab(true, false).span(7,1).applyTo(expectedScore);
+//  	        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(conditions);
+//			return conditions;
+//    }
     
     @Override
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
@@ -387,9 +386,11 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             	reportFolderDef = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, entry.getKey()+"/reports");
             	launchPathDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_PATH, entry.getKey());
             }
-            String reportNameDef = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "CyBench Report");
+            String reportNameDef = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "");
             String reportUploadStatusDef = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
             String pathToSourceSelectedDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");
+            
+//            String userArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, "");
             String jvmArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "");
          
             int threadDef = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
@@ -427,10 +428,11 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             warmupSeconds.addModifyListener(modifyListener);
             measurmentSeconds.setValues(measurmentSecondsDef, 1, 10000, 0, 1, 1);
             measurmentSeconds.addModifyListener(modifyListener);
-            expectedScore.setValues(-1, -1, 10000, 2, 1, 1);
-            expectedScore.addModifyListener(modifyListener);
+//            expectedScore.setValues(-1, -1, 10000, 2, 1, 1);
+//            expectedScore.addModifyListener(modifyListener);
 
-            userProperties.addModifyListener(modifyListener);
+//            userProperties.setText(userArguments);
+//            userProperties.addModifyListener(modifyListener);
             jvmProperties.setText(jvmArguments);
             jvmProperties.addModifyListener(modifyListener);
             
@@ -474,7 +476,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         configuration.setAttribute(LaunchConfiguration.WARMUP_SECONDS, warmupSeconds.getSelection());
         configuration.setAttribute(LaunchConfiguration.MEASURMENT_SECONDS, measurmentSeconds.getSelection());
 
-        configuration.setAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, userProperties.getText());
+//        configuration.setAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, userProperties.getText());
         configuration.setAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, jvmProperties.getText());
 //        configuration.setAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, shouldStoreReportToFileSystem.getSelection());
         configuration.setAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, shouldSendReportToCyBench.getSelection());
@@ -482,7 +484,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         
         configuration.setAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, useCyBenchBenchmarkSettings.getSelection());
         
-        configuration.setAttribute(LaunchConfiguration.EXECUTION_SCORE, expectedScore.getSelection());
+//        configuration.setAttribute(LaunchConfiguration.EXECUTION_SCORE, expectedScore.getSelection());
         configuration.setAttribute(LaunchConfiguration.ADD_CUSTOM_CLASS_PATH,  classPathProperties.getText());
         
         String buildPath = getBuildPath(launchPath.getText());

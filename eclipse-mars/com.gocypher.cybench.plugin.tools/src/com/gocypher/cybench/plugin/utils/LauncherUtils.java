@@ -20,12 +20,15 @@
 package com.gocypher.cybench.plugin.utils;
 
 import java.io.File;
+import java.io.FileReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -58,6 +61,7 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.CyBenchProjectNature;
 import com.gocypher.cybench.plugin.model.RunSelectionEntry;
 
@@ -292,7 +296,7 @@ public class LauncherUtils {
 				    IRuntimeClasspathEntry cpEntry = JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(mavenEntry.getPath().toOSString()));
 					classpathMementos.add(cpEntry.getMemento());
 				}
-			}else if(isJavaProject(project)){
+			}else if(isJavaProject(project) && !isGradleProject(project)){
 				IClasspathEntry[] javaClasspaths = javaProject.getRawClasspath();
 				for(IClasspathEntry mavenEntry : javaClasspaths) {
 					if(new File(mavenEntry.getPath().toOSString()).isAbsolute()) {
@@ -365,4 +369,45 @@ public class LauncherUtils {
 			}		
 			return false ;
 	}
+	public static String getProjectNameConstruction (IJavaProject javaProject, String className) throws Exception{
+		String benchmarkName = "Benhmark For ";
+		String projectLocation = javaProject.getProject().getLocation().toPortableString() ;
+		List<File> files = CybenchUtils.listFilesInDirectory(projectLocation) ;
+		if (LauncherUtils.isMavenProject(javaProject.getProject())) {
+			File pomXML = null ;
+			for (File file:files) {
+				if (!file.getAbsolutePath().contains("target") && "pom.xml".equals(file.getName())){
+					pomXML = file ;
+				}
+			}
+			if (pomXML != null) {
+				MavenXpp3Reader reader = new MavenXpp3Reader();
+				Model model = reader.read(new FileReader(pomXML)) ;
+				String artifactId = "", groupId ="", version="";
+				artifactId = model.getArtifactId();
+				if(model.getGroupId() != null) {
+					groupId = model.getGroupId();
+				}else {
+					groupId = model.getParent().getGroupId();
+				}
+				if(model.getVersion() != null) {
+					version = model.getVersion();
+				}else {
+					version = model.getParent().getVersion();
+				}
+				if(className != null && !className.equals("")) {
+					className = " " + className;
+				}
+				benchmarkName = benchmarkName +	artifactId + ":" + groupId + ":" + version + className;			
+				GuiUtils.logInfo("Benchmark name result after test: "+benchmarkName);
+			}
+		} else if(LauncherUtils.isGradleProject(javaProject.getProject())) {
+			benchmarkName = javaProject.getElementName();
+		}else {
+			benchmarkName = javaProject.getElementName();
+		}
+		return benchmarkName;
+		
+	}
+	
 }
