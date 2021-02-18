@@ -74,9 +74,11 @@ public class ReportFileEntry implements Serializable{
 				this.timeStampStr = CybenchUtils.formatTimestamp (this.timestamp) ;
 				this.name = "" ;
 				for (int i = 0; i < arr.length -2;i++) {
-					
-					this.name += arr[i] ;
-					
+					if(i>0) {
+						this.name += "-"+arr[i] ;
+					}else {
+						this.name += arr[i] ;
+					}
 				}
 				this.name = this.name.replaceAll("_"," ");
 				

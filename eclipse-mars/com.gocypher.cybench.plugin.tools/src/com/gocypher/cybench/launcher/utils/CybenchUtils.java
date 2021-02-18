@@ -52,6 +52,7 @@ public class CybenchUtils {
 		if(reportName==null || reportName.equals("")) {
 			reportName = "CyBench Report";
 		}
+		reportName = removeBadSymbols(reportName);
 		String fileName = reportName+"-"+System.currentTimeMillis()+"-" ;
 		if (shouldIncludeSlash) {
 			return path+"/"+fileName ;
@@ -65,6 +66,11 @@ public class CybenchUtils {
 		return result ;
 	}
 	
+	private static String removeBadSymbols(String name) {
+		name = name.replaceAll("[\\\\/:*?\"<>|]", "_");
+		name = name.replaceAll(" ", "_");
+		return name;
+	}
 	
 	public static void storeResultsToFile(String pathToFile, String content) {
 		FileWriter file = null;

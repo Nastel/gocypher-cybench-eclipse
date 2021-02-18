@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
@@ -34,6 +35,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorPart;
@@ -72,22 +74,29 @@ public class LaunchShortcut implements ILaunchShortcut {
 //	private List remoteRepositories;
 
 	IProgressMonitor monitor = new NullProgressMonitor(); 
+	private String reportName = null;
+	
     @Override
 	public void launch(ISelection selection, String mode) {
 		try {
+			reportName = null;
 			RunSelectionEntry selectionEntry = LauncherUtils.fillRunselectionData(selection);
 	    	
-			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(selectionEntry.getProjectReportsPath(), true, "report") ;
-			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(selectionEntry.getProjectReportsPath(), true, "report") ;
-	
+		
 			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager() ;
 			ILaunchConfigurationType launchType = manager.getLaunchConfigurationType("org.eclipse.jdt.launching.localJavaApplication");
 			final ILaunchConfigurationWorkingCopy config = launchType.newInstance(null, "CyBench plugin");
-			    
+	
+			if(reportName == null || reportName.equals("")) {
+				reportName = LauncherUtils.getProjectNameConstruction(selectionEntry.getJavaProjectSelected(), selectionEntry.getClassPaths().toString().substring(selectionEntry.getClassPaths().toString().lastIndexOf('.'), selectionEntry.getClassPaths().toString().length()-1));
+			}
+			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(selectionEntry.getProjectReportsPath(), true, reportName) ;
+			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(selectionEntry.getProjectReportsPath(), true, reportName) ;
+	
 			setEnvironmentProperties(config, selectionEntry);
 			List<String> classPaths = new ArrayList<String>();
 
-			if(LauncherUtils.isJavaProject(selectionEntry.getProjectSelected())) {
+			if(LauncherUtils.isJavaProject(selectionEntry.getProjectSelected()) && !LauncherUtils.isGradleProject(selectionEntry.getProjectSelected())) {
 				IJavaProject javaProject = selectionEntry.getJavaProjectSelected();
 				IClasspathEntry[] resolvedClasspath= javaProject.getResolvedClasspath(false);
 				for(IClasspathEntry classPathTest : resolvedClasspath) {
@@ -139,9 +148,11 @@ public class LaunchShortcut implements ILaunchShortcut {
     private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config, RunSelectionEntry selection) {
 		System.out.println(
 				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\""
+				+ " -DREPORT_NAME=\""+reportName+"\""
 				+ " -DREPORT_CLASSES=\""+selection.getClassPaths().toString()+"\"");
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, 
 				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\" "
+				+ " -DREPORT_NAME=\""+reportName+"\""
 				+ " -DREPORT_CLASSES=\""+LauncherUtils.setToString(selection.getClassPaths())+"\"");
     }
     

@@ -200,8 +200,9 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 		projectsViewer.getTree().setHeaderVisible(true);
 		
 		TreeViewerColumn mainColumn = new TreeViewerColumn(projectsViewer, SWT.NONE);
+		mainColumn.getColumn().setWidth(200);
         mainColumn.getColumn().setText("Name");
-
+       
        
         mainColumn.setLabelProvider(
                 new DelegatingStyledCellLabelProvider(
@@ -221,9 +222,10 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
                 .setLabelProvider(new DelegatingStyledCellLabelProvider(
                         new ReportTimestampLabelProvider()));
         
-        
-		projectsViewer.setInput(treeOfReports);
 
+		projectsViewer.setInput(treeOfReports);
+//		mainColumn.getColumn().pack();
+		
 		mainColumn.getColumn().pack();
 		modifiedColumn.getColumn().pack();
 		scoreColumn.getColumn().pack();

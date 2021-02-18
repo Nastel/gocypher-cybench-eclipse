@@ -46,24 +46,30 @@ public class LaunchShortcut implements ILaunchShortcut {
 
 
 
+	private String reportName = null;
 	@Override
 	public void launch(ISelection selection, String mode) {
 		try {
+			reportName = null;
 			RunSelectionEntry selectionEntry = LauncherUtils.fillRunselectionData(selection);
 	    	
-			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(selectionEntry.getProjectReportsPath(), true, "report") ;
-			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(selectionEntry.getProjectReportsPath(), true, "report") ;
 	
 			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager() ;
 			ILaunchConfigurationType launchType = manager.getLaunchConfigurationType("org.eclipse.jdt.launching.localJavaApplication");
 			final ILaunchConfigurationWorkingCopy config = launchType.newInstance(null, "CyBench plugin");
-			    
+			  
+			if(reportName == null || reportName.equals("")) {
+				reportName = LauncherUtils.getProjectNameConstruction(selectionEntry.getJavaProjectSelected(), selectionEntry.getClassPaths().toString().substring(selectionEntry.getClassPaths().toString().lastIndexOf('.'), selectionEntry.getClassPaths().toString().length()-1));
+			}
+			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(selectionEntry.getProjectReportsPath(), true, reportName) ;
+			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(selectionEntry.getProjectReportsPath(), true, reportName) ;
+	
 			setEnvironmentProperties(config, selectionEntry);
 
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
 			List<String> classPaths = new ArrayList<String>();
-			if(LauncherUtils.isJavaProject(selectionEntry.getProjectSelected())) {
-				IJavaProject javaProject = selectionEntry.getJavaProjectSelected();
+			if(LauncherUtils.isJavaProject(selectionEntry.getProjectSelected()) && !LauncherUtils.isGradleProject(selectionEntry.getProjectSelected())) {
+					IJavaProject javaProject = selectionEntry.getJavaProjectSelected();
 				IClasspathEntry[] resolvedClasspath= javaProject.getResolvedClasspath(false);
 				for(IClasspathEntry classPathTest : resolvedClasspath) {
 	//				GuiUtils.logInfo("classPathTest.getPath().toOSString(): "+classPathTest.getPath().toOSString());
@@ -114,9 +120,11 @@ public class LaunchShortcut implements ILaunchShortcut {
     private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config, RunSelectionEntry selection) {
 		System.out.println(
 				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\""
+				+ " -DREPORT_NAME=\""+reportName+"\""
 				+ " -DREPORT_CLASSES=\""+selection.getClassPaths().toString()+"\"");
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, 
 				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\" "
+				+ " -DREPORT_NAME=\""+reportName+"\""
 				+ " -DREPORT_CLASSES=\""+LauncherUtils.setToString(selection.getClassPaths())+"\"");
     }
     

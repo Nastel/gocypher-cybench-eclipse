@@ -99,10 +99,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	    	GuiUtils.logInfo("reportFolder: "+projectPath) ;
 	    	IProject project = LauncherUtils.getProjectFromPath(projectPath);
 	    	
-	    	selectionFolderPath = selectionFolderPath.replaceAll("\\s+","");
-			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;
-			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;
-	
+	    
 			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager() ;
 			ILaunchConfigurationType launchType = manager.getLaunchConfigurationType("org.eclipse.jdt.launching.localJavaApplication");
 			final ILaunchConfigurationWorkingCopy config = launchType.newInstance(null, "CyBench plugin");
@@ -122,7 +119,10 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 					reportName = LauncherUtils.getProjectNameConstruction(javaProject, "");
 				}
 			}
-			
+			selectionFolderPath = selectionFolderPath.replaceAll("\\s+","");
+			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;
+			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(reportFolder, true, reportName.replaceAll(" ", "_")) ;
+	
 			setEnvironmentProperties(config);
 			
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
