@@ -408,7 +408,7 @@ public class LauncherUtils {
 				if(className != null && !className.equals("")) {
 					className = " " + className;
 				}
-				benchmarkName = benchmarkName +	artifactId + ":" + groupId + ":" + version + className;			
+				benchmarkName = benchmarkName + groupId + ":" +	artifactId + ":"  + version + className;		
 				GuiUtils.logInfo("Benchmark name result after test: "+benchmarkName);
 			}
 		} else if(LauncherUtils.isGradleProject(javaProject.getProject())) {
