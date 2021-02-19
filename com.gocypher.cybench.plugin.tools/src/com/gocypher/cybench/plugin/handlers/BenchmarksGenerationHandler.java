@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.expressions.IEvaluationContext;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
@@ -39,12 +40,14 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.ISources;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -75,7 +78,8 @@ import com.sun.codemodel.JMethod;
 
 
 public class BenchmarksGenerationHandler extends AbstractHandler {
-	
+
+	boolean testProp = false;
 	List<BenchmarkMethodModel> benchmarkMethods = new ArrayList<BenchmarkMethodModel>();
 	boolean generationMethodsSelected = false;
 	
@@ -150,6 +154,33 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 			GuiUtils.logError ("JAVA Code generation error",e);
 		}
 		return null;
+	}
+	
+	@Override
+	public boolean isEnabled() {
+		return testProp;
+	}
+	
+	@Override
+	public void setEnabled(Object evaluationContext) {
+		super.setEnabled(evaluationContext);
+		try {
+			if (evaluationContext instanceof IEvaluationContext) {
+				IEvaluationContext appContext = (IEvaluationContext) evaluationContext;		
+				ISelection selection = (ISelection) appContext .getVariable(ISources.ACTIVE_CURRENT_SELECTION_NAME);	
+//				GuiUtils.logInfo ("Selection: " + selection);
+				RunSelectionEntry selectionEntry = LauncherUtils.fillRunselectionData(selection);
+				String outputPath = LauncherUtils.getRawSourceFolderForBenchmarks(selectionEntry.getProjectSelected());
+				for(String packagePath :  selectionEntry.getClassPaths()) {
+					File fileExists = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+"Benchmarks.java");
+					testProp = shouldgenerateFile(fileExists, selectionEntry, outputPath, packagePath);
+				}			
+//		      GuiUtils.logInfo ("selectionEntry: " + selectionEntry); 
+		   }
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static IEditorDescriptor getEditorDescriptor(URI uri)
