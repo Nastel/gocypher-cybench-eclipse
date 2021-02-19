@@ -97,7 +97,6 @@ public class CyBenchLauncher {
 		OptionsBuilder optBuild = new OptionsBuilder();    
         Map<String, Object> benchmarkSettings = new HashMap<>();
 
-//        Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
 
         System.out.println("_______________________ BENCHMARK TESTS FOUND _________________________________");
         
@@ -168,8 +167,10 @@ public class CyBenchLauncher {
         }
 	
 		Collection<RunResult> results = runner.run() ;
-		
-		BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results, null);
+
+//      Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
+		Map<String, Map<String, String>> customBenchmarksMetadata = new HashMap<String, Map<String, String>>();
+		BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results, customBenchmarksMetadata);
 
 		report.updateUploadStatus(launcherConfiguration.getReportUploadStatus());
 		if(launcherConfiguration.isIncludeHardware()) {

@@ -370,7 +370,7 @@ public class LauncherUtils {
 			return false ;
 	}
 	public static String getProjectNameConstruction (IJavaProject javaProject, String className) throws Exception{
-		String benchmarkName = "Benhmark For ";
+		String benchmarkName = "Benchmark For ";
 		String projectLocation = javaProject.getProject().getLocation().toPortableString() ;
 		List<File> files = CybenchUtils.listFilesInDirectory(projectLocation) ;
 		if (LauncherUtils.isMavenProject(javaProject.getProject())) {

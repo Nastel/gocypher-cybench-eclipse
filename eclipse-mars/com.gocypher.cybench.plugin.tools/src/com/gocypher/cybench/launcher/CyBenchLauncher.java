@@ -96,7 +96,7 @@ public class CyBenchLauncher {
         SecurityBuilder securityBuilder = new SecurityBuilder();        
         Map<String, Object> benchmarkSettings = new HashMap<>();
 
-//        Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
+
         
         benchmarkSettings.put("benchSource", benchSource);
         benchmarkSettings.put("benchWarmUpIteration", launcherConfiguration.getWarmUpIterations());
@@ -168,8 +168,9 @@ public class CyBenchLauncher {
         }
 	
 		Collection<RunResult> results = runner.run() ;
-		
-		BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results, null);
+//      Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
+		Map<String, Map<String, String>> customBenchmarksMetadata = new HashMap<String, Map<String, String>>();
+		BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results, customBenchmarksMetadata);
 
 		report.updateUploadStatus(launcherConfiguration.getReportUploadStatus());
 		if(launcherConfiguration.isIncludeHardware()) {

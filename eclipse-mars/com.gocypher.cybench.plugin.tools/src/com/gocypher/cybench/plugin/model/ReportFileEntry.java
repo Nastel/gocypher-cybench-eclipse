@@ -80,6 +80,12 @@ public class ReportFileEntry implements Serializable{
 						this.name += arr[i] ;
 					}
 				}
+				if(this.name.length() > 45){
+					this.name = this.name.replace("Benchmark_For_", "");
+				}
+				if(this.name.length() > 45){
+					this.name = this.name.substring(0,45);
+				}
 				this.name = this.name.replaceAll("_"," ");
 				
 			}catch (Exception e) {

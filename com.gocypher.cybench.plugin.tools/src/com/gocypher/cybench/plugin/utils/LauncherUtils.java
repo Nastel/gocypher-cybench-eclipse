@@ -21,20 +21,14 @@ package com.gocypher.cybench.plugin.utils;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.eclipse.buildship.core.BuildConfiguration;
-import org.eclipse.buildship.core.GradleBuild;
-import org.eclipse.buildship.core.GradleCore;
-import org.eclipse.buildship.core.GradleWorkspace;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -46,12 +40,9 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -380,7 +371,7 @@ public class LauncherUtils {
 	}
 	
 	public static String getProjectNameConstruction (IJavaProject javaProject, String className) throws Exception{
-		String benchmarkName = "Benhmark For ";
+		String benchmarkName = "Benchmark For ";
 		String projectLocation = javaProject.getProject().getLocation().toPortableString() ;
 		List<File> files = CybenchUtils.listFilesInDirectory(projectLocation) ;
 		if (LauncherUtils.isMavenProject(javaProject.getProject())) {

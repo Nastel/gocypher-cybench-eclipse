@@ -60,7 +60,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 	
 	private Group benchmarking;
 	private Group configuration;
-	private Group conditions;
+//	private Group conditions;
 	
     private Text reportsFolder;
     private Button browse;
