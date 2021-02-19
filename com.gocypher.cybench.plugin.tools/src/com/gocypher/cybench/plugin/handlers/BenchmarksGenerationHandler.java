@@ -92,64 +92,66 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
 		RunSelectionEntry selectionEntry = LauncherUtils.fillRunselectionData(selection);
 		
-    	try {
-        	String outputPath= LauncherUtils.getRawSourceFolderForBenchmarks(selectionEntry.getProjectSelected());
-    		for(String packagePath :  selectionEntry.getClassPaths()) {
-    			IWorkbenchPage page = window.getActivePage();
-	    		File file = new File(outputPath);
-				File fileExists = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+"Benchmarks.java");
-				benchmarkMethods = new ArrayList<BenchmarkMethodModel>();
-				if(shouldgenerateFile(fileExists, selectionEntry, outputPath, packagePath)) {
-					chooseMethodsToGenerateBenchmarks(selection, selectionEntry, packagePath);
-					if(generationMethodsSelected) {
-		    			JDefinedClass generationClass;
-			    		generationClass = codeModelInstance._class(packagePath+"Benchmarks");
-			    		generationClass.annotate(codeModelInstance.ref(State.class)).param("value", Scope.Benchmark);
-			        	/*---------------- SETUP METHODS -------------------------*/
-			    		model.setMethodType(void.class);
-			    		model.setMethodName("setup");
-			    		model.setMethodHint("//TODO Trial level: write code to be executed before each run of the benchmark");
-			    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 0);
-			    		model.setMethodName("setupIteration");
-			    		model.setMethodHint("//TODO Iteration level: write code to be executed before each iteration of the benchmark.");
-			    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 2);
-			    		
-		
-			        	/*---------------- BENCHMARK METHODS -------------------------*/
-			        	for(BenchmarkMethodModel methodModelEntry : benchmarkMethods) {
-				    		generateBenchmarkMethod(generationClass, codeModelInstance, methodModelEntry);
-			        	}
-		
-			        	/*---------------- TEADOWN METHODS -------------------------*/
-			    		model.setMethodType(void.class);
-			        	model.setMethodName("teardown");
-			    		model.setMethodHint("//TODO Trial level: write code to be executed after each run of the benchmark");
-			    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 1);
-			    		model.setMethodName("teardownIteration");
-			    		model.setMethodHint("//TODO Iteration level: write code to be executed after each iteration of the benchmark.");
-			    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 3);
-		
-						codeModelInstance.build(file);
-					}
-	    		}
-				
-	    		if(fileExists!= null && fileExists.exists()) {
-	    			IProject project = selectionEntry.getProjectSelected();
-	  		        if(project != null) {
-	  		        	IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
-	  		        	GuiUtils.refreshProject(javaProject);
-	  		        }
-					URI uri = fileExists.toURI();
-					IEditorDescriptor desc = getEditorDescriptor(uri);
-					String editorId = (desc == null) ? IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID : desc.getId();
-					String projectPath = selectionEntry.getProjectPath().replace("/", "\\");
-					String pathToOpen = fileExists.toString().replace(projectPath, "").substring(1);
-	    			IPath path = new Path(pathToOpen);
-	    			IFile fileToUse = selectionEntry.getProjectSelected().getFile(path);
-					page.openEditor(new FileEditorInput(fileToUse), editorId);
+    	try {				
+    		if(selectionEntry.getProjectSelected() !=  null) {
+    	
+	        	String outputPath= LauncherUtils.getRawSourceFolderForBenchmarks(selectionEntry.getProjectSelected());
+	    		for(String packagePath :  selectionEntry.getClassPaths()) {
+	    			IWorkbenchPage page = window.getActivePage();
+		    		File file = new File(outputPath);
+					File fileExists = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+"Benchmarks.java");
+					benchmarkMethods = new ArrayList<BenchmarkMethodModel>();
+					if(shouldgenerateFile(fileExists, selectionEntry, outputPath, packagePath)) {
+						chooseMethodsToGenerateBenchmarks(selection, selectionEntry, packagePath);
+						if(generationMethodsSelected) {
+			    			JDefinedClass generationClass;
+				    		generationClass = codeModelInstance._class(packagePath+"Benchmarks");
+				    		generationClass.annotate(codeModelInstance.ref(State.class)).param("value", Scope.Benchmark);
+				        	/*---------------- SETUP METHODS -------------------------*/
+				    		model.setMethodType(void.class);
+				    		model.setMethodName("setup");
+				    		model.setMethodHint("//TODO Trial level: write code to be executed before each run of the benchmark");
+				    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 0);
+				    		model.setMethodName("setupIteration");
+				    		model.setMethodHint("//TODO Iteration level: write code to be executed before each iteration of the benchmark.");
+				    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 2);
+				    		
+			
+				        	/*---------------- BENCHMARK METHODS -------------------------*/
+				        	for(BenchmarkMethodModel methodModelEntry : benchmarkMethods) {
+					    		generateBenchmarkMethod(generationClass, codeModelInstance, methodModelEntry);
+				        	}
+			
+				        	/*---------------- TEADOWN METHODS -------------------------*/
+				    		model.setMethodType(void.class);
+				        	model.setMethodName("teardown");
+				    		model.setMethodHint("//TODO Trial level: write code to be executed after each run of the benchmark");
+				    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 1);
+				    		model.setMethodName("teardownIteration");
+				    		model.setMethodHint("//TODO Iteration level: write code to be executed after each iteration of the benchmark.");
+				    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 3);
+			
+							codeModelInstance.build(file);
+						}
+		    		}
+					
+		    		if(fileExists!= null && fileExists.exists()) {
+		    			IProject project = selectionEntry.getProjectSelected();
+		  		        if(project != null) {
+		  		        	IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
+		  		        	GuiUtils.refreshProject(javaProject);
+		  		        }
+						URI uri = fileExists.toURI();
+						IEditorDescriptor desc = getEditorDescriptor(uri);
+						String editorId = (desc == null) ? IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID : desc.getId();
+						String projectPath = selectionEntry.getProjectPath().replace("/", "\\");
+						String pathToOpen = fileExists.toString().replace(projectPath, "").substring(1);
+		    			IPath path = new Path(pathToOpen);
+		    			IFile fileToUse = selectionEntry.getProjectSelected().getFile(path);
+						page.openEditor(new FileEditorInput(fileToUse), editorId);
+		    		}
 	    		}
     		}
-		  	
 		} catch (Exception e) {
 			GuiUtils.logError ("JAVA Code generation error",e);
 		}
@@ -170,11 +172,13 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 				ISelection selection = (ISelection) appContext .getVariable(ISources.ACTIVE_CURRENT_SELECTION_NAME);	
 //				GuiUtils.logInfo ("Selection: " + selection);
 				RunSelectionEntry selectionEntry = LauncherUtils.fillRunselectionData(selection);
-				String outputPath = LauncherUtils.getRawSourceFolderForBenchmarks(selectionEntry.getProjectSelected());
-				for(String packagePath :  selectionEntry.getClassPaths()) {
-					File fileExists = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+"Benchmarks.java");
-					testProp = shouldgenerateFile(fileExists, selectionEntry, outputPath, packagePath);
-				}			
+				if(selectionEntry.getProjectSelected() !=  null) {
+					String outputPath = LauncherUtils.getRawSourceFolderForBenchmarks(selectionEntry.getProjectSelected());
+					for(String packagePath :  selectionEntry.getClassPaths()) {
+						File fileExists = new File(outputPath+"/"+packagePath.replaceAll("\\.", "/")+"Benchmarks.java");
+						testProp = shouldgenerateFile(fileExists, selectionEntry, outputPath, packagePath);
+					}	
+				}
 //		      GuiUtils.logInfo ("selectionEntry: " + selectionEntry); 
 		   }
 		} catch (Exception e) {

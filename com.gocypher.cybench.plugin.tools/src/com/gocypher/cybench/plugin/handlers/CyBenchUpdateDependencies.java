@@ -57,17 +57,19 @@ public class CyBenchUpdateDependencies extends AbstractHandler {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
 			IJavaProject javaProject = GuiUtils.resolveJavaProject(selection);
-			this.project = javaProject.getProject();
-			GuiUtils.logInfo("-->Updating CyBench Nature:"+this.project);
-			String cyBenchExternalsPath = LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID, false) ;
-			if (!LauncherUtils.isMavenProject(javaProject.getProject()) &&  !LauncherUtils.isGradleProject(javaProject.getProject())) {
-				this.removeOldAndAddNewClassPathEntry(javaProject, cyBenchExternalsPath);
+			if(javaProject != null) {
+				this.project = javaProject.getProject();
+				GuiUtils.logInfo("-->Updating CyBench Nature:"+this.project);
+				String cyBenchExternalsPath = LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID, false) ;
+				if (!LauncherUtils.isMavenProject(javaProject.getProject()) &&  !LauncherUtils.isGradleProject(javaProject.getProject())) {
+					this.removeOldAndAddNewClassPathEntry(javaProject, cyBenchExternalsPath);
+				}
+				this.configureProjectAPTSettings (javaProject,cyBenchExternalsPath) ;
+				if (javaProject != null) {
+					GuiUtils.refreshProject(javaProject);
+				}
+				GuiUtils.logInfo("--->CyBench nature update finish");
 			}
-			this.configureProjectAPTSettings (javaProject,cyBenchExternalsPath) ;
-			if (javaProject != null) {
-				GuiUtils.refreshProject(javaProject);
-			}
-			GuiUtils.logInfo("--->CyBench nature update finish");
 		}catch (Exception e) {	
 			GuiUtils.logError ("Error on project nature update",e);
 			throw new ExecutionException(null);
@@ -126,22 +128,24 @@ public class CyBenchUpdateDependencies extends AbstractHandler {
 
 	private List<String> getAListOfFactoryPaths() {
 		List<String> externalJarFiles =  new ArrayList<String>();
-		File file = new File(project.getLocation().toOSString()+FACTORY_PATH);
-		try {
-			 SAXBuilder saxBuilder = new SAXBuilder();
-	         Document document = saxBuilder.build(file);
-	         Element classElement = document.getRootElement();
-	         List<?> factoryPathList = classElement.getChildren();
-	         for (int temp = 0; temp < factoryPathList.size(); temp++) {    
-	             Element factoryPath = (Element) factoryPathList.get(temp);
-	             if(factoryPath.getName().equals(FACTORY_ENTRY_NAME)) {
-		             Attribute attribute =  factoryPath.getAttribute("id");
-		             externalJarFiles.add(attribute.getValue());
-	             }
-	          }
-		} catch (Exception e) {
-			GuiUtils.logError ("Error on reading .factory file",e);
-			e.printStackTrace();
+		if(project != null) {
+			File file = new File(project.getLocation().toOSString()+FACTORY_PATH);
+			try {
+				 SAXBuilder saxBuilder = new SAXBuilder();
+		         Document document = saxBuilder.build(file);
+		         Element classElement = document.getRootElement();
+		         List<?> factoryPathList = classElement.getChildren();
+		         for (int temp = 0; temp < factoryPathList.size(); temp++) {    
+		             Element factoryPath = (Element) factoryPathList.get(temp);
+		             if(factoryPath.getName().equals(FACTORY_ENTRY_NAME)) {
+			             Attribute attribute =  factoryPath.getAttribute("id");
+			             externalJarFiles.add(attribute.getValue());
+		             }
+		          }
+			} catch (Exception e) {
+				GuiUtils.logError ("Error on reading .factory file",e);
+				e.printStackTrace();
+			}
 		}
 		return externalJarFiles;
 	}
