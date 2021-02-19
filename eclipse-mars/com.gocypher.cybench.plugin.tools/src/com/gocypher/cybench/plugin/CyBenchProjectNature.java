@@ -205,8 +205,8 @@ public class CyBenchProjectNature implements IProjectNature {
 	private void configureProjectAPTSettings (IJavaProject javaProject, String ... pathToExternalJars) throws Exception {
 		AptConfig.setEnabled(javaProject, true);	
 		if (LauncherUtils.isMavenProject(javaProject.getProject())) {
-			AptConfig.setGenSrcDir(javaProject, "target/jmh-generated");
-			AptConfig.setGenSrcDir(javaProject, "target/jmh-generated-tests");
+			AptConfig.setGenSrcDir(javaProject, "jmh-generated");
+			AptConfig.setGenSrcDir(javaProject, "jmh-generated-tests");
 		}else if(LauncherUtils.isGradleProject(javaProject.getProject())) {
 			AptConfig.setGenSrcDir(javaProject, "jmh-generated");
 			AptConfig.setGenSrcDir(javaProject, "jmh-generated-tests");

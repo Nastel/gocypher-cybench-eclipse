@@ -184,8 +184,8 @@ public class GuiUtils {
 		prefs.putBoolean("org.eclipse.jdt.apt.aptEnabled", true);
 		prefs.putBoolean("org.eclipse.jdt.apt.reconcileEnabled", true);
 		
-		prefs.put("org.eclipse.jdt.apt.genSrcDir", "target/jmh-generated");
-		prefs.put("org.eclipse.jdt.apt.genTestSrcDir", "target/jmh-generated-tests");
+		prefs.put("org.eclipse.jdt.apt.genSrcDir", "jmh-generated");
+		prefs.put("org.eclipse.jdt.apt.genTestSrcDir", "jmh-generated-tests");
 		prefs.flush();
 		
 	}
