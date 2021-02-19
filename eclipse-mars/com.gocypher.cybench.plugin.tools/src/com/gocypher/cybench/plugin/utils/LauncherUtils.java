@@ -274,7 +274,7 @@ public class LauncherUtils {
 		    	 * Therefore constructions for .jar memento is done in a hardcoded way.
 		    	 */
 				IRuntimeClasspathEntry cpEntry = null;
-				String path = classPaths.get(i).toLowerCase().trim();
+				String path = classPaths.get(i).trim();
 
 				if(path.endsWith(".jar")){
 					String userDefinedClassPath = "<?xml version='1.0' encoding='UTF-8' standalone='no'?> <runtimeClasspathEntry externalArchive='"+path+"' path='3' type='2'/>";
