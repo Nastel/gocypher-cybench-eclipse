@@ -65,6 +65,9 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 //	private int excutionScoreBoundary ;
 	private String selectionFolderPath;
 	private boolean useCyBenchBenchmarkSettings;
+	
+
+	private String accessToken;
     
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
@@ -189,6 +192,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 //				" -DEXECUTION_SCORE="+excutionScoreBoundary+
 				"  "+jvmProperties+
 //				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
+				" -DREMOTE_CYBENCH_ACCESS_TOKEN="+accessToken+
 				" -DREPORT_CLASSES=\""+selectionFolderPath+"\"");
 		
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-DFORKS_COUNT="+forks+
@@ -206,6 +210,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 //				" -DEXECUTION_SCORE="+excutionScoreBoundary+
 				"  "+jvmProperties+
 //				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
+				" -DREMOTE_CYBENCH_ACCESS_TOKEN="+accessToken+
 				" -DREPORT_CLASSES=\""+selectionFolderPath+"\"");
 		
     }
@@ -230,5 +235,6 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
    	   useCyBenchBenchmarkSettings = configuration.getAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, false);
    	   
    	   classPathFromUser = configuration.getAttribute(LaunchConfiguration.ADD_CUSTOM_CLASS_PATH, "");
+   	   accessToken = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, "");
     }
 }

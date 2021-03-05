@@ -123,10 +123,10 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 			
 				        	/*---------------- TEARDOWN METHODS -------------------------*/
 				    		model.setMethodType(void.class);
-				        	model.setMethodName("teardown");
+				        	model.setMethodName("tearDown");
 				    		model.setMethodHint("//TODO Trial level: write code to be executed after each run of the benchmark");
 				    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 1);
-				    		model.setMethodName("teardownIteration");
+				    		model.setMethodName("tearDownIteration");
 				    		model.setMethodHint("//TODO Iteration level: write code to be executed after each iteration of the benchmark.");
 				    		generateGeneralBenchmarkMethods(generationClass, codeModelInstance, model, 3);
 			

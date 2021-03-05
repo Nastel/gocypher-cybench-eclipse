@@ -87,6 +87,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 //    private Button shouldStoreReportToFileSystem;
     private Button shouldSendReportToCyBench;
     private Button shouldDoHardwareSnapshot;
+    
+    private Text accessToken;
 
 	private Map<String, String> paths =  new HashMap<>();
 
@@ -265,6 +267,10 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        jvmPropertiesLabel.setText("JVM Properties:");
 	        jvmProperties = new Text(configuration, SWT.BORDER);
 	        
+	        Label  accessTokenLabel = new Label(configuration, SWT.NONE);
+	        accessTokenLabel.setText("Remote Access Token:");
+	        accessToken = new Text(configuration, SWT.SINGLE | SWT.BORDER | SWT.PASSWORD);
+	        
 	        Label  classPathPropertiesLabel = new Label(configuration, SWT.NONE);
 	        classPathPropertiesLabel.setText("Classpath arguments:");
 	        
@@ -302,8 +308,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(runOnlySelectedLabel);
 // 	        GridDataFactory.swtDefaults().span(2,1).applyTo(userPropertiesLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(jvmPropertiesLabel);
+ 	        GridDataFactory.swtDefaults().span(2,1).applyTo(accessTokenLabel);
  	        GridDataFactory.swtDefaults().span(2,1).applyTo(classPathPropertiesLabel);
- 	        
+ 	       
  	       
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(emptyField);
  	        GridDataFactory.swtDefaults().span(8,1).applyTo(runOnlySelectedExplained);
@@ -316,6 +323,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(reportUploadStatus);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(onlySelectedLaunch);
  	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(jvmProperties);
+ 	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(accessToken);
  	        
  	        
  	        // Class-paths layout
@@ -391,7 +399,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             String reportUploadStatusDef = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
             String pathToSourceSelectedDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");
             String jvmArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "");
-         
+            String accessTokenDef = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, "");
+            
             int threadDef = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
             int forksDef  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
             int warmupIterationsDef  = configuration.getAttribute(LaunchConfiguration.WARMUP_ITERATION, 1);
@@ -433,6 +442,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 //            userProperties.addModifyListener(modifyListener);
             jvmProperties.setText(jvmArguments);
             jvmProperties.addModifyListener(modifyListener);
+
+            accessToken.setText(accessTokenDef);
+            accessToken.addModifyListener(modifyListener);
             
             onlySelectedLaunch.setText(pathToSourceSelectedDef);
             onlySelectedLaunch.addModifyListener(modifyListener);
@@ -476,6 +488,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 
 //        configuration.setAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, userProperties.getText());
         configuration.setAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, jvmProperties.getText());
+        configuration.setAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, accessToken.getText());
 //        configuration.setAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, shouldStoreReportToFileSystem.getSelection());
         configuration.setAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, shouldSendReportToCyBench.getSelection());
         configuration.setAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, shouldDoHardwareSnapshot.getSelection());

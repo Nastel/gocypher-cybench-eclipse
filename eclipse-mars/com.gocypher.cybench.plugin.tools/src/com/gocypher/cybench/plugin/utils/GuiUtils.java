@@ -220,7 +220,7 @@ public class GuiUtils {
   		return javaProject;
   	}
 	public static void addAndSaveClassPathEntry (IJavaProject javaProject, String ...fullPathToExternalLibraries) throws Exception {
-		for (String pathToExternalLib:fullPathToExternalLibraries) {
+		for (String pathToExternalLib:fullPathToExternalLibraries) {	
 			
 			IClasspathEntry externalJar = JavaCore.newLibraryEntry(new Path(pathToExternalLib), null, null) ;
 
@@ -232,7 +232,7 @@ public class GuiUtils {
 					classPathEntries.add (entry) ;
 				}
 				classPathEntries.add(externalJar);
-				
+
 				int i = 0 ;
 				IClasspathEntry[] classPathRaw = new IClasspathEntry[classPathEntries.size()] ;
 				for (IClasspathEntry item: classPathEntries) {
@@ -240,7 +240,7 @@ public class GuiUtils {
 					i++ ;
 				}
 							
-				javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());
+				javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());					
 //										
 //			}
 //			else {
