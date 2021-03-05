@@ -47,6 +47,9 @@ public class LauncherConfiguration {
 	private double executionScore = -1.0d;
 	private boolean useCyBenchBenchmarkSettings = false;
 	
+	private String remoteAccessToken = "";
+	
+	
 	public LauncherConfiguration() {
 	
 	}
@@ -217,4 +220,14 @@ public class LauncherConfiguration {
 	}
 	
 
+
+	public String getRemoteAccessToken() {
+		return remoteAccessToken;
+	}
+
+
+
+	public void setRemoteAccessToken(String remoteAccessToken) {
+		this.remoteAccessToken = remoteAccessToken;
+	}
 }

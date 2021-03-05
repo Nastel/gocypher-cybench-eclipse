@@ -103,6 +103,18 @@ public class CyBenchUpdateDependencies extends AbstractHandler {
 	private void configureProjectAPTSettings (IJavaProject javaProject, String ... pathToExternalJars){
 		try {
 			AptConfig.setEnabled(javaProject, true);	
+			if (LauncherUtils.isMavenProject(javaProject.getProject())) {
+				AptConfig.setGenSrcDir(javaProject, "jmh-generated");
+				AptConfig.setGenTestSrcDir(javaProject, "jmh-generated-tests");
+			}else if(LauncherUtils.isGradleProject(javaProject.getProject())) {
+				AptConfig.setGenSrcDir(javaProject, "jmh-generated");
+				AptConfig.setGenTestSrcDir(javaProject, "jmh-generated-tests");
+			}
+			else {
+				AptConfig.setGenSrcDir(javaProject, "jmh-generated");
+				AptConfig.setGenTestSrcDir(javaProject, "jmh-generated-tests");
+			}
+				
 			AptConfig.setProcessDuringReconcile(javaProject, true);
 			IFactoryPath factoryPath= AptConfig.getFactoryPath(javaProject) ;
 			List<String> externalJarFiles = getAListOfFactoryPaths();
@@ -149,5 +161,6 @@ public class CyBenchUpdateDependencies extends AbstractHandler {
 		}
 		return externalJarFiles;
 	}
+
 
 }

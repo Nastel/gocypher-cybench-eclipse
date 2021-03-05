@@ -230,12 +230,13 @@ public class GuiUtils {
 				}
 				classPathEntries.add(externalJar);
 				
-				int i = 0 ;
-				IClasspathEntry[] classPathRaw = new IClasspathEntry[classPathEntries.size()] ;
-				for (IClasspathEntry item: classPathEntries) {
-					classPathRaw[i] = item ;
-					i++ ;
-				}
+				IClasspathEntry[] classPathRaw = classPathEntries.toArray(new IClasspathEntry[0]);
+//				int i = 0 ;
+//				IClasspathEntry[] classPathRaw = new IClasspathEntry[classPathEntries.size()] ;
+//				for (IClasspathEntry item: classPathEntries) {
+//					classPathRaw[i] = item ;
+//					i++ ;
+//				}
 							
 				javaProject.setRawClasspath(classPathRaw, true, new NullProgressMonitor());
 										

@@ -226,7 +226,7 @@ public class CyBenchLauncher {
         String responseWithUrl = null;
         
         if (report.isEligibleForStoringExternally() && launcherConfiguration.isShouldSendReportToCyBench()) {
-            responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted);
+            responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted, launcherConfiguration.getRemoteAccessToken());
 
             String deviceReports = JSONUtils.parseJsonIntoMap(responseWithUrl).get(Constants.REPORT_USER_URL).toString();
             String resultURL = JSONUtils.parseJsonIntoMap(responseWithUrl).get(Constants.REPORT_URL).toString();
@@ -339,7 +339,11 @@ public class CyBenchLauncher {
 		launcherConfiguration.setClassCalled(checkNullAndReturnSet("REPORT_CLASSES"));
 		launcherConfiguration.setMeasurmentSeconds(checkNullAndReturnInt("MEASURMENT_SECONDS"));
 		launcherConfiguration.setExecutionScore(checkNullAndReturnInt("DEXECUTION_SCORE"));
+		
+
+		launcherConfiguration.setRemoteAccessToken(checkNullAndReturnString("REMOTE_CYBENCH_ACCESS_TOKEN"));
 	}
+	
 	
 	private static String checkNullAndReturnString(String propertyName)  {
 		if(System.getProperty(propertyName)!= null) {
