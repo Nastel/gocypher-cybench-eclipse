@@ -50,24 +50,25 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private String reportFolder;
 	private String reportName;
 	private String launchPath;
-	private String reportUploadStatus;
-	private int thread;
-	private int forks;
-	private int warmupIterations;
-	private int measurmentIterations;
-	private int warmupSeconds;
-	private int mesurmentSeconds;
-	private boolean sendReportCybnech; 
-	private boolean includeHardware;
-//	private String userProperties;
-	private String jvmProperties;
 	private String classPathFromUser;
-//	private int excutionScoreBoundary ;
 	private String selectionFolderPath;
-	private boolean useCyBenchBenchmarkSettings;
+	private String jvmProperties;
 	
-
+	private String launchConfigurationMemento;
+	
 	private String accessToken;
+	private String  reportUploadStatus;
+	
+	private Integer thread;
+	private Integer forks;
+	private Integer warmupIterations;
+	private Integer measurmentIterations;
+	private Integer warmupSeconds;
+	private Integer mesurmentSeconds;
+    
+	private Boolean sendReportCybnech;
+	private Boolean includeHardware;
+	private  Boolean useCyBenchBenchmarkSettings;
     
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
@@ -177,7 +178,14 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		
 	}
     private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config) {
-    	GuiUtils.logInfo("-DFORKS_COUNT="+forks+
+    	GuiUtils.logInfo(
+//				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
+//				" -DEXECUTION_SCORE="+excutionScoreBoundary+
+//				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
+//				" -DREMOTE_CYBENCH_ACCESS_TOKEN="+accessToken+
+				//----------------------------------------------
+
+    			" -DFORKS_COUNT="+forks+
 				" -DTHREADS_COUNT="+thread+
 				" -DREPORT_NAME=\""+reportName+"\""+
 				" -DBENCHMARK_REPORT_STATUS=\""+reportUploadStatus+"\""+
@@ -185,17 +193,22 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DMEASURMENT_ITERATIONS="+measurmentIterations+
 				" -DWARMUP_SECONDS="+warmupSeconds+
 				" -DMEASURMENT_SECONDS="+mesurmentSeconds+
-//				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
 				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
 				" -DUSE_CYBNECH_BENCHMARK_SETTINGS="+useCyBenchBenchmarkSettings+
-//				" -DEXECUTION_SCORE="+excutionScoreBoundary+
-				"  "+jvmProperties+
-//				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
-				" -DREMOTE_CYBENCH_ACCESS_TOKEN="+accessToken+
-				" -DREPORT_CLASSES=\""+selectionFolderPath+"\"");
+				" -DREPORT_CLASSES=\""+selectionFolderPath+"\""+
+
+				//----------------------------------------------
+				jvmProperties+" ");
+//			    " -DLAUNCH_CONFIGURATION_MEMENTO=\""+launchConfigurationMemento+"\"");
 		
-		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-DFORKS_COUNT="+forks+
+		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, 
+//				" -DEXECUTION_SCORE="+excutionScoreBoundary+
+//				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
+//				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
+				//----------------------------------------------
+				
+				" -DFORKS_COUNT="+forks+
 				" -DTHREADS_COUNT="+thread+
 				" -DREPORT_NAME=\""+reportName+"\""+
 				" -DBENCHMARK_REPORT_STATUS=\""+reportUploadStatus+"\""+
@@ -203,38 +216,42 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DMEASURMENT_ITERATIONS="+measurmentIterations+
 				" -DWARMUP_SECONDS="+warmupSeconds+
 				" -DMEASURMENT_SECONDS="+mesurmentSeconds+
-//				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
 				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
 				" -DUSE_CYBNECH_BENCHMARK_SETTINGS="+useCyBenchBenchmarkSettings+
-//				" -DEXECUTION_SCORE="+excutionScoreBoundary+
-				"  "+jvmProperties+
-//				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
+				" -DREPORT_CLASSES=\""+selectionFolderPath+"\""+
 				" -DREMOTE_CYBENCH_ACCESS_TOKEN="+accessToken+
-				" -DREPORT_CLASSES=\""+selectionFolderPath+"\"");
+				
+				//----------------------------------------------
+				jvmProperties+" ");
+//				" -DLAUNCH_CONFIGURATION_MEMENTO=\""+launchConfigurationMemento+"\"");
 		
     }
     private void setRunConfigurationProperties(ILaunchConfiguration configuration) throws CoreException {
 	   reportFolder = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, "/report");
        reportName = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "CyBench Report");
-       reportUploadStatus = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
-       thread = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
-       forks  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
-       warmupIterations  = configuration.getAttribute(LaunchConfiguration.WARMUP_ITERATION, 1);
-       measurmentIterations = configuration.getAttribute(LaunchConfiguration.MEASURMENT_ITERATIONS, 5);
-       warmupSeconds = configuration.getAttribute(LaunchConfiguration.WARMUP_SECONDS, 10);
-       mesurmentSeconds = configuration.getAttribute(LaunchConfiguration.MEASURMENT_SECONDS, 10);
-//       storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
-       sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
-       includeHardware = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
-//       userProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, "");
-       jvmProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "");
-//   	   excutionScoreBoundary = configuration.getAttribute(LaunchConfiguration.EXECUTION_SCORE, -1);
    	   launchPath = configuration.getAttribute(LaunchConfiguration.BUILD_PATH, "");
    	   selectionFolderPath =configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");  
-   	   useCyBenchBenchmarkSettings = configuration.getAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, false);
-   	   
    	   classPathFromUser = configuration.getAttribute(LaunchConfiguration.ADD_CUSTOM_CLASS_PATH, "");
-   	   accessToken = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, "");
+	   jvmProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "");
+//     storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
+//     userProperties = configuration.getAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, "");
+// 	   excutionScoreBoundary = configuration.getAttribute(LaunchConfiguration.EXECUTION_SCORE, -1);
+	   
+	   	reportUploadStatus = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
+		
+	    thread = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
+	    forks  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
+	    warmupIterations  = configuration.getAttribute(LaunchConfiguration.WARMUP_ITERATION, 1);
+	    measurmentIterations = configuration.getAttribute(LaunchConfiguration.MEASURMENT_ITERATIONS, 5);
+	    warmupSeconds = configuration.getAttribute(LaunchConfiguration.WARMUP_SECONDS, 10);
+	    mesurmentSeconds = configuration.getAttribute(LaunchConfiguration.MEASURMENT_SECONDS, 10);
+	    
+	    sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
+	    includeHardware = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
+	    useCyBenchBenchmarkSettings = configuration.getAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, false);
+
+	    accessToken =  configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, "");
+//   	   launchConfigurationMemento = configuration.getMemento();
     }
 }

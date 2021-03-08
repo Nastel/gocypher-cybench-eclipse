@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 import com.gocypher.cybench.core.utils.SecurityUtils;
 import com.gocypher.cybench.launcher.model.BenchmarkReport;
+
 import org.openjdk.jmh.profile.GCProfiler;
 import org.openjdk.jmh.profile.HotspotRuntimeProfiler;
 import org.openjdk.jmh.profile.HotspotThreadProfiler;
@@ -319,6 +320,7 @@ public class CyBenchLauncher {
 	    }
 	
 	private static void fillLaunchConfigurations(LauncherConfiguration launcherConfiguration) {
+		
 		launcherConfiguration.setReportName(checkNullAndReturnString("REPORT_NAME"));
 		launcherConfiguration.setReportUploadStatus(checkNullAndReturnString("BENCHMARK_REPORT_STATUS"));
 
@@ -336,9 +338,16 @@ public class CyBenchLauncher {
 		launcherConfiguration.setUseCyBenchBenchmarkSettings(checkNullAndReturnBoolean("USE_CYBNECH_BENCHMARK_SETTINGS"));
 		launcherConfiguration.setClassCalled(checkNullAndReturnSet("REPORT_CLASSES"));
 		launcherConfiguration.setMeasurmentSeconds(checkNullAndReturnInt("MEASURMENT_SECONDS"));
-		launcherConfiguration.setExecutionScore(checkNullAndReturnInt("DEXECUTION_SCORE"));
 		
+
 		launcherConfiguration.setRemoteAccessToken(checkNullAndReturnString("REMOTE_CYBENCH_ACCESS_TOKEN"));
+	}
+	
+	private static Object checkNullAndReturn(Object propertyName)  {
+		if(propertyName!= null) {
+			return propertyName;
+		}
+		return "";
 	}
 	
 	private static String checkNullAndReturnString(String propertyName)  {

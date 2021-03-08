@@ -44,7 +44,6 @@ public class LauncherConfiguration {
 	private boolean includeHardware = true;
 	private Set<String> classCalled = new LinkedHashSet<String>();
 	
-	private double executionScore = -1.0d;
 	private boolean useCyBenchBenchmarkSettings = false;
 	
 	private String remoteAccessToken = "";
@@ -157,18 +156,6 @@ public class LauncherConfiguration {
 
 	public void setPathToEncryptedReportFile(String pathToEncryptedReportFile) {
 		this.pathToEncryptedReportFile = pathToEncryptedReportFile;
-	}
-
-
-
-	public double getExecutionScore() {
-		return executionScore;
-	}
-
-
-
-	public void setExecutionScore(double executionScore) {
-		this.executionScore = executionScore;
 	}
 
 
