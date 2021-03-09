@@ -275,7 +275,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
  	        
 
 	        Label  accessTokenLabel = new Label(configuration, SWT.NONE);
-	        accessTokenLabel.setText("Remote Access Token:");
+	        accessTokenLabel.setText("Bench Access Token:");
 	        accessToken = new Text(configuration, SWT.SINGLE | SWT.BORDER | SWT.PASSWORD);
 	        
 	        

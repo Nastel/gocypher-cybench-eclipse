@@ -196,7 +196,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
 				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
 				" -DUSE_CYBNECH_BENCHMARK_SETTINGS="+useCyBenchBenchmarkSettings+
-				" -DREPORT_CLASSES=\""+selectionFolderPath+"\""+
+				" -DREPORT_CLASSES=\""+selectionFolderPath+"\""+" "+
 
 				//----------------------------------------------
 				jvmProperties+" ");
@@ -220,7 +220,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
 				" -DUSE_CYBNECH_BENCHMARK_SETTINGS="+useCyBenchBenchmarkSettings+
 				" -DREPORT_CLASSES=\""+selectionFolderPath+"\""+
-				" -DREMOTE_CYBENCH_ACCESS_TOKEN="+accessToken+
+				" -DREMOTE_CYBENCH_ACCESS_TOKEN="+accessToken+" "+
 				
 				//----------------------------------------------
 				jvmProperties+" ");
