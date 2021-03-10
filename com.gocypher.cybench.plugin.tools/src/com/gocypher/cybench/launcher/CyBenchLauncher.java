@@ -225,26 +225,27 @@ public class CyBenchLauncher {
         String reportEncrypted = ReportingService.getInstance().prepareReportForDelivery(securityBuilder, report);
         
         String responseWithUrl = null;
-        
+        String deviceReports = null;
+        String resultURL = null;
+        Map<?, ?> response = new HashMap<>();
         if (report.isEligibleForStoringExternally() && launcherConfiguration.isShouldSendReportToCyBench()) {
             responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted, launcherConfiguration.getRemoteAccessToken());
+            response = com.gocypher.cybench.core.utils.JSONUtils.parseJsonIntoMap(responseWithUrl);
 
-            String deviceReports = JSONUtils.parseJsonIntoMap(responseWithUrl).get(Constants.REPORT_USER_URL).toString();
-            String resultURL = JSONUtils.parseJsonIntoMap(responseWithUrl).get(Constants.REPORT_URL).toString();
-            System.out.println("Benchmark report submitted successfully to "+ Constants.REPORT_URL);
-            System.out.println("You can find all device benchmarks on "+ deviceReports);
-            System.out.println("Your report is available at "+ resultURL);
-            System.out.println("NOTE: It may take a few minutes for your report to appear online");
-
-            report.setDeviceReportsURL(deviceReports);
-            report.setReportURL(resultURL);
-        	
-        	
+            if(!response.containsKey("ERROR") && responseWithUrl != null && !responseWithUrl.isEmpty()) {
+                if(response.get(Constants.FOUND_TOKEN_REPOSITORIES) != null) {
+                    deviceReports = response.get(Constants.REPORT_USER_URL).toString() + response.get(Constants.FOUND_TOKEN_REPOSITORIES).toString();
+                    resultURL = response.get(Constants.REPORT_URL).toString() + response.get(Constants.FOUND_TOKEN_REPOSITORIES).toString();
+                }else{
+                    deviceReports = response.get(Constants.REPORT_USER_URL).toString() ;
+                    resultURL = response.get(Constants.REPORT_URL).toString();
+                }
+                report.setDeviceReportsURL(deviceReports);
+                report.setReportURL(resultURL);
+            }
   
         } else {
-//			responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted);
-//			report.setReportURL(responseWithUrl);
-			System.out.println("You may submit your report manually at {}"+ responseWithUrl);
+ 			System.out.println("You may submit your report manually at "+Constants.CYB_UPLOAD_URL);
 	     }
         BigDecimal reportScore = report.getTotalScore();
         if(reportScore == null) {
@@ -256,6 +257,16 @@ public class CyBenchLauncher {
         System.out.println("Store file at: "+pathToReportFile+reportScore+".cybench");
         CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cybench", reportJSON);
         CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cyb", reportEncrypted);
+        
+        if(!response.containsKey("ERROR") && responseWithUrl != null && !responseWithUrl.isEmpty()) {
+            System.out.println("Benchmark report submitted successfully to "+ Constants.REPORT_URL);
+            System.out.println("You can find all device benchmarks on "+ deviceReports);
+            System.out.println("Your report is available at "+ resultURL);
+            System.out.println("NOTE: It may take a few minutes for your report to appear online");
+        }else{
+        	System.out.println((String) response.get("ERROR"));
+ 			System.out.println("You may submit your report manually at "+Constants.CYB_UPLOAD_URL);
+        }
         
         System.out.println("-----------------------------------------------------------------------------------------");
         System.out.println("                                 Finished CyBench benchmarks                             ");
