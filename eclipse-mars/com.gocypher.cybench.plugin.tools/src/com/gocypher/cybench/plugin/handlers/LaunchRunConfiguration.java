@@ -39,6 +39,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
+import com.gocypher.cybench.launcher.utils.Constants;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.LaunchConfiguration;
@@ -178,55 +180,66 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		
 	}
     private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config) {
+    	String start = " -D";
     	GuiUtils.logInfo(
+    			start+Constants.NUMBER_OF_FORKS+"="+forks+
+    			start+Constants.RUN_THREAD_COUNT+"="+thread+
+    			start+Constants.BENCHMARK_REPORT_NAME+"=\""+reportName+"\""+
+    			start+Constants.REPORT_UPLOAD_STATUS+"=\""+reportUploadStatus+"\""+
+
+    			start+Constants.WARM_UP_ITERATIONS+"="+warmupIterations+
+    			start+Constants.MEASUREMENT_ITERATIONS+"="+measurmentIterations+
+    			start+Constants.WARM_UP_SECONDS+"="+warmupSeconds+
+    			start+Constants.MEASUREMENT_SECONDS+"="+mesurmentSeconds+
+    			start+Constants.SEND_REPORT+"="+sendReportCybnech+
+    			
+    			start+Constants.COLLECT_HARDWARE_PROPS+"="+includeHardware+
+    			start+Constants.USE_CYBENCH_CONFIGURATION+"="+useCyBenchBenchmarkSettings+
+    			
+				"  "+jvmProperties+
+				
+    			start+Constants.USER_REPORT_TOKEN+"="+accessToken+
+    			start+Constants.SELECTED_CLASS_PATHS+"=\""+selectionFolderPath+"\"");
+    			
+//				" -DTHREADS_COUNT="+thread+
+//				" -DREPORT_NAME=\""+reportName+"\""+
+//				" -DBENCHMARK_REPORT_STATUS=\""+reportUploadStatus+"\""+
+//				" -DWARMUP_ITERATION="+warmupIterations+
+//				" -DMEASURMENT_ITERATIONS="+measurmentIterations+
+//				" -DWARMUP_SECONDS="+warmupSeconds+
+//				" -DMEASURMENT_SECONDS="+mesurmentSeconds+
 //				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
+//				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
+//				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
+//				" -DUSE_CYBNECH_BENCHMARK_SETTINGS="+useCyBenchBenchmarkSettings+
 //				" -DEXECUTION_SCORE="+excutionScoreBoundary+
+//				"  "+jvmProperties+
 //				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
 //				" -DREMOTE_CYBENCH_ACCESS_TOKEN="+accessToken+
-				//----------------------------------------------
-
-    			" -DFORKS_COUNT="+forks+
-				" -DTHREADS_COUNT="+thread+
-				" -DREPORT_NAME=\""+reportName+"\""+
-				" -DBENCHMARK_REPORT_STATUS=\""+reportUploadStatus+"\""+
-				" -DWARMUP_ITERATION="+warmupIterations+
-				" -DMEASURMENT_ITERATIONS="+measurmentIterations+
-				" -DWARMUP_SECONDS="+warmupSeconds+
-				" -DMEASURMENT_SECONDS="+mesurmentSeconds+
-				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
-				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
-				" -DUSE_CYBNECH_BENCHMARK_SETTINGS="+useCyBenchBenchmarkSettings+
-				" -DREPORT_CLASSES=\""+selectionFolderPath+"\""+" "+
-
-				//----------------------------------------------
-				jvmProperties+" ");
-//			    " -DLAUNCH_CONFIGURATION_MEMENTO=\""+launchConfigurationMemento+"\"");
+//				" -DREPORT_CLASSES=\""+selectionFolderPath+"\"");
 		
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, 
-//				" -DEXECUTION_SCORE="+excutionScoreBoundary+
-//				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
-//				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
-				//----------------------------------------------
+    			start+Constants.NUMBER_OF_FORKS+"="+forks+
+    			start+Constants.RUN_THREAD_COUNT+"="+thread+
+    			start+Constants.BENCHMARK_REPORT_NAME+"=\""+reportName+"\""+
+    			start+Constants.REPORT_UPLOAD_STATUS+"=\""+reportUploadStatus+"\""+
+
+    			start+Constants.WARM_UP_ITERATIONS+"="+warmupIterations+
+    			start+Constants.MEASUREMENT_ITERATIONS+"="+measurmentIterations+
+    			start+Constants.WARM_UP_SECONDS+"="+warmupSeconds+
+    			start+Constants.MEASUREMENT_SECONDS+"="+mesurmentSeconds+
+    			start+Constants.SEND_REPORT+"="+sendReportCybnech+
+    			
+    			start+Constants.COLLECT_HARDWARE_PROPS+"="+includeHardware+
+    			start+Constants.USE_CYBENCH_CONFIGURATION+"="+useCyBenchBenchmarkSettings+
+    			
+				"  "+jvmProperties+
 				
-				" -DFORKS_COUNT="+forks+
-				" -DTHREADS_COUNT="+thread+
-				" -DREPORT_NAME=\""+reportName+"\""+
-				" -DBENCHMARK_REPORT_STATUS=\""+reportUploadStatus+"\""+
-				" -DWARMUP_ITERATION="+warmupIterations+
-				" -DMEASURMENT_ITERATIONS="+measurmentIterations+
-				" -DWARMUP_SECONDS="+warmupSeconds+
-				" -DMEASURMENT_SECONDS="+mesurmentSeconds+
-				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
-				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
-				" -DUSE_CYBNECH_BENCHMARK_SETTINGS="+useCyBenchBenchmarkSettings+
-				" -DREPORT_CLASSES=\""+selectionFolderPath+"\""+
-				" -DREMOTE_CYBENCH_ACCESS_TOKEN="+accessToken+" "+
-				
-				//----------------------------------------------
-				jvmProperties+" ");
-//				" -DLAUNCH_CONFIGURATION_MEMENTO=\""+launchConfigurationMemento+"\"");
+    			start+Constants.USER_REPORT_TOKEN+"="+accessToken+
+    			start+Constants.SELECTED_CLASS_PATHS+"=\""+selectionFolderPath+"\"");
 		
     }
+    
     private void setRunConfigurationProperties(ILaunchConfiguration configuration) throws CoreException {
 	   reportFolder = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, "/report");
        reportName = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "CyBench Report");

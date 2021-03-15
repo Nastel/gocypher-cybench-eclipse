@@ -38,6 +38,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorPart;
 
+import com.gocypher.cybench.launcher.utils.Constants;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.RunSelectionEntry;
@@ -86,7 +87,12 @@ public class LaunchShortcut implements ILaunchShortcut {
 			final ILaunchConfigurationWorkingCopy config = launchType.newInstance(null, "CyBench plugin");
 	
 			if(reportName == null || reportName.equals("")) {
-				reportName = LauncherUtils.getProjectNameConstruction(selectionEntry.getJavaProjectSelected(), selectionEntry.getClassPaths().toString().substring(selectionEntry.getClassPaths().toString().lastIndexOf('.'), selectionEntry.getClassPaths().toString().length()-1));
+				String temp = selectionEntry.getClassPaths().toString();
+				if(temp != null && temp.contains(".")) {
+					reportName = LauncherUtils.getProjectNameConstruction(selectionEntry.getJavaProjectSelected(), temp.substring(temp.lastIndexOf('.'), temp.length()-1));
+				}else{
+					reportName = LauncherUtils.getProjectNameConstruction(selectionEntry.getJavaProjectSelected(), "");
+				}
 			}
 			String pathToTempReportPlainFile = CybenchUtils.generatePlainReportFilename(selectionEntry.getProjectReportsPath(), true, reportName) ;
 			String pathToTempReportEncryptedFile = CybenchUtils.generateEncryptedReportFilename(selectionEntry.getProjectReportsPath(), true, reportName) ;
@@ -98,7 +104,6 @@ public class LaunchShortcut implements ILaunchShortcut {
 				IJavaProject javaProject = selectionEntry.getJavaProjectSelected();
 				IClasspathEntry[] resolvedClasspath= javaProject.getResolvedClasspath(false);
 				for(IClasspathEntry classPathTest : resolvedClasspath) {
-	//				GuiUtils.logInfo("classPathTest.getPath().toOSString(): "+classPathTest.getPath().toOSString());
 					classPaths.add(classPathTest.getPath().toOSString());
 				}
 			}
@@ -144,14 +149,23 @@ public class LaunchShortcut implements ILaunchShortcut {
 	}
 	
     private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config, RunSelectionEntry selection) {
+     	String start = " -D";
+     	String classPaths = "";
+     	if(!selection.getClassPaths().isEmpty()) {
+     		classPaths = selection.getClassPaths().toString();
+     	}
 		System.out.println(
-				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\""
-				+ " -DREPORT_NAME=\""+reportName+"\""
-				+ " -DREPORT_CLASSES=\""+selection.getClassPaths().toString()+"\"");
+				start+Constants.BENCHMARK_REPORT_NAME+"=\""+reportName+"\""+
+    			start+Constants.SELECTED_CLASS_PATHS+"=\""+classPaths+"\"");
+//				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\""
+//				+ " -DREPORT_NAME=\""+reportName+"\""
+//				+ " -DREPORT_CLASSES=\""+selection.getClassPaths().toString()+"\"");
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, 
-				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\" "
-				+ " -DREPORT_NAME=\""+reportName+"\""
-				+ " -DREPORT_CLASSES=\""+LauncherUtils.setToString(selection.getClassPaths())+"\"");
+				start+Constants.BENCHMARK_REPORT_NAME+"=\""+reportName+"\""+
+    			start+Constants.SELECTED_CLASS_PATHS+"=\""+classPaths+"\"");
+//				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\" "
+//				+ " -DREPORT_NAME=\""+reportName+"\""
+//				+ " -DREPORT_CLASSES=\""+LauncherUtils.setToString(selection.getClassPaths())+"\"");
     }
     
    

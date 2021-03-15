@@ -331,26 +331,25 @@ public class CyBenchLauncher {
 	
 	private static void fillLaunchConfigurations(LauncherConfiguration launcherConfiguration) {
 		
-		launcherConfiguration.setReportName(checkNullAndReturnString("REPORT_NAME"));
-		launcherConfiguration.setReportUploadStatus(checkNullAndReturnString("BENCHMARK_REPORT_STATUS"));
+		launcherConfiguration.setReportName(checkNullAndReturnString(Constants.BENCHMARK_REPORT_NAME));
+		launcherConfiguration.setReportUploadStatus(checkNullAndReturnString(Constants.REPORT_UPLOAD_STATUS));
 
-		launcherConfiguration.setThreads(checkNullAndReturnInt("TREADS_COUNT"));
-		launcherConfiguration.setForks(checkNullAndReturnInt("FORKS_COUNT"));
-		launcherConfiguration.setWarmUpIterations(checkNullAndReturnInt("WARMUP_ITERATION"));
-		launcherConfiguration.setMeasurementIterations(checkNullAndReturnInt("MEASURMENT_ITERATIONS"));
-		launcherConfiguration.setWarmUpSeconds(checkNullAndReturnInt("WARMUP_SECONDS"));
+		launcherConfiguration.setThreads(checkNullAndReturnInt(Constants.RUN_THREAD_COUNT));
+		launcherConfiguration.setForks(checkNullAndReturnInt(Constants.NUMBER_OF_FORKS));
+		launcherConfiguration.setWarmUpIterations(checkNullAndReturnInt(Constants.WARM_UP_ITERATIONS));
+		launcherConfiguration.setMeasurementIterations(checkNullAndReturnInt(Constants.MEASUREMENT_ITERATIONS));
+		launcherConfiguration.setWarmUpSeconds(checkNullAndReturnInt(Constants.WARM_UP_SECONDS));
+		launcherConfiguration.setMeasurmentSeconds(checkNullAndReturnInt(Constants.MEASUREMENT_SECONDS));
 
-		launcherConfiguration.setIncludeHardware(checkNullAndReturnBoolean("INCLUDE_HARDWARE_PROPERTIES"));
-		launcherConfiguration.setShouldSendReportToCyBench(checkNullAndReturnBoolean("SHOULD_SEND_REPORT_CYBENCH"));
-		launcherConfiguration.setUserProperties(checkNullAndReturnString("CUSTOM_USER_PROPERTIES"));
+		launcherConfiguration.setIncludeHardware(checkNullAndReturnBoolean(Constants.COLLECT_HARDWARE_PROPS));
+		launcherConfiguration.setShouldSendReportToCyBench(checkNullAndReturnBoolean(Constants.SEND_REPORT));
+//			launcherConfiguration.setUserProperties(checkNullAndReturnString("CUSTOM_USER_PROPERTIES"));
 		   
 
-		launcherConfiguration.setUseCyBenchBenchmarkSettings(checkNullAndReturnBoolean("USE_CYBNECH_BENCHMARK_SETTINGS"));
-		launcherConfiguration.setClassCalled(checkNullAndReturnSet("REPORT_CLASSES"));
-		launcherConfiguration.setMeasurmentSeconds(checkNullAndReturnInt("MEASURMENT_SECONDS"));
-		
+		launcherConfiguration.setUseCyBenchBenchmarkSettings(checkNullAndReturnBoolean(Constants.USE_CYBENCH_CONFIGURATION));
+		launcherConfiguration.setClassCalled(checkNullAndReturnSet(Constants.SELECTED_CLASS_PATHS));
 
-		launcherConfiguration.setRemoteAccessToken(checkNullAndReturnString("REMOTE_CYBENCH_ACCESS_TOKEN"));
+		launcherConfiguration.setRemoteAccessToken(checkNullAndReturnString(Constants.USER_REPORT_TOKEN));
 	}
 	
 	private static Object checkNullAndReturn(Object propertyName)  {
