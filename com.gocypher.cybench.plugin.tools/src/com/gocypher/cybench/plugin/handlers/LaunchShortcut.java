@@ -112,7 +112,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) );
 			List<String> classpathMementos = LauncherUtils.getNeededClassPaths(selectionEntry.getProjectSelected(), classPaths);
-//	    	GuiUtils.logInfo("Classpath: "+classpathMementos) ;
+//	    	GuiUtils.logInfo("Class-path: "+classpathMementos) ;
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
