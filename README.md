@@ -155,6 +155,7 @@ Launch configuration view which allows to create a custom launch settings for a 
     * Important options:
         * “Run Project” - select the project which contains JMH benchmarks.
         * “Reports Folder” - folder where CyBench reports are stored, default is the location of the “Run Project” option plus “/reports” subdirectory.
+        * “Bench Access Token” - by providing the "bench" token that you get after creating a workspace in CyBench UI, you can send reports to your private directory, which will be visible only to the users that you authorize.
         * “Send Report To CyBench” - flag which defines that either report should be sent to CyBench repository or not.
 
 ![](./docs/images/image18.png)
