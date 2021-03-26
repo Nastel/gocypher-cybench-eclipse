@@ -238,9 +238,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         	String launchPathDef = "";
         	String reportFolderDef = "";
         	if(entry!= null) {
-        		scanElements(entry.getKey());
             	reportFolderDef = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, entry.getKey()+"/reports");
             	launchPathDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_PATH, entry.getKey());
+        		scanElements(launchPathDef);
                 
             }
             String reportNameDef = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "");
@@ -393,7 +393,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
      */
     private String prepareFullPathForPackage(String projectName, String fileType, String fullfilePath) {
     	projectName = projectName.replace("/", "\\");
-    	return fullfilePath.replace(fileType, "").replace(projectName, "").replace("\\", ".").replace("src-benchmarks", "").replace("src", "");
+    	String tempName = fullfilePath.replace(fileType, "").replace(projectName, "").replace("\\", ".");
+    	tempName =  tempName.replace("src-benchmarks", "").replace("src", "").replace("test.java", "");
+    	return tempName;
     }
     
     /**
