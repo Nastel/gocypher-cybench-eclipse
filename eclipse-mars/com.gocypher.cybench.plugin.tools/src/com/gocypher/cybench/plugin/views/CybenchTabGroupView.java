@@ -30,6 +30,7 @@ public class CybenchTabGroupView extends AbstractLaunchConfigurationTabGroup {
     public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
     	ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
     			new CybenchTabView(),
+    			new CybenchSecondTabView(),
     			new CommonTab()
     	};
         setTabs(tabs);

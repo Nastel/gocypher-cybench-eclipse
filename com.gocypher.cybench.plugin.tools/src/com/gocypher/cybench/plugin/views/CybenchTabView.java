@@ -62,7 +62,6 @@ import org.eclipse.swt.widgets.Text;
 import com.gocypher.cybench.plugin.model.LaunchConfiguration;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
-//import com.gocypher.cybench.plugin.utils.MultiCheckSelectionCombo;
 
 
 public class CybenchTabView extends AbstractLaunchConfigurationTab {
@@ -71,7 +70,6 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 
     private Text reportName;
     private Combo launchPath;
-//    private Combo onlySelectedLaunch;
 
     private Text reportsFolder;
     private Button browse;
@@ -93,30 +91,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     
     private final String textForHint = ">>> If no benchmark classes will be"
     		+ "selected all project benchmarks will be executed. <<<";
-//    private MultiCheckSelectionCombo classesToExecute;
-    
-//    private Text onlySelectedLaunch;
-//    private Combo reportUploadStatus;
-    
-//    private Spinner forks;
-//    private Spinner threads;
-//    private Spinner measurmentIterations;
-//    private Spinner warmupIterations;
-//    private Spinner warmupSeconds;
-//    private Spinner measurmentSeconds;
-    
-//    private Spinner expectedScore;
-
-//    private Text userProperties;
-//    private Button useCyBenchBenchmarkSettings;
-    
-//    private Button shouldStoreReportToFileSystem;
-
-//    private Text classPathProperties;
 
     
 	private Map<String, String> paths =  new HashMap<>();
-	
 	private ArrayList<String> projectSelectedPaths = new ArrayList<String>();
 
     @Override
@@ -127,21 +104,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         Composite comp = new Group(parent, SWT.BORDER);
         setControl(comp);
         GridLayoutFactory.swtDefaults().numColumns(10).applyTo(comp); 
-
-//    	benchmarking = new Group(comp, SWT.NONE);
-//        benchmarking.setText("Benchmarking settings");
-//        benchmarking.setLayout(new GridLayout(10, false));
-//
-//        
-//        Label useCyBenchBenchmarkSettingsLabel = new Label(benchmarking, SWT.NONE);
-//        useCyBenchBenchmarkSettingsLabel.setText("Use CyBench Benchmark Settings:");
-//        useCyBenchBenchmarkSettings = new Button(benchmarking, SWT.CHECK);
-//        useCyBenchBenchmarkSettings.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 8, 1)); 
-
-              
+      
         /* Configuration GROUP */
-        configuration = prepareCyBenchConfigurations(comp, itemsArray);
-	           
+        configuration = prepareCyBenchConfigurations(comp, itemsArray);           
     }
     
     private Group  prepareCyBenchConfigurations(Composite comp, String[] itemsArray) {
@@ -150,153 +115,88 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
          configuration.setText("Configuration");
          configuration.setLayout(new GridLayout(10, false));
          
-         	Label sendReportsToCybenchLabel = new Label(configuration, SWT.NONE);
-	        sendReportsToCybenchLabel.setText("Send Report To CyBench:");
-	        shouldSendReportToCyBench = new Button(configuration, SWT.CHECK);
-	        shouldSendReportToCyBench.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 3, 1)); 
+     	Label sendReportsToCybenchLabel = new Label(configuration, SWT.NONE);
+        sendReportsToCybenchLabel.setText("Send Report To CyBench:");
+        shouldSendReportToCyBench = new Button(configuration, SWT.CHECK);
+        shouldSendReportToCyBench.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 3, 1)); 
 
+        Label doHardwarePropertiesSnapshotLabel = new Label(configuration, SWT.NONE);
+        doHardwarePropertiesSnapshotLabel.setText("Include Hardware Propeties");
+        shouldDoHardwareSnapshot = new Button(configuration, SWT.CHECK);
+        shouldDoHardwareSnapshot.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 3, 1)); 
+        shouldSendReportEnableDisable();
+        
+        shouldSendReportToCyBench.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+            	shouldSendReportEnableDisable();
+            }
+        });
+        
+        /* Empty field 3 */
+        Label emptyField3 = new Label(configuration, SWT.NONE);
+		GridDataFactory.swtDefaults().span(2,1).applyTo(emptyField3);
+        
+        /* Report launch path input field */
+        Label reportlaunchPathLabel = new Label(configuration, SWT.NONE);
+        launchPath = new Combo(configuration, SWT.BORDER); 
+        launchPath.setItems(itemsArray);
+        launchPath.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+        reportlaunchPathLabel.setText("Run Project:");
+       
+        launchPath.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+            	setAvailbaleBenchmarksChoice(launchPath.getText());
+            	reportsFolder.setText(launchPath.getText()+"/reports");
+            }
+        });
+        
+        /* Report save folder path choice*/
+        Label reportFolderLabel = new Label(configuration, SWT.NONE);
+        reportFolderLabel.setText("Reports Folder:");
+        reportsFolder = new Text(configuration, SWT.BORDER);
+        
+        browse = new Button(configuration, SWT.PUSH);
+        browse.setText("Browse ...");
+        browse.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+				DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.NULL);
+                String path = dialog.open();
+                if (path != null) {
+                	reportsFolder.setText(path);
+                }
+            }
+        });     
 
-	        Label doHardwarePropertiesSnapshotLabel = new Label(configuration, SWT.NONE);
-	        doHardwarePropertiesSnapshotLabel.setText("Include Hardware Propeties");
-	        shouldDoHardwareSnapshot = new Button(configuration, SWT.CHECK);
-	        shouldDoHardwareSnapshot.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 3, 1)); 
-	        shouldSendReportEnableDisable();
-	        
-	        
-	        
-	        shouldSendReportToCyBench.addSelectionListener(new SelectionAdapter() {
-	            public void widgetSelected(SelectionEvent e) {
-	            	shouldSendReportEnableDisable();
-	            }
-	
-	        });
-	        
-	        /* Empty field 3 */
- 	        Label emptyField3 = new Label(configuration, SWT.NONE);
-			GridDataFactory.swtDefaults().span(2,1).applyTo(emptyField3);
- 	        
- 	        /* Report launch path input field */
- 	        Label reportlaunchPathLabel = new Label(configuration, SWT.NONE);
- 	        launchPath = new Combo(configuration, SWT.BORDER); 
- 	        launchPath.setItems(itemsArray);
- 	        launchPath.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
- 	        reportlaunchPathLabel.setText("Run Project:");
- 	       
-           
- 	        launchPath.addSelectionListener(new SelectionAdapter() {
-	            public void widgetSelected(SelectionEvent e) {
-	            	setAvailbaleBenchmarksChoice(launchPath.getText());
-	            	reportsFolder.setText(launchPath.getText()+"/reports");
-	            }
-	
-	        });
- 	         
- 	        
- 	        /* Report save folder path choice*/
- 	        Label reportFolderLabel = new Label(configuration, SWT.NONE);
- 	        reportFolderLabel.setText("Reports Folder:");
- 	        reportsFolder = new Text(configuration, SWT.BORDER);
- 	        
- 	        browse = new Button(configuration, SWT.PUSH);
- 	        browse.setText("Browse ...");
- 	        browse.addSelectionListener(new SelectionAdapter() {
- 	            public void widgetSelected(SelectionEvent e) {
- 					DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.NULL);
- 	                String path = dialog.open();
- 	                if (path != null) {
- 	                	reportsFolder.setText(path);
- 	                }
- 	            }
- 	
- 	        });     
-
-
- 	        /* Report name input field */
- 	        Label reportNameLabel = new Label(configuration, SWT.NONE);
- 	        reportNameLabel.setText("Report Name:");
- 	        reportName = new Text(configuration, SWT.BORDER);
- 	        
-	        Label  accessTokenLabel = new Label(configuration, SWT.NONE);
-	        accessTokenLabel.setText("Bench Access Token:");
-	        accessToken = new Text(configuration, SWT.SINGLE | SWT.BORDER | SWT.PASSWORD);
-	        
- 	        /* Report selection field Component */
- 	        createBenchmarkClassesSelection(configuration);	      
- 	        
-			GridDataFactory.swtDefaults().span(2,1).applyTo(reportFolderLabel);
-			GridDataFactory.swtDefaults().span(2,1).applyTo(reportNameLabel);
-			GridDataFactory.swtDefaults().span(2,1).applyTo(reportlaunchPathLabel);
-			GridDataFactory.swtDefaults().span(2,1).applyTo(accessTokenLabel);    
-			GridDataFactory.fillDefaults().grab(true, false).span(7,1).applyTo(reportsFolder);
-			GridDataFactory.swtDefaults().span(1,1).applyTo(browse);
-			GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(reportName);
-			GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(launchPath);
-			GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(accessToken);
- 	       
-
- 	        
- 	        /* Report selection field */
-// 	        Label runOnlySelectedLabel = new Label(configuration, SWT.NONE);
-// 	        runOnlySelectedLabel.setText("Execute:");
-//
-// 	        onlySelectedLaunch = new Combo(configuration, SWT.BORDER); 
-// 	        onlySelectedLaunch.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-
- 	        /* User save to file send t CyBench choice buttons */
-// 	        Label storeReportsToFileSystemLabel = new Label(configuration, SWT.NONE);
-// 	        storeReportsToFileSystemLabel.setText("Store Report In File System:");
-// 	        shouldStoreReportToFileSystem = new Button(configuration, SWT.CHECK);
-// 	        shouldStoreReportToFileSystem.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 4, 1)); 	   
-	        
-//	        Label  classPathPropertiesLabel = new Label(configuration, SWT.NONE);
-//	        classPathPropertiesLabel.setText("Classpath arguments:");
-//	        classPathProperties = new Text(configuration, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-			
-// 	        onlySelectedLaunch = new Text(configuration, SWT.BORDER);
- 	        /* User properties input */
-// 	        Label userPropertiesLabel = new Label(configuration, SWT.NONE);
-// 	        userPropertiesLabel.setText("User Properties:");
-// 	        userProperties = new Text(configuration, SWT.BORDER);
- 	        
-// 	        Label  jvmPropertiesLabel = new Label(configuration, SWT.NONE);
-// 	        jvmPropertiesLabel.setText("JVM Properties:");
-//	        jvmProperties = new Text(configuration, SWT.BORDER);
- 	        /* User save to file send t CyBench choice buttons */
-// 	        Label storeReportsToFileSystemLabel = new Label(configuration, SWT.NONE);
-// 	        storeReportsToFileSystemLabel.setText("Store Report In File System:");
-// 	        shouldStoreReportToFileSystem = new Button(configuration, SWT.CHECK);
-// 	        shouldStoreReportToFileSystem.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 4, 1));
-
-//	        Label  classPathPropertiesLabel = new Label(configuration, SWT.NONE);
-//	        classPathPropertiesLabel.setText("Classpath arguments:");
-//	        classPathProperties = new Text(configuration, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
- 	        
- 	        /* Report status input field */
-// 	        Label benchmarkUploadStatusLabel = new Label(configuration, SWT.NONE);
-// 	        benchmarkUploadStatusLabel.setText("Report Upload Status:");
-// 	        reportUploadStatus = new Combo(configuration, SWT.BORDER); 
-// 	        reportUploadStatus.setItems(new String [] {"Public", "Private"});
-// 	        reportUploadStatus.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
- 	        
-// 	        GridDataFactory.swtDefaults().span(2,1).applyTo(benchmarkUploadStatusLabel);
-// 	        GridDataFactory.swtDefaults().span(2,1).applyTo(userPropertiesLabel);
-// 	        GridDataFactory.swtDefaults().span(2,1).applyTo(jvmPropertiesLabel);
-// 	        GridDataFactory.swtDefaults().span(2,1).applyTo(classPathPropertiesLabel);
- 	        
-// 	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(userProperties);
-// 	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(reportUploadStatus);
-// 	        GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(jvmProperties);
- 	        
- 	       
- 	        // Class-paths layout
-	        GridData classPathGrid = new GridData();
-	        classPathGrid.horizontalSpan = 10;
-	        classPathGrid.widthHint = GridData.FILL_HORIZONTAL;
- 	        classPathGrid.heightHint = 100;
-// 	       	GridDataFactory.createFrom(classPathGrid).applyTo(classPathProperties);
- 	        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(configuration);
- 	        
-			return configuration;
+        /* Report name input field */
+        Label reportNameLabel = new Label(configuration, SWT.NONE);
+        reportNameLabel.setText("Report Name:");
+        reportName = new Text(configuration, SWT.BORDER);
+        
+        Label  accessTokenLabel = new Label(configuration, SWT.NONE);
+        accessTokenLabel.setText("Bench Access Token:");
+        accessToken = new Text(configuration, SWT.SINGLE | SWT.BORDER | SWT.PASSWORD);
+        
+        /* Report selection field Component */
+        createBenchmarkClassesSelection(configuration);	      
+        
+		GridDataFactory.swtDefaults().span(2,1).applyTo(reportFolderLabel);
+		GridDataFactory.swtDefaults().span(2,1).applyTo(reportNameLabel);
+		GridDataFactory.swtDefaults().span(2,1).applyTo(reportlaunchPathLabel);
+		GridDataFactory.swtDefaults().span(2,1).applyTo(accessTokenLabel);    
+		GridDataFactory.fillDefaults().grab(true, false).span(7,1).applyTo(reportsFolder);
+		GridDataFactory.swtDefaults().span(1,1).applyTo(browse);
+		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(reportName);
+		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(launchPath);
+		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(accessToken);	      
+       
+        // Class-paths layout
+        GridData classPathGrid = new GridData();
+        classPathGrid.horizontalSpan = 10;
+        classPathGrid.widthHint = GridData.FILL_HORIZONTAL;
+        classPathGrid.heightHint = 100;
+        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(configuration);
+        
+		return configuration;
  	        
     }
     private void shouldSendReportEnableDisable() {
@@ -307,20 +207,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     		shouldDoHardwareSnapshot.setEnabled(true);
     	}
     }
-//    private Group prepareConditionGroup(Composite comp) {
-//    	  conditions = new Group(comp, SWT.NONE);
-//          conditions.setText("Execution Conditions");
-//          conditions.setLayout(new GridLayout(10, false));
-//  	        /* Report expected score input */
-//  	        Label expectedScoreLabel = new Label(conditions, SWT.NONE);
-//  	        expectedScoreLabel.setText("Score Less Then:");
-//  	        expectedScore = new Spinner(conditions, SWT.BORDER);
-//  	        GridDataFactory.swtDefaults().span(2,1).applyTo(expectedScoreLabel);
-//  	        GridDataFactory.fillDefaults().grab(true, false).span(7,1).applyTo(expectedScore);
-//  	        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(conditions);
-//			return conditions;
-//    }
-    
+
     @Override
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
     }
@@ -386,55 +273,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             shouldDoHardwareSnapshot.addSelectionListener(selectionListener);
             shouldSendReportEnableDisable();
 
-
 			checkIfThereAreSelectedBenchmarks();
-//          String reportUploadStatusDef = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "private");
-//        String userArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, "");
-//        String jvmArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "");
-            
-//          int threadDef = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
-//          int forksDef  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
-//          int warmupIterationsDef  = configuration.getAttribute(LaunchConfiguration.WARMUP_ITERATION, 1);
-//          int measurmentIterationsDef = configuration.getAttribute(LaunchConfiguration.MEASURMENT_ITERATIONS, 5);
-//          int warmupSecondsDef = configuration.getAttribute(LaunchConfiguration.WARMUP_SECONDS, 10);
-//          int measurmentSecondsDef = configuration.getAttribute(LaunchConfiguration.MEASURMENT_SECONDS, 10);
-          
-//          boolean storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
-//          boolean useCybenchbenchmarkSettingsDef = configuration.getAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, true);
-        
-//          String classPathArguments = configuration.getAttribute(LaunchConfiguration.ADD_CUSTOM_CLASS_PATH, "");
-//          reportUploadStatus.setText(reportUploadStatusDef);
-//          reportUploadStatus.addModifyListener(modifyListener);
-            
-//            forks.setValues(forksDef, 1, 10000, 0, 1, 1);
-//            forks.addModifyListener(modifyListener);
-//            threads.setValues(threadDef, 1, 100, 0, 1, 1);
-//            threads.addModifyListener(modifyListener);
-//            measurmentIterations.setValues(measurmentIterationsDef, 1, 10000, 0, 1, 1);
-//            measurmentIterations.addModifyListener(modifyListener);
-//            warmupIterations.setValues(warmupIterationsDef, 1, 10000, 0, 1, 1);
-//            warmupIterations.addModifyListener(modifyListener);
-//            warmupSeconds.setValues(warmupSecondsDef, 1, 10000, 0, 1, 1);
-//            warmupSeconds.addModifyListener(modifyListener);
-//            measurmentSeconds.setValues(measurmentSecondsDef, 1, 10000, 0, 1, 1);
-//            measurmentSeconds.addModifyListener(modifyListener);
-//            expectedScore.setValues(-1, -1, 10000, 2, 1, 1);
-//            expectedScore.addModifyListener(modifyListener);
-
-//            userProperties.setText(userArguments);
-//            userProperties.addModifyListener(modifyListener);
-//            jvmProperties.setText(jvmArguments);
-//            jvmProperties.addModifyListener(modifyListener);
-//            shouldStoreReportToFileSystem.setSelection(storeReportInFile);
-//            shouldStoreReportToFileSystem.addSelectionListener(selectionListener);
-            
-//            useCyBenchBenchmarkSettings.setSelection(useCybenchbenchmarkSettingsDef);
-//            useCyBenchBenchmarkSettings.addSelectionListener(selectionListener);
-            
-//            classPathProperties.setText(classPathArguments);
-//            classPathProperties.addModifyListener(modifyListener);
-            
-//            useCybenchEnableDisable();
             
         } catch (CoreException e) {
         	GuiUtils.logError("There was a problem on the run configuration initialization: ", e);
@@ -458,24 +297,6 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     	configuration.setAttribute(LaunchConfiguration.BUILD_PATH,  buildPath);
 
 		checkIfThereAreSelectedBenchmarks();
-//      configuration.setAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, jvmProperties.getText());
-//        configuration.setAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, useCyBenchBenchmarkSettings.getSelection());
-//        configuration.setAttribute(LaunchConfiguration.ADD_CUSTOM_CLASS_PATH,  classPathProperties.getText());
-        
-    	
-//        configuration.setAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, reportUploadStatus.getText());
-        
-//        configuration.setAttribute(LaunchConfiguration.TREADS_COUNT, threads.getSelection());
-//        configuration.setAttribute(LaunchConfiguration.FORKS_COUNT, forks.getSelection());
-//        configuration.setAttribute(LaunchConfiguration.WARMUP_ITERATION, warmupIterations.getSelection());
-//        configuration.setAttribute(LaunchConfiguration.MEASURMENT_ITERATIONS, measurmentIterations.getSelection());
-//        configuration.setAttribute(LaunchConfiguration.WARMUP_SECONDS, warmupSeconds.getSelection());
-//        configuration.setAttribute(LaunchConfiguration.MEASURMENT_SECONDS, measurmentSeconds.getSelection());
-
-//        configuration.setAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, userProperties.getText());
-//        configuration.setAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, shouldStoreReportToFileSystem.getSelection());
-        
-//        configuration.setAttribute(LaunchConfiguration.EXECUTION_SCORE, expectedScore.getSelection());
     }
     
     private String getBuildPath(String buildProjectPath) {
@@ -646,23 +467,17 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         middle.setLayout(new GridLayout(9, false));
         middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
-        
         GridData classPathGrid = new GridData();
-//        classPathGrid.horizontalSpan = 5;
         classPathGrid.grabExcessHorizontalSpace = true;
         classPathGrid.heightHint = 200;
-        classPathGrid.widthHint = 450;
-//        classPathGrid.minimumWidth = 200;
+        classPathGrid.widthHint = 360;
 	        
-        
-
 		GridDataFactory.swtDefaults().span(10,1).applyTo(middle);
 
         Group leftGroup = new Group(middle, SWT.FILL  | SWT.WRAP);
         leftGroup.setText("Benchmarks Available");
         leftGroup.setLayout(new GridLayout(4, false));
         leftGroup.setLayoutData(classPathGrid);
-//       	GridDataFactory.createFrom(classPathGrid).applyTo(leftGroup);
         
         leftList = new List(leftGroup, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL | SWT.H_SCROLL);
         ((Control) leftList).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
