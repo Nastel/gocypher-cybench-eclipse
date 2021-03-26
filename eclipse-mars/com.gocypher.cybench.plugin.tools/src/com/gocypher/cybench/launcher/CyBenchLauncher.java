@@ -211,7 +211,7 @@ public class CyBenchLauncher {
             report.addToBenchmarks(benchReport);
         }
         report.computeScores();
-        getReportUploadStatus(report);
+//        getReportUploadStatus(report);
         //FIXME add all missing custom properties including public/private flag
 
         System.out.println("-----------------------------------------------------------------------------------------");
@@ -332,7 +332,6 @@ public class CyBenchLauncher {
 	private static void fillLaunchConfigurations(LauncherConfiguration launcherConfiguration) {
 		
 		launcherConfiguration.setReportName(checkNullAndReturnString(Constants.BENCHMARK_REPORT_NAME));
-		launcherConfiguration.setReportUploadStatus(checkNullAndReturnString(Constants.REPORT_UPLOAD_STATUS));
 
 		launcherConfiguration.setThreads(checkNullAndReturnInt(Constants.RUN_THREAD_COUNT));
 		launcherConfiguration.setForks(checkNullAndReturnInt(Constants.NUMBER_OF_FORKS));
@@ -348,8 +347,13 @@ public class CyBenchLauncher {
 
 		launcherConfiguration.setUseCyBenchBenchmarkSettings(checkNullAndReturnBoolean(Constants.USE_CYBENCH_CONFIGURATION));
 		launcherConfiguration.setClassCalled(checkNullAndReturnSet(Constants.SELECTED_CLASS_PATHS));
-
 		launcherConfiguration.setRemoteAccessToken(checkNullAndReturnString(Constants.USER_REPORT_TOKEN));
+
+		if(launcherConfiguration.getRemoteAccessToken() != null && !launcherConfiguration.getRemoteAccessToken().equals("")){
+			launcherConfiguration.setReportUploadStatus("private");
+		}else{
+			launcherConfiguration.setReportUploadStatus("public");
+		}
 	}
 	
 	private static Object checkNullAndReturn(Object propertyName)  {
