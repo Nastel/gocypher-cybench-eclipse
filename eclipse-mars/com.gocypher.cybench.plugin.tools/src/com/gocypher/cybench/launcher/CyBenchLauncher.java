@@ -269,16 +269,6 @@ public class CyBenchLauncher {
 	
 	
 
-    private static void getReportUploadStatus(BenchmarkOverviewReport report) {
-        String reportUploadStatus = getProperty(Constants.REPORT_UPLOAD_STATUS);
-        if (Constants.REPORT_PUBLIC.equals(reportUploadStatus)) {
-            report.setUploadStatus(reportUploadStatus);
-        } else if (Constants.REPORT_PRIVATE.equals(reportUploadStatus)) {
-            report.setUploadStatus(reportUploadStatus);
-        } else {
-            report.setUploadStatus(Constants.REPORT_PUBLIC);
-        }
-    }
     public static String getProperty(String key) {
         return System.getProperty(key, cfg.getProperty(key));
     }
@@ -354,13 +344,6 @@ public class CyBenchLauncher {
 		}else{
 			launcherConfiguration.setReportUploadStatus("public");
 		}
-	}
-	
-	private static Object checkNullAndReturn(Object propertyName)  {
-		if(propertyName!= null) {
-			return propertyName;
-		}
-		return "";
 	}
 	
 	private static String checkNullAndReturnString(String propertyName)  {

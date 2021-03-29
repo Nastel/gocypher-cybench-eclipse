@@ -56,8 +56,6 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private String selectionFolderPath;
 	private String jvmProperties;
 	
-	private String launchConfigurationMemento;
-	
 	private String accessToken;
 	private String  reportUploadStatus;
 	
