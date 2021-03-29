@@ -48,6 +48,7 @@ public class MessageDialogView  extends Dialog {
 	    this.methodsExist = methods;
 	}
 
+
     @Override
     protected Control createDialogArea(Composite parent) {
 	    Composite popupViewPort = (Composite) super.createDialogArea(parent);

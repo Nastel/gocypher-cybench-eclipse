@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -54,9 +55,11 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.gocypher.cybench.plugin.model.LaunchConfiguration;
@@ -85,9 +88,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private Button moveRight;
     private Label hintText;
     
-    private Button createNew;
-    private Label createNewValueLable;
-    private Text addBenchmarksAvailable;
+    private String benchmarkClassInput;
+   
     
     private final String textForHint = ">>> If no benchmark classes will be"
     		+ "selected all project benchmarks will be executed. <<<";
@@ -245,6 +247,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             }
             String reportNameDef = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "");
             String pathToSourceSelectedDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");
+            String pathToSourceNotSelectedDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_NOT_SELECTED_PATH, "");
             
             String accessTokenDef = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, "");
             boolean sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
@@ -262,7 +265,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             accessToken.addModifyListener(modifyListener);
             
 //            onlySelectedLaunch.setText(pathToSourceSelectedDef);
-            initializeSelectedBenchmarks(pathToSourceSelectedDef);
+            initializeSelectedBenchmarks(pathToSourceSelectedDef, pathToSourceNotSelectedDef);
             moveLeft.addSelectionListener(selectionListener);
             moveRight.addSelectionListener(selectionListener);
 
@@ -287,6 +290,10 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         
         String selectedBenchmarkLaunchClasses = getSelectedBenchmarksFormList();
         configuration.setAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, selectedBenchmarkLaunchClasses);
+
+        String notSelectedBenchmarkLaunchClasses = getNotSelectedBenchmarksFormList();
+        configuration.setAttribute(LaunchConfiguration.LAUNCH_NOT_SELECTED_PATH, notSelectedBenchmarkLaunchClasses);
+        
         
         configuration.setAttribute(LaunchConfiguration.REPORT_FOLDER, reportsFolder.getText());
         
@@ -420,13 +427,19 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
      * Set the available choices into the left List field
      * @param path
      */
-    private void initializeSelectedBenchmarks(String benchmarkClassesString) {
+    private void initializeSelectedBenchmarks(String benchmarkClassesString, String benchmarkClassesNotSelectedString) {
       	try {
             java.util.List<String> selectedExecutionClasses = Arrays.asList(benchmarkClassesString.split(","));
+            java.util.List<String> notSelectedExecutionClasses = Arrays.asList(benchmarkClassesNotSelectedString.split(","));
       		leftList.removeAll();
       		rightList.removeAll();
 	        for(String prop : projectSelectedPaths) {
-        	    if(!selectedExecutionClasses.contains(prop)) {
+        	    if(!selectedExecutionClasses.contains(prop) && prop != null && !prop.equals("")) {
+    	    		leftList.add(prop);
+        	    }
+	        }
+	        for(String prop : notSelectedExecutionClasses) {
+        	    if(!projectSelectedPaths.contains(prop)  && prop != null && !prop.equals("")) {
         	    	leftList.add(prop);
         	    }
 	        }
@@ -466,19 +479,19 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private void createBenchmarkClassesSelection(Composite composite)
     {
         Composite middle = new Composite(composite, SWT.FILL);
-        middle.setLayout(new GridLayout(9, false));
+        middle.setLayout(new GridLayout(11, false));
         middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
         GridData classPathGrid = new GridData();
         classPathGrid.grabExcessHorizontalSpace = true;
         classPathGrid.heightHint = 200;
-        classPathGrid.widthHint = 360;
+        classPathGrid.widthHint = 400;
 	        
 		GridDataFactory.swtDefaults().span(10,1).applyTo(middle);
 
         Group leftGroup = new Group(middle, SWT.FILL  | SWT.WRAP);
-        leftGroup.setText("Benchmarks Available");
-        leftGroup.setLayout(new GridLayout(4, false));
+        leftGroup.setText("Benchmarks Class Available");
+        leftGroup.setLayout(new GridLayout(10, false));
         leftGroup.setLayoutData(classPathGrid);
         
         leftList = new List(leftGroup, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -513,10 +526,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         addNew.addSelectionListener(showAddNewValue);
 
         Group rightGroup = new Group(middle, SWT.FILL | SWT.WRAP );
-        rightGroup.setText("Benchmarks Selected");
-        rightGroup.setLayout(new GridLayout(4, false));
+        rightGroup.setText("Benchmarks Class Selected");
+        rightGroup.setLayout(new GridLayout(10, false));
         rightGroup.setLayoutData(classPathGrid);
-//       	GridDataFactory.createFrom(classPathGrid).applyTo(rightGroup);
 
         rightList = new List(rightGroup, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL | SWT.H_SCROLL);
         rightList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -528,22 +540,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         fD[0].setHeight(8);
         hintText.setFont( new Font(middle.getDisplay(),fD[0]));
 		GridDataFactory.swtDefaults().span(9,1).applyTo(hintText);
-		
-		createNewValueLable = new Label(configuration, SWT.NONE);
-		createNewValueLable.setText("Add new benchmark:");
-		createNewValueLable.setVisible(false);
-        addBenchmarksAvailable = new Text(configuration, SWT.SINGLE | SWT.BORDER);	      
-		addBenchmarksAvailable.setVisible(false);
-		
-	    createNew = new Button(configuration, SWT.PUSH);
-	    createNew.setText("Add New");  
-	    createNew.addSelectionListener(addNewValue);
-	    createNew.setVisible(false);
-
-		GridDataFactory.swtDefaults().span(2,1).applyTo(createNewValueLable); 
-		GridDataFactory.fillDefaults().grab(true, false).span(6,1).applyTo(addBenchmarksAvailable);
-		GridDataFactory.swtDefaults().grab(true, false).span(1,1).applyTo(createNew);    
-
+		       
     }
    
     
@@ -629,37 +626,24 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 
 		@Override
 		public void widgetSelected(SelectionEvent arg0) {
-			createNewValueLable.setVisible(true);
-			addBenchmarksAvailable.setVisible(true);
-			createNew.setVisible(true);
+			openAddNewBenchmarkClassPopup();
 		}
 	};
 	
-	private SelectionListener addNewValue = new SelectionListener() {
-
-		@Override
-		public void widgetDefaultSelected(SelectionEvent arg0) {
-				
-		}
-
-		@Override
-		public void widgetSelected(SelectionEvent arg0) {
-			String inputText = addBenchmarksAvailable.getText();
-			if(inputText != null && inputText != "") {
-				rightList.add(inputText);
-				checkIfThereAreSelectedBenchmarks();
-				createNewValueLable.setVisible(false);
-				addBenchmarksAvailable.setVisible(false);
-				createNew.setVisible(false);
-				setChangeHappened();
-			}
-		}
-	};
+	
 	
 	private String getSelectedBenchmarksFormList() {
 		String[] selectedItems = new String[rightList.getItemCount()];
 		for(int i = 0; i<rightList.getItemCount(); i++) {
 			selectedItems[i]= rightList.getItem(i);
+		}
+		return String.join(",",selectedItems);
+	}
+	
+	private String getNotSelectedBenchmarksFormList() {
+		String[] selectedItems = new String[leftList.getItemCount()];
+		for(int i = 0; i<leftList.getItemCount(); i++) {
+			selectedItems[i]= leftList.getItem(i);
 		}
 		return String.join(",",selectedItems);
 	}
@@ -676,5 +660,30 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 		setDirty(true);
     	updateLaunchConfigurationDialog();
 	}
+	
+	private void openAddNewBenchmarkClassPopup() {
+		Display.getDefault().syncExec(new Runnable() {
+		    public void run() {
+		    	try {
+		    		Shell addNewBenhcmarkClass = new Shell();
+		    		BenchmarkClassInputDialog pop = new BenchmarkClassInputDialog(addNewBenhcmarkClass);
+					if (pop.open() == Window.OK) {
+						benchmarkClassInput = pop.getBenchmarkClassInput();
+						rightList.add(benchmarkClassInput);
+						setChangeHappened();
+					}
+		    	}catch (Exception e) {			    		
+		    		GuiUtils.logError ("Error  on view open",e) ;
+		    	}
+		    }
+		});	
+			
+		
+		
+		
+		
+	}
 
+	
+	
 }
