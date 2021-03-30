@@ -484,9 +484,12 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         
         GridData classPathGrid = new GridData();
         classPathGrid.grabExcessHorizontalSpace = true;
-        classPathGrid.heightHint = 200;
-        classPathGrid.widthHint = 400;
+        classPathGrid.heightHint = 250;
+        classPathGrid.minimumHeight = 250;
+        classPathGrid.minimumWidth = 420;
+        classPathGrid.widthHint = 420;
 	        
+        
 		GridDataFactory.swtDefaults().span(10,1).applyTo(middle);
 
         Group leftGroup = new Group(middle, SWT.FILL  | SWT.WRAP);
@@ -495,7 +498,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         leftGroup.setLayoutData(classPathGrid);
         
         leftList = new List(leftGroup, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL | SWT.H_SCROLL);
-        ((Control) leftList).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//        leftList.setLayoutData(listGrid);
+//        ((Control) leftList).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         Composite buttons = new Composite(middle, SWT.FILL);
         buttons.setLayout(new GridLayout(1, false));
@@ -531,7 +535,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         rightGroup.setLayoutData(classPathGrid);
 
         rightList = new List(rightGroup, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL | SWT.H_SCROLL);
-        rightList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//        rightList.setLayoutData(listGrid);
+//        rightList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
         /* Report selection field Explanation*/
         hintText = new Label(middle, SWT.NONE);
@@ -540,6 +545,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         fD[0].setHeight(8);
         hintText.setFont( new Font(middle.getDisplay(),fD[0]));
 		GridDataFactory.swtDefaults().span(9,1).applyTo(hintText);
+		
+		GridDataFactory.fillDefaults().grab(true, true).span(8,1).applyTo(leftList);	     
+		GridDataFactory.fillDefaults().grab(true, true).span(8,1).applyTo(rightList);	       
 		       
     }
    

@@ -36,7 +36,7 @@ public class BenchmarkClassInputPopupView extends Dialog {
     }
     @Override
     protected Point getInitialSize() {
-        return new Point(550, 380);
+        return new Point(550, 150);
     }
     
     @Override

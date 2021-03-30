@@ -158,41 +158,29 @@ public class CybenchSecondTabView extends AbstractLaunchConfigurationTab {
     	}
     }
     private Group  prepareCyBenchConfigurations(Composite comp) {
+   	 	configuration = new Group(comp, SWT.FILL);
+        configuration.setText("Configuration");
+        configuration.setLayout(new GridLayout(10, false));
 
-	   	 	configuration = new Group(comp, SWT.FILL | SWT.V_SCROLL);
-	        configuration.setText("Configuration");
-	        configuration.setLayout(new GridLayout(10, false));
-
-	        Label  jvmPropertiesLabel = new Label(configuration, SWT.NONE);
-	        jvmPropertiesLabel.setText("JVM Properties:");
-	        jvmProperties = new Text(configuration, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-//	        jvmProperties.setLayoutData(new GridData(GridData.FILL_BOTH));
-	        
-	        Label  classPathPropertiesLabel = new Label(configuration, SWT.NONE);
-	        classPathPropertiesLabel.setText("Classpath arguments:");
-	        classPathProperties = new Text(configuration, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-//	        classPathProperties.setLayoutData(new GridData(GridData.FILL_BOTH));
-	        
- 	        GridDataFactory.swtDefaults().span(2,1).applyTo(jvmPropertiesLabel);
- 	        GridDataFactory.swtDefaults().span(2,1).applyTo(classPathPropertiesLabel);
- 	        // Class-paths layout
-	        GridData classPathGrid = new GridData();
-	        classPathGrid.horizontalSpan = 10;
-	        classPathGrid.widthHint = GridData.FILL_HORIZONTAL;
- 	        classPathGrid.heightHint = 120;
-
-//	        GridDataFactory.fillDefaults().minSize(700, 200).grab(false, false).span(10,3).applyTo(jvmProperties);
-//	        GridDataFactory.fillDefaults().minSize(700, 200).grab(false, false).span(10,3).applyTo(classPathProperties);
-//	        GridDataFactory.fillDefaults().minSize(700, 600).grab(false, false).span(10,10).applyTo(configuration);
-	        
- 	       	GridDataFactory.createFrom(classPathGrid).applyTo(jvmProperties);
- 	        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(configuration);
- 	        
- 	       	GridDataFactory.createFrom(classPathGrid).applyTo(classPathProperties);
- 	        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(configuration);
- 	        
-			return configuration;
- 	        
+        GridData classPathGrid = new GridData();
+        classPathGrid.horizontalSpan = 10;
+        classPathGrid.widthHint = GridData.FILL_HORIZONTAL;
+        classPathGrid.heightHint = 120;
+        
+        Label  jvmPropertiesLabel = new Label(configuration, SWT.NONE);
+        jvmPropertiesLabel.setText("JVM Properties:");
+        jvmProperties = new Text(configuration, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+        jvmProperties.setLayoutData(classPathGrid);
+        
+        Label  classPathPropertiesLabel = new Label(configuration, SWT.NONE);
+        classPathPropertiesLabel.setText("Classpath arguments:");
+        classPathProperties = new Text(configuration, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+        classPathProperties.setLayoutData(classPathGrid);
+        
+        GridDataFactory.fillDefaults().span(2,1).applyTo(jvmPropertiesLabel);
+        GridDataFactory.fillDefaults().span(2,1).applyTo(classPathPropertiesLabel);
+        
+		return configuration;       
     }
 
     @Override
@@ -223,54 +211,6 @@ public class CybenchSecondTabView extends AbstractLaunchConfigurationTab {
     @Override
     public void initializeFrom(ILaunchConfiguration configuration) {
         try {
-//    	    Map.Entry<String,String> entry = paths.entrySet().iterator().next();
-//        	String launchPathDef = "";
-//        	String reportFolderDef = "";
-//        	if(entry!= null) {
-//            	reportFolderDef = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, entry.getKey()+"/reports");
-//            	launchPathDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_PATH, entry.getKey());
-//            	setAvailbaleBenchmarksChoice(entry.getKey());
-//            }
-//            String reportNameDef = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "");
-//            String reportUploadStatusDef = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
-//            String pathToSourceSelectedDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");
-            
-//            String userArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, "");
-//            String accessTokenDef = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, "");
-            
-//            boolean storeReportInFile = configuration.getAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, true);
-//            boolean sendRepohardwarePropeties = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
-            
-//            reportsFolder.setText(reportFolderDef);
-//            reportsFolder.addModifyListener(modifyListener);
-//            reportName.setText(reportNameDef);
-//            reportName.addModifyListener(modifyListener);
-//            reportUploadStatus.setText(reportUploadStatusDef);
-//            reportUploadStatus.addModifyListener(modifyListener);
-//            launchPath.setText(launchPathDef);
-//            launchPath.addModifyListener(modifyListener);
-        	
-	//        expectedScore.setValues(-1, -1, 10000, 2, 1, 1);
-	//        expectedScore.addModifyListener(modifyListener);
-	
-	//        userProperties.setText(userArguments);
-	//        userProperties.addModifyListener(modifyListener);
-	
-	//        accessToken.setText(accessTokenDef);
-	//        accessToken.addModifyListener(modifyListener);
-	          
-	//        onlySelectedLaunch.setText(pathToSourceSelectedDef);
-	//        onlySelectedLaunch.addModifyListener(modifyListener);
-	          
-	//        shouldStoreReportToFileSystem.setSelection(storeReportInFile);
-	//        shouldStoreReportToFileSystem.addSelectionListener(selectionListener);
-	//        shouldSendReportToCyBench.setSelection(sendReportCybnech);
-	//        shouldSendReportToCyBench.addSelectionListener(selectionListener);
-	          
-	//        shouldDoHardwareSnapshot.setSelection(includehardwarePropeties);
-	//        shouldDoHardwareSnapshot.addSelectionListener(selectionListener);
-	          
-	//        shouldSendReportEnableDisable();
 
             String jvmArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "");
             int threadDef = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
@@ -324,23 +264,7 @@ public class CybenchSecondTabView extends AbstractLaunchConfigurationTab {
         configuration.setAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, jvmProperties.getText());
         configuration.setAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, useCyBenchBenchmarkSettings.getSelection());
         configuration.setAttribute(LaunchConfiguration.ADD_CUSTOM_CLASS_PATH,  classPathProperties.getText());
-        
-//        configuration.setAttribute(LaunchConfiguration.REPORT_FOLDER, reportsFolder.getText());
-//        configuration.setAttribute(LaunchConfiguration.REPORT_NAME, reportName.getText());
-//        configuration.setAttribute(LaunchConfiguration.LAUNCH_PATH, launchPath.getText());
-//        configuration.setAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, reportUploadStatus.getText());
-//        configuration.setAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, onlySelectedLaunch.getText());
-        
-//        configuration.setAttribute(LaunchConfiguration.CUSTOM_USER_PROPERTIES, userProperties.getText());
-//        configuration.setAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, accessToken.getText());
-//        configuration.setAttribute(LaunchConfiguration.SHOULD_SAVE_REPOT_TO_FILE, shouldStoreReportToFileSystem.getSelection());
-//        configuration.setAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, shouldSendReportToCyBench.getSelection());
-//        configuration.setAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, shouldDoHardwareSnapshot.getSelection());      
-        
-//        configuration.setAttribute(LaunchConfiguration.EXECUTION_SCORE, expectedScore.getSelection());
-        
-//        String buildPath = getBuildPath(launchPath.getText());
-//    	configuration.setAttribute(LaunchConfiguration.BUILD_PATH,  buildPath);
+
     }
     
 

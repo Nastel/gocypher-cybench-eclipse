@@ -12,12 +12,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-public class BenchmarkClassInputDialogView extends Dialog {
+public class BenchmarkClassInputPopupView extends Dialog {
 
     private Text txtBenchmarkClass;
     private String benchmarkClass;
 
-    public BenchmarkClassInputDialogView(Shell parentShell) {
+    public BenchmarkClassInputPopupView(Shell parentShell) {
         super(parentShell);
     }
     
@@ -36,7 +36,7 @@ public class BenchmarkClassInputDialogView extends Dialog {
     }
     @Override
     protected Point getInitialSize() {
-        return new Point(550, 380);
+        return new Point(550, 150);
     }
     
     
