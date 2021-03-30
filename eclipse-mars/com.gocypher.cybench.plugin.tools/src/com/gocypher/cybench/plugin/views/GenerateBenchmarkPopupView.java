@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.gocypher.cybench.plugin.model.BenchmarkMethodModel;
 
-public class MessageDialogView  extends Dialog {
+public class GenerateBenchmarkPopupView  extends Dialog {
 
     private List<BenchmarkMethodModel> methodsExist;
     private List<BenchmarkMethodModel> methodsToGenerate = new ArrayList<BenchmarkMethodModel>();;
@@ -38,16 +38,15 @@ public class MessageDialogView  extends Dialog {
     Label hintText;
     private final String textForHint = "HINT: if no method is selected only the stub will be generated";
 
-    public MessageDialogView(IShellProvider parentShell) {
+    public GenerateBenchmarkPopupView(IShellProvider parentShell) {
 		super(parentShell);
 	}
 
 
-	public MessageDialogView(Shell parentShell, List<BenchmarkMethodModel> methods) {
+	public GenerateBenchmarkPopupView(Shell parentShell, List<BenchmarkMethodModel> methods) {
 		super(parentShell);
 	    this.methodsExist = methods;
 	}
-
 
     @Override
     protected Control createDialogArea(Composite parent) {
@@ -77,7 +76,7 @@ public class MessageDialogView  extends Dialog {
         content.setSize(new Point(420, 300));
         
         scrolledComposite = new ScrolledComposite(content, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-        
+
         Composite container = new Composite(scrolledComposite, SWT.MULTI);
         container.setLayout(new GridLayout(6, false));
         

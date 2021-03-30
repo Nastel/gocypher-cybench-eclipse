@@ -58,8 +58,7 @@ import org.eclipse.swt.widgets.Shell;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
-import com.gocypher.cybench.plugin.views.BenchmarkClassInputDialog;
-import com.gocypher.cybench.plugin.views.ProjectUpdatePopup;
+import com.gocypher.cybench.plugin.views.ProjectUpdatePopupView;
 
 public class CyBenchProjectNature implements IProjectNature {
 	public  static final String NATURE_ID = "com.gocypher.cybench.plugin.tools.cybenchnature";
@@ -278,7 +277,7 @@ public class CyBenchProjectNature implements IProjectNature {
 				    public void run() {
 				    	try {
 				    		Shell addNewBenhcmarkClass = new Shell();
-				    		ProjectUpdatePopup pop = new ProjectUpdatePopup(addNewBenhcmarkClass);
+				    		ProjectUpdatePopupView pop = new ProjectUpdatePopupView(addNewBenhcmarkClass);
 							if (pop.open() == Window.OK) {
 								if(pop.continueUpdate()) {
 									GuiUtils.logInfo("POM file found:"+pomXML.getAbsolutePath());

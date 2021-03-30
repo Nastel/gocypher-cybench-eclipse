@@ -1,27 +1,42 @@
 package com.gocypher.cybench.plugin.views;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-public class ProjectUpdatePopup extends Dialog  {
+public class ProjectUpdatePopupView extends Dialog  {
 	
 		private final String messageNotific = "NOTICE: While adding JMH dependencies the comments and spaces from pom.xml will be removed, no dependencies \n"
 											+ "or other instances get deleted, but the file structure may be reorganized. If you choose to cancel the process\n"
 											+ "the nature will be updated but you will need to add the JMH dependencies yourself.";
-		private final String questionNotific = "Are you sure you want to continue?";
+		private final String questionNotific = "Are you sure you want to update pom.xml file?";
 		
 		
 		private boolean natureUpdateContinue = false;
-	    public ProjectUpdatePopup(Shell parentShell) {
+	    public ProjectUpdatePopupView(Shell parentShell) {
 	        super(parentShell);
+	    }
+	    
+	    @Override
+	    protected void createButtonsForButtonBar(Composite parent) {
+	        super.createButtonsForButtonBar(parent);
+
+	        Button cancelButton = getButton(IDialogConstants.CANCEL_ID);
+	        cancelButton.setText("No");
+	        
+
+	    	Button okButton = getButton(IDialogConstants.OK_ID);
+	    	okButton.setText("Yes");
+	    	
 	    }
 	    
 	    @Override

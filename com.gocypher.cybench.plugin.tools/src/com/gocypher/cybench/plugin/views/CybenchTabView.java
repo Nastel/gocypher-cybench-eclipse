@@ -666,7 +666,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 		    public void run() {
 		    	try {
 		    		Shell addNewBenhcmarkClass = new Shell();
-		    		BenchmarkClassInputDialog pop = new BenchmarkClassInputDialog(addNewBenhcmarkClass);
+		    		BenchmarkClassInputPopupView pop = new BenchmarkClassInputPopupView(addNewBenhcmarkClass);
 					if (pop.open() == Window.OK) {
 						benchmarkClassInput = pop.getBenchmarkClassInput();
 						rightList.add(benchmarkClassInput);

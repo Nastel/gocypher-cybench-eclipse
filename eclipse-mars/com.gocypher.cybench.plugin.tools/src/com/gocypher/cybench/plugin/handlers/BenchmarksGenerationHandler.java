@@ -71,7 +71,7 @@ import com.gocypher.cybench.plugin.model.BenchmarkMethodModel;
 import com.gocypher.cybench.plugin.model.RunSelectionEntry;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
-import com.gocypher.cybench.plugin.views.MessageDialogView;
+import com.gocypher.cybench.plugin.views.GenerateBenchmarkPopupView;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JMethod;
@@ -321,7 +321,7 @@ public class BenchmarksGenerationHandler extends AbstractHandler {
 		    public void run() {
 		    	try {
 		    		Shell generateMethods = new Shell();
-		    		MessageDialogView pop = new MessageDialogView(generateMethods, benchmarkMethods);
+		    		GenerateBenchmarkPopupView pop = new GenerateBenchmarkPopupView(generateMethods, benchmarkMethods);
 					if (pop.open() == Window.OK) {
 						generationMethodsSelected = true;
 						benchmarkMethods = pop.getMethodsToGenerate();

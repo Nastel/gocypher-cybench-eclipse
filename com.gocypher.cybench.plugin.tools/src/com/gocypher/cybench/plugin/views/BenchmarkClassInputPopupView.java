@@ -12,12 +12,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-public class BenchmarkClassInputDialog extends Dialog {
+public class BenchmarkClassInputPopupView extends Dialog {
 
     private Text txtBenchmarkClass;
     private String benchmarkClass;
 
-    public BenchmarkClassInputDialog(Shell parentShell) {
+    public BenchmarkClassInputPopupView(Shell parentShell) {
         super(parentShell);
     }
     
