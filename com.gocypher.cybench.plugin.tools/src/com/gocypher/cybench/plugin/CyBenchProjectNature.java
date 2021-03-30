@@ -51,9 +51,15 @@ import org.eclipse.jdt.apt.core.util.IFactoryPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
+import com.gocypher.cybench.plugin.views.BenchmarkClassInputDialog;
+import com.gocypher.cybench.plugin.views.ProjectUpdatePopup;
 
 public class CyBenchProjectNature implements IProjectNature {
 	public  static final String NATURE_ID = "com.gocypher.cybench.plugin.tools.cybenchnature";
@@ -62,6 +68,7 @@ public class CyBenchProjectNature implements IProjectNature {
 	private static final String JMH_CORE_ARTIFACT_ID="jmh-core" ;
 	private static final String JMH_ANNOTATIONDS_ARTIFACT_ID="jmh-generator-annprocess" ;
 	private static final String JMH_VERSION = "1.26" ;
+	private static File pomXML = null ;
 	
 	//private static final String fullPathHardcodedCore = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-core-1.26.jar" ;
 	//private static final String fullPathHardcodedAnnotations = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-generator-annprocess-1.26.jar" ;
@@ -260,27 +267,43 @@ public class CyBenchProjectNature implements IProjectNature {
 			String projectLocation = javaProject.getProject().getLocation().toPortableString() ;
 			GuiUtils.logInfo("Selected maven project location:"+projectLocation);
 			List<File> files = CybenchUtils.listFilesInDirectory(projectLocation) ;
-			File pomXML = null ;
+	
 			for (File file:files) {
 				if (!file.getAbsolutePath().contains("target") && "pom.xml".equals(file.getName())){
 					pomXML = file ;
 				}
 			}
 			if (pomXML != null) {
-				GuiUtils.logInfo("POM file found:"+pomXML.getAbsolutePath());
-				MavenXpp3Reader reader = new MavenXpp3Reader();
-				Model model = reader.read(new FileReader(pomXML)) ;
-				GuiUtils.logInfo("Pom model:"+model.getDependencies());
-								
-				for (Dependency dep:createCyBenchMvnDependencies(model.getDependencies())) {
-					GuiUtils.logInfo("will add new dependency:"+dep);
-					model.addDependency(dep);
-				}
+				Display.getDefault().syncExec(new Runnable() {
+				    public void run() {
+				    	try {
+				    		Shell addNewBenhcmarkClass = new Shell();
+				    		ProjectUpdatePopup pop = new ProjectUpdatePopup(addNewBenhcmarkClass);
+							if (pop.open() == Window.OK) {
+								if(pop.continueUpdate()) {
+									GuiUtils.logInfo("POM file found:"+pomXML.getAbsolutePath());
+									MavenXpp3Reader reader = new MavenXpp3Reader();
+									Model model = reader.read(new FileReader(pomXML)) ;
+									GuiUtils.logInfo("Pom model:"+model.getDependencies());
+													
+									for (Dependency dep:createCyBenchMvnDependencies(model.getDependencies())) {
+										GuiUtils.logInfo("will add new dependency:"+dep);
+										model.addDependency(dep);
+									}
+									
+									GuiUtils.logInfo("Will write model to file:"+pomXML.getAbsolutePath());
+									MavenXpp3Writer writer = new MavenXpp3Writer() ;
+									writer.write(new FileOutputStream(pomXML), model);
+									GuiUtils.logInfo("POM file updated successfully!");
+									pomXML = null;
+								}
+							}
+				    	}catch (Exception e) {			    		
+				    		GuiUtils.logError ("Error  on view open",e) ;
+				    	}
+				    }
+				});	
 				
-				GuiUtils.logInfo("Will write model to file:"+pomXML.getAbsolutePath());
-				MavenXpp3Writer writer = new MavenXpp3Writer() ;
-				writer.write(new FileOutputStream(pomXML), model);
-				GuiUtils.logInfo("POM file updated successfully!");
 			}
 		} else if(LauncherUtils.isGradleProject(javaProject.getProject())) {
 		    String jmhDependency = LauncherUtils.GRADLE_JMH_DEPENDENCY;

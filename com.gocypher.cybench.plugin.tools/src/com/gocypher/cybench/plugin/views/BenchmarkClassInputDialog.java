@@ -3,6 +3,7 @@ package com.gocypher.cybench.plugin.views;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -25,6 +26,17 @@ public class BenchmarkClassInputDialog extends Dialog {
         super.create();
 //        setTitle("This is my first custom dialog");
 //        setMessage("This is a TitleAreaDialog", IMessageProvider.INFORMATION);
+    }
+    
+    @Override
+    protected void configureShell(Shell newShell) {
+        super.configureShell(newShell);
+        newShell.setText("Add new Benchmark Class path");
+     
+    }
+    @Override
+    protected Point getInitialSize() {
+        return new Point(550, 380);
     }
     
     @Override
