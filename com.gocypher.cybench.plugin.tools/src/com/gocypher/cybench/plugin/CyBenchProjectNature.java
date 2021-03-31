@@ -280,20 +280,7 @@ public class CyBenchProjectNature implements IProjectNature {
 				    		ProjectUpdatePopupView pop = new ProjectUpdatePopupView(addNewBenhcmarkClass);
 							if (pop.open() == Window.OK) {
 								if(pop.continueUpdate()) {
-									GuiUtils.logInfo("POM file found:"+pomXML.getAbsolutePath());
-									MavenXpp3Reader reader = new MavenXpp3Reader();
-									Model model = reader.read(new FileReader(pomXML)) ;
-									GuiUtils.logInfo("Pom model:"+model.getDependencies());
-													
-									for (Dependency dep:createCyBenchMvnDependencies(model.getDependencies())) {
-										GuiUtils.logInfo("will add new dependency:"+dep);
-										model.addDependency(dep);
-									}
-									
-									GuiUtils.logInfo("Will write model to file:"+pomXML.getAbsolutePath());
-									MavenXpp3Writer writer = new MavenXpp3Writer() ;
-									writer.write(new FileOutputStream(pomXML), model);
-									GuiUtils.logInfo("POM file updated successfully!");
+									updateMavenDependencies();
 									pomXML = null;
 								}
 							}
@@ -398,6 +385,69 @@ public class CyBenchProjectNature implements IProjectNature {
 		}
 		
 		return false ;
+	}
+	
+	private void updateMavenDependencies(){
+		try{
+			// New version that uses simple stupid way for updating pom.xml
+
+		    String jmhDependencyMaven = LauncherUtils.MAVEN_JMH_DEPENDENCY;
+		    String jmhAnnotationDependencyMaven = LauncherUtils.MAVEN_JMH_ANNOTATION_DEPENDENCY;
+		    
+			File mavenBuild = pomXML ;
+			String newBuildFile = "";
+		    Scanner myReader = new Scanner(mavenBuild);
+		    while (myReader.hasNextLine()) {
+				String data = myReader.nextLine();
+				if (data.contains("jmh-core")){
+					jmhDependencyMaven = "";
+				}
+				if (data.contains("jmh-generator-annprocess")){
+					jmhAnnotationDependencyMaven = "";
+				}
+		    }
+			myReader.close();
+		    myReader = new Scanner(mavenBuild);
+		    boolean dependenciesExist = true;
+		    while (myReader.hasNextLine()) {
+				String data = myReader.nextLine();
+				if(!data.contains("</project>")){
+					newBuildFile += data + "\n";
+				}
+				if (data.contains("<dependencies>")){
+					newBuildFile += jmhDependencyMaven + jmhAnnotationDependencyMaven;
+					dependenciesExist = false;
+			    }
+			    
+			}
+		    if(dependenciesExist){
+		    	newBuildFile += "  <dependencies>" + "\n" + jmhDependencyMaven + jmhAnnotationDependencyMaven + "\n  </dependencies> \n\n</project>";
+		    }else{
+		    	newBuildFile += "</project>";
+		    }
+			myReader.close();
+			FileWriter fw_build = new FileWriter(pomXML);
+			fw_build.write(newBuildFile);
+			fw_build.close();
+			
+			// Old update version that changes the pom.xml
+//			GuiUtils.logInfo("POM file found:"+pomXML.getAbsolutePath());
+//			MavenXpp3Reader reader = new MavenXpp3Reader();
+//			Model model = reader.read(new FileReader(pomXML)) ;
+//			GuiUtils.logInfo("Pom model:"+model.getDependencies());
+//							
+//			for (Dependency dep:createCyBenchMvnDependencies(model.getDependencies())) {
+//				GuiUtils.logInfo("will add new dependency:"+dep);
+//				model.addDependency(dep);
+//			}
+//			
+//			GuiUtils.logInfo("Will write model to file:"+pomXML.getAbsolutePath());
+//			MavenXpp3Writer writer = new MavenXpp3Writer() ;
+//			writer.write(new FileOutputStream(pomXML), model);
+//			GuiUtils.logInfo("POM file updated successfully!");
+		}catch(Exception ex){
+			GuiUtils.logError("problem while adding maven dependencies into pom.xml: ", ex);
+		}
 	}
 	
 

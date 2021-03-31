@@ -15,9 +15,11 @@ import org.eclipse.swt.widgets.Shell;
 
 public class ProjectUpdatePopupView extends Dialog  {
 	
-		private final String messageNotific = "NOTICE: While adding JMH dependencies the comments and spaces from pom.xml will be removed, no dependencies \n"
-											+ "or other instances get deleted, but the file structure may be reorganized. If you choose to cancel the process\n"
-											+ "the nature will be updated but you will need to add the JMH dependencies yourself.";
+		//	private final String messageNotific = "NOTICE: While adding JMH dependencies the comments and spaces from pom.xml will be removed, no dependencies \n"
+		//	+ "or other instances get deleted, but the file structure may be reorganized. If you choose to cancel the process\n"
+		//	+ "the nature will be updated but you will need to add the JMH dependencies yourself.";
+		
+		private final String messageNotific = "NOTICE: Your project pom.xml will be updated and JMH dependencies will be added.";
 		private final String questionNotific = "Are you sure you want to update pom.xml file?";
 		
 		

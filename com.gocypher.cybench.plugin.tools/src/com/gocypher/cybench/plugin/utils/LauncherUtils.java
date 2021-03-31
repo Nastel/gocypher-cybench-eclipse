@@ -71,6 +71,10 @@ public class LauncherUtils {
 	public static String GRADLE_JMH_DEPENDENCY="	implementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.26'"+ "\n";
 	public static String GRADLE_JMH_ANNOTATION_DEPENDENCY="	annotationProcessor  group: 'org.openjdk.jmh', name:'jmh-generator-annprocess', version:'1.26'"+ "\n";
 
+	public static String MAVEN_JMH_DEPENDENCY="\n    <dependency> \n      <groupId>org.openjdk.jmh</groupId> \n      <artifactId>jmh-core</artifactId> \n      <version> 1.26 </version> \n    </dependency>";
+	public static String MAVEN_JMH_ANNOTATION_DEPENDENCY="\n    <dependency> \n      <groupId>org.openjdk.jmh</groupId> \n      <artifactId>jmh-generator-annprocess</artifactId> \n      <version>1.26</version> \n      <scope>provided</scope> \n    </dependency>";
+	 
+
 	static IProgressMonitor monitor = new NullProgressMonitor(); 
     private static final int CLASSPATH_SCOPE = IClasspathManager.CLASSPATH_RUNTIME; 
     
