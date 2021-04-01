@@ -35,10 +35,8 @@ public class ProjectUpdatePopupView extends Dialog  {
 	        Button cancelButton = getButton(IDialogConstants.CANCEL_ID);
 	        cancelButton.setText("No");
 	        
-
 	    	Button okButton = getButton(IDialogConstants.OK_ID);
 	    	okButton.setText("Yes");
-	    	
 	    }
 	    
 	    @Override

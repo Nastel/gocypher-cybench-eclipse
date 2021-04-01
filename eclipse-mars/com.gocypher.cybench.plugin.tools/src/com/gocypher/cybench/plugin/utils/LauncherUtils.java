@@ -72,7 +72,7 @@ public class LauncherUtils {
 	public static String GRADLE_JMH_ANNOTATION_DEPENDENCY="	annotationProcessor  group: 'org.openjdk.jmh', name:'jmh-generator-annprocess', version:'1.26'"+ "\n";
 	
 	public static String MAVEN_JMH_DEPENDENCY="\n    <dependency> \n      <groupId>org.openjdk.jmh</groupId> \n      <artifactId>jmh-core</artifactId> \n      <version> 1.26 </version> \n    </dependency>";
-	public static String MAVEN_JMH_ANNOTATION_DEPENDENCY="\n    <dependency> \n      <groupId>org.openjdk.jmh</groupId> \n      <artifactId>jmh-generator-annprocess</artifactId> \n      <version>1.26</version> \n      <scope>provided</scope> \n    </dependency>";
+	public static String MAVEN_JMH_ANNOTATION_DEPENDENCY="\n    <dependency> \n      <groupId>org.openjdk.jmh</groupId> \n      <artifactId>jmh-generator-annprocess</artifactId> \n      <version>1.26</version> \n      <scope>provided</scope> \n    </dependency>\n";
 	 
 
 	
@@ -155,13 +155,13 @@ public class LauncherUtils {
 		RunSelectionEntry selectionEntry = new RunSelectionEntry();
 		try {
 		 if (selection instanceof IStructuredSelection) {
+//				GuiUtils.logInfo("IStructuredSelection: ");
 	    		IStructuredSelection ss = (IStructuredSelection) selection;
 		    	for (Object elem : ss.toList()) {
 		    		IProject project = null;
 		    		String selectedPath = "";
-//		    		System.out.println("elem: "+elem.toString());
 	    			IJavaProject javaProject = null;
- 				if (elem instanceof IProject) {
+	    			if (elem instanceof IProject) {
  						project = (IProject) elem;
 	    				selectionEntry.setProjectPath(project.getLocation().toString());
 	    			}
@@ -171,7 +171,11 @@ public class LauncherUtils {
 	    		        IFolder folder = (IFolder)  adaptable.getAdapter(IFolder.class);	    		        
 	    		        project = res.getProject();
 	    		        selectedPath = res.getLocation().toString();
-	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
+	    				if(res.getProjectRelativePath().toPortableString() != null && !res.getProjectRelativePath().toPortableString().equals("")){
+	    					selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
+	    				}else{
+	    					selectionEntry.setProjectPath(selectedPath);
+	    				}
 	    				selectionEntry.setClassPaths(LauncherUtils.addClasses(folder.members(), selectionEntry.getClassPaths()));
 	    				GuiUtils.logInfo("selectedPath IFolder: "+selectionEntry.getProjectPath());
 	    			}
@@ -195,7 +199,11 @@ public class LauncherUtils {
 	    				}
 	    		        project = res.getProject();
 	    		        selectedPath = res.getLocation().toString();
-	    				selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
+	    				if(res.getProjectRelativePath().toPortableString() != null && !res.getProjectRelativePath().toPortableString().equals("")){
+	    					selectionEntry.setProjectPath(selectedPath.replace("/"+res.getProjectRelativePath().toPortableString(), ""));
+	    				}else{
+	    					selectionEntry.setProjectPath(selectedPath);
+	    				}
 	    				GuiUtils.logInfo("selectedPath IAdaptable: "+selectionEntry.getProjectPath());
 	    			} else {
 	    				GuiUtils.logError("The run selection was not recognized: "+ selection);
