@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.StringUtils;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -66,7 +67,7 @@ import com.gocypher.cybench.plugin.CyBenchProjectNature;
 import com.gocypher.cybench.plugin.model.RunSelectionEntry;
 
 public class LauncherUtils {
-	public static String SRC_FOLDER_FOR_BENCHMARKS_JAVA="/src-benchmarks" ;
+	public static String SRC_FOLDER_FOR_BENCHMARKS_JAVA="/src_benchmarks" ;
 	public static String SRC_FOLDER_FOR_BENCHMARKS_MVN="/src/test/java" ;
 	public static String GRADLE_JMH_DEPENDENCY="	implementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.26'"+ "\n";
 	public static String GRADLE_JMH_ANNOTATION_DEPENDENCY="	annotationProcessor  group: 'org.openjdk.jmh', name:'jmh-generator-annprocess', version:'1.26'"+ "\n";
@@ -422,4 +423,20 @@ public class LauncherUtils {
 		return benchmarkName;
 		
 	}
+	
+    public static String addReferenceToTragetClassesForMavenModules(String path){
+    	String pathToTarget = "\\target\\classes";
+    	String tempPath = "";
+
+    	try {
+			if(StringUtils.countMatches(path, "\\") <= 1 && StringUtils.countMatches(path, "/") <= 1){
+				tempPath = path + pathToTarget;
+				path = tempPath.toString();
+			}
+		} catch (Exception e) {
+	    	GuiUtils.logError("The selected modules: " + path + " is not build or the target/classes folder was not found: ",e) ;
+	    	return "";
+		}
+    	return tempPath;
+    }
 }

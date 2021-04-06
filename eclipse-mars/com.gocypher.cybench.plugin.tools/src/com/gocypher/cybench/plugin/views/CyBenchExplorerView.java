@@ -377,7 +377,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 
 	@Override
 	public void refreshView() {
-		GuiUtils.logInfo("filesSystemSelectedPath: "+filesSystemSelectedPath);
+//		GuiUtils.logInfo("filesSystemSelectedPath: "+filesSystemSelectedPath);
 		this.loadData(filesSystemSelectedPath);
 		
 		this.projectsViewer.setInput(this.treeOfReports);

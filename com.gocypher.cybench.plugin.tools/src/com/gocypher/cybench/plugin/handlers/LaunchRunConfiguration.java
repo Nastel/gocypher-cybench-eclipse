@@ -112,8 +112,13 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
 				IClasspathEntry[] resolvedClasspath= javaProject.getResolvedClasspath(false);
 				for(IClasspathEntry classPathTest : resolvedClasspath) {
-	//				GuiUtils.logInfo("classPathTest.getPath().toOSString(): "+classPathTest.getPath().toOSString());
-					classPaths.add(classPathTest.getPath().toOSString());
+					String tempPathVariable = classPathTest.getPath().toOSString();
+					String referenceToTargetClassesForMavenModules = LauncherUtils.addReferenceToTragetClassesForMavenModules(tempPathVariable);
+					if(referenceToTargetClassesForMavenModules != ""){
+						classPaths.add(referenceToTargetClassesForMavenModules);
+					}else{
+						classPaths.add(tempPathVariable);
+					}
 				}
 			}
 			if(LauncherUtils.isJavaProject(project)) {

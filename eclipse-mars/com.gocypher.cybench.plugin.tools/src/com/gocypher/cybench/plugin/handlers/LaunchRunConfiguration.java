@@ -111,7 +111,13 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				IJavaProject javaProject = (IJavaProject)JavaCore.create((IProject)project);
 				IClasspathEntry[] resolvedClasspath= javaProject.getResolvedClasspath(false);
 				for(IClasspathEntry classPathTest : resolvedClasspath) {
-					classPaths.add(classPathTest.getPath().toOSString());
+					String tempPathVariable = classPathTest.getPath().toOSString();
+					String referenceToTargetClassesForMavenModules = LauncherUtils.addReferenceToTragetClassesForMavenModules(tempPathVariable);
+					if(referenceToTargetClassesForMavenModules != ""){
+						classPaths.add(referenceToTargetClassesForMavenModules);
+					}else{
+						classPaths.add(tempPathVariable);
+					}
 				}
 			}
 			if(LauncherUtils.isJavaProject(project)) {
@@ -129,7 +135,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
 	    
 	    	if(project != null){
-		    	GuiUtils.logInfo("project: "+project.getLocation().toPortableString()) ;
+//		    	GuiUtils.logInfo("project: "+project.getLocation().toPortableString()) ;
 				if((LauncherUtils.isMavenProject(project))){
 					String testPath = launchPath.substring(0, launchPath.lastIndexOf('/'))+ "/test-"+launchPath.substring(launchPath.lastIndexOf('/') + 1);
 					launchPath = launchPath +","+ testPath;

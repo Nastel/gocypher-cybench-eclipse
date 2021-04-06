@@ -104,7 +104,13 @@ public class LaunchShortcut implements ILaunchShortcut {
 				IJavaProject javaProject = selectionEntry.getJavaProjectSelected();
 				IClasspathEntry[] resolvedClasspath= javaProject.getResolvedClasspath(false);
 				for(IClasspathEntry classPathTest : resolvedClasspath) {
-					classPaths.add(classPathTest.getPath().toOSString());
+					String tempPathVariable = classPathTest.getPath().toOSString();
+					String referenceToTargetClassesForMavenModules = LauncherUtils.addReferenceToTragetClassesForMavenModules(tempPathVariable);
+					if(referenceToTargetClassesForMavenModules != ""){
+						classPaths.add(referenceToTargetClassesForMavenModules);
+					}else{
+						classPaths.add(tempPathVariable);
+					}
 				}
 			}
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
@@ -152,7 +158,7 @@ public class LaunchShortcut implements ILaunchShortcut {
      	String start = " -D";
      	String classPaths = "";
      	if(!selection.getClassPaths().isEmpty()) {
-     		classPaths = selection.getClassPaths().toString();
+     		classPaths = String.join(", ", selection.getClassPaths());
      	}
 		System.out.println(
 				start+Constants.BENCHMARK_REPORT_NAME+"=\""+reportName+"\""+

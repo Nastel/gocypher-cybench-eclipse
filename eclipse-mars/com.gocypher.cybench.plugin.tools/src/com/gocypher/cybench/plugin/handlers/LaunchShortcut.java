@@ -19,10 +19,16 @@
 
 package com.gocypher.cybench.plugin.handlers;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.codehaus.plexus.util.StringUtils;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -79,18 +85,29 @@ public class LaunchShortcut implements ILaunchShortcut {
 					IJavaProject javaProject = selectionEntry.getJavaProjectSelected();
 				IClasspathEntry[] resolvedClasspath= javaProject.getResolvedClasspath(false);
 				for(IClasspathEntry classPathTest : resolvedClasspath) {
-	//				GuiUtils.logInfo("classPathTest.getPath().toOSString(): "+classPathTest.getPath().toOSString());
-					classPaths.add(classPathTest.getPath().toOSString());
+					String tempPathVariable = classPathTest.getPath().toOSString();
+					String referenceToTargetClassesForMavenModules = LauncherUtils.addReferenceToTragetClassesForMavenModules(tempPathVariable);
+//			    	GuiUtils.logInfo("referenceToTargetClassesForMavenModules: "+referenceToTargetClassesForMavenModules) ;
+					if(referenceToTargetClassesForMavenModules != ""){
+						classPaths.add(referenceToTargetClassesForMavenModules);
+					}else{
+						classPaths.add(tempPathVariable);
+					}
 				}
 			}
 			if(selectionEntry.getOutputPath() != null){
-				classPaths.addAll(Arrays.asList(selectionEntry.getOutputPath().split(",")));
+				List<String> temp = Arrays.asList(selectionEntry.getOutputPath().split(","));
+				classPaths.addAll(temp);
+//		    	GuiUtils.logInfo("Arrays.asList(selectionEntry.getOutputPath().split(','):"+ temp);
 			}
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.PLUGIN_ID, true));
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) );
 
 			List<String> classpathMementos = LauncherUtils.getNeededClassPaths(selectionEntry.getProjectSelected(), classPaths);
-	    	//GuiUtils.logInfo("classpathMementos: "+classpathMementos) ;
+			
+//			String t1 = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?> \n <runtimeClasspathEntry internalArchive=\"\\java-pol-core\\target\\classes\" path=\"3\" type=\"2\"/>";																													  
+//     		classpathMementos.add(t1);
+//	    	GuiUtils.logInfo("classpathMementos: "+classpathMementos) ;
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");
@@ -130,7 +147,7 @@ public class LaunchShortcut implements ILaunchShortcut {
      	String start = " -D";
      	String classPaths = "";
      	if(!selection.getClassPaths().isEmpty()) {
-     		classPaths = selection.getClassPaths().toString();
+     		classPaths = String.join(", ", selection.getClassPaths());
      	}
 		System.out.println(
 				start+Constants.BENCHMARK_REPORT_NAME+"=\""+reportName+"\""+
@@ -146,8 +163,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 //				+ " -DREPORT_CLASSES=\""+LauncherUtils.setToString(selection.getClassPaths())+"\"");
     }
     
-   
-    
+  
 	@Override
 	public void launch(IEditorPart arg0, String arg1) {
 				
