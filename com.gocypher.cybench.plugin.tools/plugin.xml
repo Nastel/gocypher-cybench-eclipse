@@ -416,5 +416,19 @@
        		</adapt>
          </definition>
    </extension>
+    <extension
+          point="org.eclipse.ui.preferencePages">
+       <page
+             class="com.gocypher.cybench.plugin.tools.preferences.CyBenchPreferencePage"
+             id="com.gocypher.cybench.plugin.tools.preferences.CyBenchPreferencePage"
+             name="CyBench">
+       </page>
+    </extension>
+    <extension
+          point="org.eclipse.core.runtime.preferences">
+       <initializer
+             class="com.gocypher.cybench.plugin.tools.preferences.PreferenceInitializer">
+       </initializer>
+    </extension>
    
 </plugin>

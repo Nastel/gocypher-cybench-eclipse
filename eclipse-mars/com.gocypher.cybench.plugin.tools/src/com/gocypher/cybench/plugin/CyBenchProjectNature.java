@@ -20,8 +20,6 @@
 package com.gocypher.cybench.plugin;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -30,9 +28,6 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 //import org.eclipse.buildship.core.BuildConfiguration;
 //import org.eclipse.buildship.core.GradleBuild;
 //import org.eclipse.buildship.core.GradleCore;

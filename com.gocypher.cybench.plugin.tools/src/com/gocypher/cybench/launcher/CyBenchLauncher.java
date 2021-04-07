@@ -255,7 +255,6 @@ public class CyBenchLauncher {
         CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cyb", reportEncrypted);
         
         if(!response.containsKey("ERROR") && responseWithUrl != null && !responseWithUrl.isEmpty()) {
-            System.out.println("Benchmark report submitted successfully to "+ Constants.REPORT_URL);
             System.out.println("You can find all device benchmarks on "+ deviceReports);
             System.out.println("Your report is available at "+ resultURL);
             System.out.println("NOTE: It may take a few minutes for your report to appear online");

@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -54,7 +55,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
@@ -63,7 +63,9 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.gocypher.cybench.plugin.Activator;
 import com.gocypher.cybench.plugin.model.LaunchConfiguration;
+import com.gocypher.cybench.plugin.tools.preferences.PreferenceConstants;
 import com.gocypher.cybench.plugin.utils.GuiUtils;
 import com.gocypher.cybench.plugin.utils.LauncherUtils;
 
@@ -278,12 +280,17 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         		scanElements(launchPathDef);
                 
             }
+        	
+        	IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+        	String token = store.getString(PreferenceConstants.P_AUTH_TOKEN);
+        	String email = store.getString(PreferenceConstants.P_EMAIL);
+        	
             String reportNameDef = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "");
             String pathToSourceSelectedDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");
             String pathToSourceNotSelectedDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_NOT_SELECTED_PATH, "");
             
-            String accessTokenDef = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, "");
-            String userEmailDef = configuration.getAttribute(LaunchConfiguration.USER_EMAIL_ADDRESS, "");
+            String accessTokenDef = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, token);
+            String userEmailDef = configuration.getAttribute(LaunchConfiguration.USER_EMAIL_ADDRESS, email);
             boolean sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
             boolean includehardwarePropeties = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
             
