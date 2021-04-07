@@ -239,13 +239,13 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private ModifyListener modifyEmailListener = new ModifyListener() {
     	public void modifyText(ModifyEvent e) {
 			String email = userEmail.getText();
-			GuiUtils.logInfo("userEmail.getText(): "+userEmail.getText());
+//			GuiUtils.logInfo("userEmail.getText(): "+userEmail.getText());
 	        EmailValidator validator = EmailValidator.getInstance();
 	        if(email == null || email.equals("")) {
 	        	emailLabel.setVisible(false);
 	        }
 	        else if(validator.isValid(email)) {
-				GuiUtils.logInfo("validator.isValid(email): "+validator.isValid(email));
+//				GuiUtils.logInfo("validator.isValid(email): "+validator.isValid(email));
 				setChangeHappened();
 	        	emailLabel.setVisible(false);
 	        }else {
