@@ -226,7 +226,13 @@ public class CyBenchLauncher {
         Map<?, ?> response = new HashMap<>();
         
         if (report.isEligibleForStoringExternally() && launcherConfiguration.isShouldSendReportToCyBench()) {
-            responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted, launcherConfiguration.getRemoteAccessToken()+":"+launcherConfiguration.getEmailAddress());
+            String tokenAndEmail = "";
+            if(launcherConfiguration.getEmailAddress() != null && !launcherConfiguration.getEmailAddress().equals("")){
+                tokenAndEmail = launcherConfiguration.getRemoteAccessToken() + ":"+ launcherConfiguration.getEmailAddress();
+            }else{
+                tokenAndEmail = launcherConfiguration.getRemoteAccessToken();
+            }
+            responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted, tokenAndEmail);
 
  			System.out.println("You may submit your report manually at responseWithUrl:  "+responseWithUrl);
             response = com.gocypher.cybench.core.utils.JSONUtils.parseJsonIntoMap(responseWithUrl);

@@ -229,7 +229,13 @@ public class CyBenchLauncher {
         String resultURL = null;
         Map<?, ?> response = new HashMap<>();
         if (report.isEligibleForStoringExternally() && launcherConfiguration.isShouldSendReportToCyBench()) {
-            responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted, launcherConfiguration.getRemoteAccessToken()+":"+launcherConfiguration.getEmailAddress());
+            String tokenAndEmail = "";
+            if(launcherConfiguration.getEmailAddress() != null && !launcherConfiguration.getEmailAddress().equals("")){
+                tokenAndEmail = launcherConfiguration.getRemoteAccessToken() + ":"+ launcherConfiguration.getEmailAddress();
+            }else{
+                tokenAndEmail = launcherConfiguration.getRemoteAccessToken();
+            }
+            responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted, tokenAndEmail);
             response = JSONUtils.parseJsonIntoMap(responseWithUrl);
             if(!response.containsKey("ERROR") && responseWithUrl != null && !responseWithUrl.isEmpty()) {
                 deviceReports = response.get(Constants.REPORT_USER_URL).toString() ;
