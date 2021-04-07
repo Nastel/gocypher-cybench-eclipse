@@ -56,6 +56,7 @@ import com.gocypher.cybench.launcher.environment.services.CollectSystemInformati
 import com.gocypher.cybench.launcher.model.BenchmarkOverviewReport;
 import com.gocypher.cybench.launcher.report.DeliveryService;
 import com.gocypher.cybench.launcher.report.ReportingService;
+import com.gocypher.cybench.launcher.utils.ComputationUtils;
 import com.gocypher.cybench.launcher.utils.Constants;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.launcher.utils.SecurityBuilder;
@@ -226,12 +227,7 @@ public class CyBenchLauncher {
         Map<?, ?> response = new HashMap<>();
         
         if (report.isEligibleForStoringExternally() && launcherConfiguration.isShouldSendReportToCyBench()) {
-            String tokenAndEmail = "";
-            if(launcherConfiguration.getEmailAddress() != null && !launcherConfiguration.getEmailAddress().equals("")){
-                tokenAndEmail = launcherConfiguration.getRemoteAccessToken() + ":"+ launcherConfiguration.getEmailAddress();
-            }else{
-                tokenAndEmail = launcherConfiguration.getRemoteAccessToken();
-            }
+            String tokenAndEmail = ComputationUtils.getRequestHeader(launcherConfiguration.getRemoteAccessToken(), launcherConfiguration.getEmailAddress());
             responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted, tokenAndEmail);
 
  			System.out.println("You may submit your report manually at responseWithUrl:  "+responseWithUrl);
