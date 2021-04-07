@@ -49,4 +49,6 @@ public interface LaunchConfiguration {
 	public static final String ADD_CUSTOM_CLASS_PATH ="com.cybench.useCustomClassPath";
 	
 	public static final String REMOTE_CYBENCH_ACCESS_TOKEN ="com.cybench.remoteAccessToken";
+	public static final String USER_EMAIL_ADDRESS ="com.cybench.userEmailAddress";
+	
 }

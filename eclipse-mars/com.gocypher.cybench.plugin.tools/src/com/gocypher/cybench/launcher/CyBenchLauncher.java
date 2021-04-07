@@ -226,7 +226,7 @@ public class CyBenchLauncher {
         Map<?, ?> response = new HashMap<>();
         
         if (report.isEligibleForStoringExternally() && launcherConfiguration.isShouldSendReportToCyBench()) {
-            responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted, launcherConfiguration.getRemoteAccessToken());
+            responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted, launcherConfiguration.getRemoteAccessToken()+":"+launcherConfiguration.getEmailAddress());
 
  			System.out.println("You may submit your report manually at responseWithUrl:  "+responseWithUrl);
             response = com.gocypher.cybench.core.utils.JSONUtils.parseJsonIntoMap(responseWithUrl);
@@ -338,6 +338,7 @@ public class CyBenchLauncher {
 		launcherConfiguration.setUseCyBenchBenchmarkSettings(checkNullAndReturnBoolean(Constants.USE_CYBENCH_CONFIGURATION));
 		launcherConfiguration.setClassCalled(checkNullAndReturnSet(Constants.SELECTED_CLASS_PATHS));
 		launcherConfiguration.setRemoteAccessToken(checkNullAndReturnString(Constants.USER_REPORT_TOKEN));
+		launcherConfiguration.setEmailAddress(checkNullAndReturnString(Constants.USER_EMAIL_ADDRESS));
 
 		if(launcherConfiguration.getRemoteAccessToken() != null && !launcherConfiguration.getRemoteAccessToken().equals("")){
 			launcherConfiguration.setReportUploadStatus("private");

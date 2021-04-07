@@ -85,6 +85,7 @@ Export-Package: joptsimple,
  org.openjdk.jmh.runner.options,
  org.openjdk.jmh.util,
  org.openjdk.jmh.util.lines,
+ org.apache.commons.validator.routines,
  com.fasterxml.jackson.annotation;version="2.11.2",
  com.fasterxml.jackson.core;uses:="com.fasterxml.jackso
  n.core.async,com.fasterxml.jackson.core.exc,com.fasterxml.jackson.cor

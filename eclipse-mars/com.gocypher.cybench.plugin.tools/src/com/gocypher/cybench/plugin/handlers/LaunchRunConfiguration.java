@@ -56,7 +56,6 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private String selectionFolderPath;
 	private String jvmProperties;
 	
-	private String accessToken;
 	private String  reportUploadStatus;
 	
 	private Integer thread;
@@ -69,6 +68,9 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private Boolean sendReportCybnech;
 	private Boolean includeHardware;
 	private  Boolean useCyBenchBenchmarkSettings;
+	
+	private String accessToken;
+	private String userEmail;
     
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
@@ -240,6 +242,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				"  "+jvmProperties+
 				
     			start+Constants.USER_REPORT_TOKEN+"="+accessToken+
+    			start+Constants.USER_EMAIL_ADDRESS+"="+userEmail+
     			start+Constants.SELECTED_CLASS_PATHS+"=\""+selectionFolderPath+"\"");
 		
     }
@@ -269,6 +272,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	    useCyBenchBenchmarkSettings = configuration.getAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, false);
 
 	    accessToken =  configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, "");
+   	    userEmail = configuration.getAttribute(LaunchConfiguration.USER_EMAIL_ADDRESS, "");
 //   	   launchConfigurationMemento = configuration.getMemento();
     }
 }

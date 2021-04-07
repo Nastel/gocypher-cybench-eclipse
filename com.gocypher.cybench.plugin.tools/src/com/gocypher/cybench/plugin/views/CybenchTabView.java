@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.apache.commons.validator.routines.EmailValidator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -78,6 +79,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private Button browse;
 
     private Text accessToken;
+    private Text userEmail;
+    private Label emailLabel;
     
     private Button shouldSendReportToCyBench;
     private Button shouldDoHardwareSnapshot;
@@ -91,7 +94,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private String benchmarkClassInput;
    
     
-    private final String textForHint = ">>> If no benchmark classes will be"
+    private final String textForHint = ">>> If no benchmark classes will be "
     		+ "selected all project benchmarks will be executed. <<<";
 
     
@@ -177,7 +180,17 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         Label  accessTokenLabel = new Label(configuration, SWT.NONE);
         accessTokenLabel.setText("Bench Access Token:");
         accessToken = new Text(configuration, SWT.SINGLE | SWT.BORDER | SWT.PASSWORD);
+
+        Label  userEmailLabel = new Label(configuration, SWT.NONE);
+        userEmailLabel.setText("Email Address:");
+        userEmail = new Text(configuration, SWT.SINGLE | SWT.BORDER );
         
+
+        Label emptyLabel = new Label(configuration, SWT.NONE);
+        emptyLabel.setText("");
+        emailLabel = new Label(configuration, SWT.NONE);
+        emailLabel.setText("Only by providing correct email address the report will be associated with the user");
+        emailLabel.setVisible(false);
         /* Report selection field Component */
         createBenchmarkClassesSelection(configuration);	      
         
@@ -185,11 +198,15 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 		GridDataFactory.swtDefaults().span(2,1).applyTo(reportNameLabel);
 		GridDataFactory.swtDefaults().span(2,1).applyTo(reportlaunchPathLabel);
 		GridDataFactory.swtDefaults().span(2,1).applyTo(accessTokenLabel);    
+		GridDataFactory.swtDefaults().span(2,1).applyTo(userEmailLabel);   
+		GridDataFactory.swtDefaults().span(2,1).applyTo(emptyLabel);   
 		GridDataFactory.fillDefaults().grab(true, false).span(7,1).applyTo(reportsFolder);
 		GridDataFactory.swtDefaults().span(1,1).applyTo(browse);
 		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(reportName);
 		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(launchPath);
-		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(accessToken);	      
+		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(accessToken);	
+		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(userEmail);  	
+		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(emailLabel);      
        
         // Class-paths layout
         GridData classPathGrid = new GridData();
@@ -219,7 +236,23 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 			setChangeHappened();
     	}
 	};
-	
+    private ModifyListener modifyEmailListener = new ModifyListener() {
+    	public void modifyText(ModifyEvent e) {
+			String email = userEmail.getText();
+			GuiUtils.logInfo("userEmail.getText(): "+userEmail.getText());
+	        EmailValidator validator = EmailValidator.getInstance();
+	        if(email == null || email.equals("")) {
+	        	emailLabel.setVisible(false);
+	        }
+	        else if(validator.isValid(email)) {
+				GuiUtils.logInfo("validator.isValid(email): "+validator.isValid(email));
+				setChangeHappened();
+	        	emailLabel.setVisible(false);
+	        }else {
+	        	emailLabel.setVisible(true);
+	        }
+		}
+	};
     private SelectionListener selectionListener = new SelectionListener() {
 
 		@Override
@@ -250,10 +283,13 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             String pathToSourceNotSelectedDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_NOT_SELECTED_PATH, "");
             
             String accessTokenDef = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, "");
+            String userEmailDef = configuration.getAttribute(LaunchConfiguration.USER_EMAIL_ADDRESS, "");
             boolean sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
             boolean includehardwarePropeties = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
             
-            
+
+            userEmail.setText(userEmailDef);
+            userEmail.addModifyListener(modifyEmailListener);
             reportsFolder.setText(reportFolderDef);
             reportsFolder.addModifyListener(modifyListener);
             reportName.setText(reportNameDef);
@@ -298,6 +334,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         configuration.setAttribute(LaunchConfiguration.REPORT_FOLDER, reportsFolder.getText());
         
         configuration.setAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, accessToken.getText());
+        configuration.setAttribute(LaunchConfiguration.USER_EMAIL_ADDRESS,userEmail.getText());
         configuration.setAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, shouldSendReportToCyBench.getSelection());
         configuration.setAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, shouldDoHardwareSnapshot.getSelection());
         String buildPath = getBuildPath(launchPath.getText());
@@ -484,8 +521,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         
         GridData classPathGrid = new GridData();
         classPathGrid.grabExcessHorizontalSpace = true;
-        classPathGrid.heightHint = 250;
-        classPathGrid.minimumHeight = 250;
+        classPathGrid.heightHint = 200;
+        classPathGrid.minimumHeight = 200;
         classPathGrid.minimumWidth = 420;
         classPathGrid.widthHint = 420;
 	        
@@ -685,13 +722,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 		    	}
 		    }
 		});	
-			
-		
-		
-		
-		
 	}
 
-	
 	
 }
