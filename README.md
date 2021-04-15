@@ -4,16 +4,16 @@
 
 **Deployment packages from [release page](https://github.com/K2NIO/gocypher-cybench-eclipse/releases)**
 
-* File `CybenchTools.zip` contains Eclipse update site for Eclipse 2020-09.
-* File `CyBenchToolsForEclipseMars.zip` contains Eclipse update site for Eclipse Mars 2.
+* File `CybenchTools-0.2-beta.zip` contains Eclipse update site for Eclipse 2020-09.
+* File `CyBenchToolsForEclipseMars-0.2-beta.zip` contains Eclipse update site for Eclipse Mars 2.
 
 **Prerequisites**
 
-* Package `CybenchTools.zip` is built and tested using
+* Package `CybenchTools-0.2-beta.zip` is built and tested using
     * JAVA – JDK-11.0.9,
     * Eclipse Version: 2020-09 (4.17.0).
     
-* Package `CyBenchToolsForEclipseMars.zip` is built and tested using
+* Package `CyBenchToolsForEclipseMars-0.2-beta.zip` is built and tested using
     * JAVA – JDK-1.8.0_201,
     * Eclipse Version: Eclipse Mars 2 (4.5.2).
     
@@ -52,8 +52,6 @@ Installation process for both version of plugins is the same:
 ![](./docs/images/image4.png)
 
 ![](./docs/images/image5.png)
-
-![](./docs/images/image6.png)
 
 ## Usage Instructions
 
@@ -103,7 +101,7 @@ Feature generates benchmark class stubs, adds necessary annotations and methods 
 **Steps:**
 
 * Select any JAVA class file in the project explorer which meets pre-conditions.
-* Right click mouse button on it and Select `CyBench Generate` or click CTRL+7.
+* Right click mouse button on it and Select `CyBench Generate Benchmark Stubs` or click CTRL+7.
 
 ![](./docs/images/image15.png)
 
@@ -126,10 +124,6 @@ Feature generates benchmark class stubs, adds necessary annotations and methods 
 
 Launches all JMH benchmarks which are found under selected JAVA file. Quick launch does not collect hardware or JVM settings and does not send report to CyBench repository.
 
-**Pre-conditions**
-
-* `CyBench Nature` for a project.
-
 **Steps:**
 
 * Right click on the JAVA file or project (quick launch projects does not work in java perspective) which contains JMH Benchmarks.
@@ -151,7 +145,7 @@ Launch configuration view which allows to create a custom launch settings for a 
 
 * Select menu→ “Run”→ “Run Configurations”.
 * In the “Run Configurations” dialog window click on item “CyBench” and click “Create New” button
-* Define configuration for CyBench launcher in tab “CyBench Properties”.
+* Define the configuration for CyBench launcher in the tab “CyBench Configuration” and ”Execution Settings”.
     * Important options:
         * “Run Project” - select the project which contains JMH benchmarks.
         * “Reports Folder” - folder where CyBench reports are stored, default is the location of the “Run Project” option plus “/reports” subdirectory.
@@ -159,6 +153,11 @@ Launch configuration view which allows to create a custom launch settings for a 
         * “Send Report To CyBench” - flag which defines that either report should be sent to CyBench repository or not.
 
 ![](./docs/images/image18.png)
+
+        * “Use CyBench Benchmark Settings” - uses the settings provided below only if selected will use default or annotations otherwise.
+        * "JVM Properties" - Field “JVM Properties“ covers Java system properties, Memory settings (Xmx, Xms, etc.), GC settings and other properties  (like -server), but everything must be correctly defined (in a way if you would launch Java application from command line) i.e. if it is system property then “-D“ prefix is must, because this value is added as it is written to the execution command during benchmark launch.
+
+![](./docs/images/image20.png)
 
 * Click “Apply” → “Run” to start execution of the selected project benchmarks  .      
 * CyBench launcher will start display messages in the console view.
