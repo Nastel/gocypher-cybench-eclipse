@@ -154,8 +154,8 @@ Launch configuration view which allows to create a custom launch settings for a 
 
 ![](./docs/images/image18.png)
 
-        * “Use CyBench Benchmark Settings” - uses the settings provided below only if selected will use default or annotations otherwise.
-        * "JVM Properties" - Field “JVM Properties“ covers Java system properties, Memory settings (Xmx, Xms, etc.), GC settings and other properties  (like -server), but everything must be correctly defined (in a way if you would launch Java application from command line) i.e. if it is system property then “-D“ prefix is must, because this value is added as it is written to the execution command during benchmark launch.
+  * “Use CyBench Benchmark Settings” - uses the settings provided below only if selected will use default or annotations otherwise.
+  * "JVM Properties" - Field “JVM Properties“ covers Java system properties, Memory settings (Xmx, Xms, etc.), GC settings and other properties  (like -server), but everything must be correctly defined (in a way if you would launch Java application from command line) i.e. if it is system property then “-D“ prefix is must, because this value is added as it is written to the execution command during benchmark launch.
 
 ![](./docs/images/image20.png)
 
