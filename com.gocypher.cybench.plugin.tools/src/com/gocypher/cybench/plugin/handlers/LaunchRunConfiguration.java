@@ -135,7 +135,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			setEnvironmentProperties(config);
 			
 			config.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, "org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector");
-	    	
+			
 	    	if(project != null){
 		    	GuiUtils.logInfo("project: "+project.getLocation().toPortableString()) ;
 				if((LauncherUtils.isMavenProject(project))){
@@ -146,7 +146,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 					launchPath = launchPath +","+ testPath;
 				}
 	    	}
-		
+	    	
 			if(classPathFromUser != null && !classPathFromUser.equals("")){
 				classPaths.addAll(Arrays.asList(classPathFromUser.split(",")));
 	    	}
@@ -155,7 +155,11 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 			classPaths.add(LauncherUtils.resolveBundleLocation(Activator.EXTERNALS_PLUGIN_ID,false) );
 			
 			List<String> classpathMementos = LauncherUtils.getNeededClassPaths(project, classPaths);
-//	    	GuiUtils.logInfo("Classpath full:  "+classpathMementos) ;
+
+			List<String> userDefinedclasspathMementos = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, (List<String>)null);
+	    	classpathMementos.addAll(userDefinedclasspathMementos);
+
+	    	//GuiUtils.logInfo("Classpath full:  "+classpathMementos) ;
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, classpathMementos);
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "\""+pathToTempReportPlainFile+"\" \""+pathToTempReportEncryptedFile+"\"");

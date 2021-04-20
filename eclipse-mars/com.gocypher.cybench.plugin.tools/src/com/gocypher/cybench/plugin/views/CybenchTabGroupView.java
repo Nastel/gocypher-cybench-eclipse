@@ -23,6 +23,7 @@ import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.CommonTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
+import org.eclipse.jdt.debug.ui.launchConfigurations.JavaClasspathTab;
 
 public class CybenchTabGroupView extends AbstractLaunchConfigurationTabGroup {
 
@@ -31,6 +32,7 @@ public class CybenchTabGroupView extends AbstractLaunchConfigurationTabGroup {
     	ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
     			new CybenchTabView(),
     			new CybenchSecondTabView(),
+    			new JavaClasspathTab(),
     			new CommonTab()
     	};
         setTabs(tabs);
