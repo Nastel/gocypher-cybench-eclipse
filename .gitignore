@@ -35,3 +35,22 @@ buildNumber.properties
 # https://github.com/takari/maven-wrapper#usage-without-binary-jar
 .mvn/wrapper/maven-wrapper.jar
 
+/**/target/*
+/**/node_modules/*
+/**/build/*
+/**/out/*
+/**/.idea
+/**/*.iml
+/**/*log.*
+/**/*.log
+/**/*_log
+/**/_dev/*
+/**/*_dev.*
+/**/temp/*
+/**/.vscode/*
+/**/deploy/*
+/**/report.json
+/**/output-test.png
+/**/test_picture.png
+/**/.gradle/*
+/**/release/*
