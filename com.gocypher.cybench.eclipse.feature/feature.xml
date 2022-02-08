@@ -20,7 +20,7 @@
 <feature
       id="com.gocypher.cybench.eclipse.feature"
       label="CyBench"
-      version="1.0.0.qualifier"
+      version="1.0.1.qualifier"
       provider-name="K2N.IO"
       plugin="com.gocypher.cybench.plugin.tools">
 
