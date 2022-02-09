@@ -238,6 +238,9 @@ public class CyBenchLauncher {
                             report.setProjectVersion(getMetadataFromBuildFile("version")); // default
                             benchmarkReport.setProjectVersion(getMetadataFromBuildFile("version"));
                         }
+						if (StringUtils.isEmpty(benchmarkReport.getVersion())) {
+                        	benchmarkReport.setVersion(benchmarkReport.getProjectVersion());
+                        }
 
                         if (StringUtils.isEmpty(report.getBenchmarkSessionId())) {
                             Map<String, String> bMetadata = benchmarkReport.getMetadata();
