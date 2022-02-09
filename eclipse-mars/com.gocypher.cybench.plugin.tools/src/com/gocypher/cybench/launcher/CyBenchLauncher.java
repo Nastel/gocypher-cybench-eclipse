@@ -509,9 +509,11 @@ public class CyBenchLauncher {
         System.out.println("* Gradle project detected, grabbing missing metadata from gradle build files");
         System.out.println("* Checking for Groovy or Kotlin style build instructions");
         String property = "";
-        String dir = System.getProperty("user.dir");
+        Path tempPath = Paths.get(filePath);
+        tempPath = tempPath.getParent().getParent();
+       // String dir = System.getProperty("user.dir");
         String switcher;
-        File buildFile = new File(dir + "/settings.gradle");
+        File buildFile = new File(tempPath + "/settings.gradle"); //dir
 
         if (buildFile.exists()) {
             switcher = "groovy";
@@ -522,12 +524,12 @@ public class CyBenchLauncher {
         switch (switcher) {
         case "groovy":
              System.out.println("* Regular (groovy) build file detected, looking for possible metadata..");
-            property = getGradleProperty(prop, dir,
+            property = getGradleProperty(prop, tempPath.toString(), //dir
                     new String[] { "/config/project.properties", "/settings.gradle", "/version.gradle" });
             break;
         case "kotlin":
              System.out.println("* Kotlin style build file detected, looking for possible metadata..");
-            property = getGradleProperty(prop, dir,
+            property = getGradleProperty(prop, tempPath.toString(), //dir
                     new String[] { "/config/project.properties", "/settings.gradle.kts", "/version.gradle.kts" });
             break;
         }
