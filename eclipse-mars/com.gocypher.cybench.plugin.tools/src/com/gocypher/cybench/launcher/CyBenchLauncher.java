@@ -84,7 +84,7 @@ import com.gocypher.cybench.launcher.utils.SecurityBuilder;
 
 public class CyBenchLauncher {
 	public static Map<String,String> resultsMap = new HashMap<>() ;
-	private static final  String benchSource = "Eclipse Mars plugin";
+	private static final  String benchSource = "Eclipse Mars plugin (v0.3-beta)";
     static Properties cfg = new Properties();
     private static String filePath;
 	
