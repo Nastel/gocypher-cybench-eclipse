@@ -85,7 +85,7 @@ import com.gocypher.cybench.launcher.utils.SecurityBuilder;
 
 public class CyBenchLauncher {
 	public static Map<String,String> resultsMap = new HashMap<>() ;
-	private static final  String benchSource = "Eclipse plugin";
+	private static final  String benchSource = "Eclipse plugin (v0.3-beta)";
 	private static String filePath;
     static Properties cfg = new Properties();
     
@@ -242,15 +242,15 @@ public class CyBenchLauncher {
                         	benchmarkReport.setVersion(benchmarkReport.getProjectVersion());
                         }
 
-                        if (StringUtils.isEmpty(report.getBenchmarkSessionId())) {
-                            Map<String, String> bMetadata = benchmarkReport.getMetadata();
-                            if (bMetadata != null) {
-                                String sessionId = bMetadata.get("benchSession");
-                                if (StringUtils.isNotEmpty(sessionId)) {
-                                    report.setBenchmarkSessionId(sessionId);
-                                }
-                            }
-                        }
+//                        if (StringUtils.isEmpty(report.getBenchmarkSessionId())) {
+//                            Map<String, String> bMetadata = benchmarkReport.getMetadata();
+//                            if (bMetadata != null) {
+//                                String sessionId = bMetadata.get("benchSession");
+//                                if (StringUtils.isNotEmpty(sessionId)) {
+//                                    report.setBenchmarkSessionId(sessionId);
+//                                }
+//                            }
+//                        }
                     } catch (Exception e) {
                     	System.out.println("Error grabbing metadata: " + e);
                     }                    
@@ -453,7 +453,7 @@ public class CyBenchLauncher {
 
         Path tempPath = Paths.get(filePath);
         tempPath = tempPath.getParent().getParent();
-        System.out.println("Real Path: " + tempPath.toString());
+       
         
         File gradle = new File(tempPath + "/build.gradle");
         File gradleKTS = new File(tempPath + "/build.gradle.kts");
