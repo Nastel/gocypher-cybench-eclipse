@@ -133,9 +133,17 @@ public class CyBenchLauncher {
         benchmarkSettings.put("benchThreadCount", launcherConfiguration.getThreads());
         benchmarkSettings.put("benchReportName", launcherConfiguration.getReportName());
 
+		if (!checkValidMetadata("artifactId")) {
+			failBuildFromMissingMetaData("Project");
+			System.exit(1);
+		}
+
+		if (!checkValidMetadata("version")) {
+			failBuildFromMissingMetaData("Version");
+			System.exit(1);
+		}
         System.out.println("Executing benchmarks...");
-        
-		
+        		
 
 		if(launcherConfiguration.getClassCalled().size() > 0) {
 			for(String classname : launcherConfiguration.getClassCalled()) {
@@ -242,15 +250,15 @@ public class CyBenchLauncher {
                         	benchmarkReport.setVersion(benchmarkReport.getProjectVersion());
                         }
 
-//                        if (StringUtils.isEmpty(report.getBenchmarkSessionId())) {
-//                            Map<String, String> bMetadata = benchmarkReport.getMetadata();
-//                            if (bMetadata != null) {
-//                                String sessionId = bMetadata.get("benchSession");
-//                                if (StringUtils.isNotEmpty(sessionId)) {
-//                                    report.setBenchmarkSessionId(sessionId);
-//                                }
-//                            }
-//                        }
+                        if (StringUtils.isEmpty(report.getBenchmarkSessionId())) {
+                            Map<String, String> bMetadata = benchmarkReport.getMetadata();
+                            if (bMetadata != null) {
+                                String sessionId = bMetadata.get("benchSession");
+                                if (StringUtils.isNotEmpty(sessionId)) {
+                                    report.setBenchmarkSessionId(sessionId);
+                                }
+                            }
+                        }
                     } catch (Exception e) {
                     	System.out.println("Error grabbing metadata: " + e);
                     }                    
@@ -448,6 +456,18 @@ public class CyBenchLauncher {
         	benchmarkReport.setProjectVersion(value);
         }
     }
+    
+    public static boolean checkValidMetadata(String prop) {
+    	String tempProp = "";
+    	tempProp = getMetaDataFromGradle(prop);
+    	   	
+    	if (isPropUnspecified(tempProp)) {
+    		return false;
+    	}
+    	return true;
+    	
+    }
+    
     public static String getMetadataFromBuildFile(String prop) {
         String property = "";
 
@@ -512,6 +532,7 @@ public class CyBenchLauncher {
         String property = "";
         Path tempPath = Paths.get(filePath); // no longer use 'user.dir', as 'user.dir' was being set to system files (c:/windows/system32)
         // String dir = System.getProperty("user.dir");
+        tempPath = tempPath.getParent().getParent();
         String switcher;
         File buildFile = new File(tempPath + "/settings.gradle"); // switch broken 'user.dir' to actual file path of project
 
