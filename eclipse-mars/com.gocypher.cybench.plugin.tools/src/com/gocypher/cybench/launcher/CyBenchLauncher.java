@@ -128,6 +128,16 @@ public class CyBenchLauncher {
         benchmarkSettings.put("benchForkCount", launcherConfiguration.getForks());
         benchmarkSettings.put("benchThreadCount", launcherConfiguration.getThreads());
         benchmarkSettings.put("benchReportName", launcherConfiguration.getReportName());
+        
+        if (!checkValidMetadata("artifactId")) {
+        		failBuildFromMissingMetadata("Project");
+        		System.exit(1);
+        }
+        
+        if (!checkValidMetadata("version")) {
+        		failBuildFromMissingMetadata("Version");
+        		System.exit(1);
+        }
 
         System.out.println("Executing benchmarks...");
         
@@ -447,12 +457,32 @@ public class CyBenchLauncher {
         	benchmarkReport.setProjectVersion(value);
         }
     }
+    
+    public static boolean checkValidMetadata(String prop) {
+		System.out.println("** Checking for valid metadata (" + prop + ") before proceeding...");
+
+    	String tempProp = "";
+    	Path tempPath = Paths.get(filePath);
+    	tempPath = tempPath.getParent().getParent();
+    	
+    	File pomCheck = new File(tempPath + "/pom.xml");
+    	if (!pomCheck.exists()) {
+    		System.out.println("No pom.xml file detected, checking for Gradle files..");
+        	tempProp = getMetadataFromGradle(prop);
+        	if (isPropUnspecified(tempProp)) {
+        		return false;
+        	}
+    	} 
+    	System.out.println("** (" + prop + ") metadata OK");
+    	return true;
+    	
+    }
+    
     public static String getMetadataFromBuildFile(String prop) {
         String property = "";
 
         Path tempPath = Paths.get(filePath);
         tempPath = tempPath.getParent().getParent();
-        System.out.println("Real Path: " + tempPath.toString());
         
         File gradle = new File(tempPath + "/build.gradle");
         File gradleKTS = new File(tempPath + "/build.gradle.kts");
@@ -460,16 +490,16 @@ public class CyBenchLauncher {
        
         if (gradle.exists() && pom.exists()) {
             System.out.println("Multiple build instructions detected, resolving to pom.xml..");
-            property = getMetaDataFromMaven(prop);
+            property = getMetadataFromMaven(prop);
         } else if (gradle.exists() || gradleKTS.exists()) {
-            property = getMetaDataFromGradle(prop);
+            property = getMetadataFromGradle(prop);
         } else if (pom.exists()) {
-            property = getMetaDataFromMaven(prop);
+            property = getMetadataFromMaven(prop);
         }
         return property;
     }
 
-    private static String getMetaDataFromMaven(String prop) {
+    private static String getMetadataFromMaven(String prop) {
         String property = "";
         Path tempPath = Paths.get(filePath);
         tempPath = tempPath.getParent().getParent();
@@ -492,30 +522,30 @@ public class CyBenchLauncher {
         } catch (ParserConfigurationException e) {
             System.out.println("Error creating DocumentBuilder");
             e.printStackTrace();
-            failBuildFromMissingMetaData();
+            failBuildFromMissingMetadata();
         } catch (SAXException e) {
             System.out.println("SAX error");
             e.printStackTrace();
-            failBuildFromMissingMetaData();
+            failBuildFromMissingMetadata();
         } catch (IOException e) {
             System.out.println("IO Error");
             e.printStackTrace();
-            failBuildFromMissingMetaData();
+            failBuildFromMissingMetadata();
         }
         return property;
     }
 
-    private static String getMetaDataFromGradle(String prop) {
-        System.out.println("* Gradle project detected, grabbing missing metadata from gradle build files");
-        System.out.println("* Checking for Groovy or Kotlin style build instructions");
-        String property = "";
+    private static String getMetadataFromGradle(String prop) {
+        System.out.println("* Gradle project detected, attempting to grab missing metadata from gradle build files");
+        
+        String property = "";      
         Path tempPath = Paths.get(filePath);
         tempPath = tempPath.getParent().getParent();
-       // String dir = System.getProperty("user.dir");
-        String switcher;
-        File buildFile = new File(tempPath + "/settings.gradle"); //dir
-
-        if (buildFile.exists()) {
+        String switcher;     
+        File rootBuildFile = new File(tempPath.getParent() + "/settings.gradle"); //dir
+        File buildFile = new File(tempPath.getFileName() + "/settings.gradle");
+        
+        if (buildFile.exists() || rootBuildFile.exists()) {
             switcher = "groovy";
         } else {
             switcher = "kotlin";
@@ -523,12 +553,12 @@ public class CyBenchLauncher {
 
         switch (switcher) {
         case "groovy":
-             System.out.println("* Regular (groovy) build file detected, looking for possible metadata..");
+             System.out.println("* Regular (Groovy) build file detected, looking for possible metadata..");
             property = getGradleProperty(prop, tempPath.toString(), //dir
                     new String[] { "/config/project.properties", "/settings.gradle", "/version.gradle" });
             break;
         case "kotlin":
-             System.out.println("* Kotlin style build file detected, looking for possible metadata..");
+             System.out.println("* No Groovy build files could be found, now checking for Kotlin style.");
             property = getGradleProperty(prop, tempPath.toString(), //dir
                     new String[] { "/config/project.properties", "/settings.gradle.kts", "/version.gradle.kts" });
             break;
@@ -573,7 +603,7 @@ public class CyBenchLauncher {
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
-                    failBuildFromMissingMetaData("Project");
+                    failBuildFromMissingMetadata("Project");
                 }
                 return property;
             }
@@ -591,7 +621,7 @@ public class CyBenchLauncher {
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
-                    failBuildFromMissingMetaData("Version");
+                    failBuildFromMissingMetadata("Version");
                 }
                 return property;
             }
@@ -606,7 +636,7 @@ public class CyBenchLauncher {
         return StringUtils.isBlank(prop) || "unspecified".equals(prop);
     }
 
-    private static void failBuildFromMissingMetaData(String metadata) {
+    private static void failBuildFromMissingMetadata(String metadata) {
         System.out.println("* ===[Build failed from lack of metadata: ("+ metadata + ")]===");
         System.out.println("* CyBench runner is unable to continue due to missing crucial metadata.");
         if (metadata.contains("Version")) {
@@ -646,7 +676,7 @@ public class CyBenchLauncher {
         }
     }
 
-    private static void failBuildFromMissingMetaData() {
+    private static void failBuildFromMissingMetadata() {
         System.out.println("* ===[Build failed from lack of metadata]===");
         System.out.println("* CyBench runner is unable to continue due to missing crucial metadata.");
         System.out.println("* Error while parsing Maven project's 'pom.xml' file.");
