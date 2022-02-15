@@ -134,12 +134,12 @@ public class CyBenchLauncher {
         benchmarkSettings.put("benchReportName", launcherConfiguration.getReportName());
 
 		if (!checkValidMetadata("artifactId")) {
-			failBuildFromMissingMetaData("Project");
+			failBuildFromMissingMetadata("Project");
 			System.exit(1);
 		}
 
 		if (!checkValidMetadata("version")) {
-			failBuildFromMissingMetaData("Version");
+			failBuildFromMissingMetadata("Version");
 			System.exit(1);
 		}
         System.out.println("Executing benchmarks...");
@@ -458,12 +458,20 @@ public class CyBenchLauncher {
     }
     
     public static boolean checkValidMetadata(String prop) {
+		System.out.println("** Checking for valid metadata (" + prop + ") before proceeding...");
+
     	String tempProp = "";
-    	tempProp = getMetaDataFromGradle(prop);
-    	   	
-    	if (isPropUnspecified(tempProp)) {
-    		return false;
+    	Path tempPath = Paths.get(filePath);
+    	tempPath = tempPath.getParent().getParent();
+    	File pomCheck = new File(tempPath + "/pom.xml");
+    	if (!pomCheck.exists()) {
+    		System.out.println("No pom.xml file detected, checking for Gradle files..");
+    		tempProp = getMetadataFromGradle(prop);
+    		if (isPropUnspecified(tempProp)) {
+    			return false;
+    		}
     	}
+    	System.out.println("** (" + prop + ") metadata OK");
     	return true;
     	
     }
@@ -481,16 +489,16 @@ public class CyBenchLauncher {
        
         if (gradle.exists() && pom.exists()) {
             System.out.println("Multiple build instructions detected, resolving to pom.xml..");
-            property = getMetaDataFromMaven(prop);
+            property = getMetadataFromMaven(prop);
         } else if (gradle.exists() || gradleKTS.exists()) {
-            property = getMetaDataFromGradle(prop);
+            property = getMetadataFromGradle(prop);
         } else if (pom.exists()) {
-            property = getMetaDataFromMaven(prop);
+            property = getMetadataFromMaven(prop);
         }
         return property;
     }
 
-    private static String getMetaDataFromMaven(String prop) {
+    private static String getMetadataFromMaven(String prop) {
         String property = "";
         Path tempPath = Paths.get(filePath);
         tempPath = tempPath.getParent().getParent();
@@ -513,30 +521,31 @@ public class CyBenchLauncher {
         } catch (ParserConfigurationException e) {
             System.out.println("Error creating DocumentBuilder");
             e.printStackTrace();
-            failBuildFromMissingMetaData();
+            failBuildFromMissingMetadata();
         } catch (SAXException e) {
             System.out.println("SAX error");
             e.printStackTrace();
-            failBuildFromMissingMetaData();
+            failBuildFromMissingMetadata();
         } catch (IOException e) {
             System.out.println("IO Error");
             e.printStackTrace();
-            failBuildFromMissingMetaData();
+            failBuildFromMissingMetadata();
         }
         return property;
     }
 
-    private static String getMetaDataFromGradle(String prop) {
+    private static String getMetadataFromGradle(String prop) {
         System.out.println("* Gradle project detected, grabbing missing metadata from gradle build files");
-        System.out.println("* Checking for Groovy or Kotlin style build instructions");
-        String property = "";
-        Path tempPath = Paths.get(filePath); // no longer use 'user.dir', as 'user.dir' was being set to system files (c:/windows/system32)
-        // String dir = System.getProperty("user.dir");
-        tempPath = tempPath.getParent().getParent();
+        
         String switcher;
-        File buildFile = new File(tempPath + "/settings.gradle"); // switch broken 'user.dir' to actual file path of project
+        String property = "";
+        Path tempPath = Paths.get(filePath);
+        tempPath = tempPath.getParent().getParent();
+        
+        File rootBuildFile = new File(tempPath.getParent() + "/settings.gradle");
+        File buildFile = new File(tempPath + "/settings.gradle");
 
-        if (buildFile.exists()) {
+        if (buildFile.exists() || rootBuildFile.exists()) {
             switcher = "groovy";
         } else {
             switcher = "kotlin";
@@ -549,7 +558,7 @@ public class CyBenchLauncher {
                     new String[] { "/config/project.properties", "/settings.gradle", "/version.gradle" });
             break;
         case "kotlin":
-             System.out.println("* Kotlin style build file detected, looking for possible metadata..");
+             System.out.println("* No Groovy build files could be found, now checking for Kotlin style.");
             property = getGradleProperty(prop, tempPath.toString(),
                     new String[] { "/config/project.properties", "/settings.gradle.kts", "/version.gradle.kts" });
             break;
@@ -594,7 +603,7 @@ public class CyBenchLauncher {
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
-                    failBuildFromMissingMetaData("Project");
+                    failBuildFromMissingMetadata("Project");
                 }
                 return property;
             }
@@ -612,7 +621,7 @@ public class CyBenchLauncher {
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
-                    failBuildFromMissingMetaData("Version");
+                    failBuildFromMissingMetadata("Version");
                 }
                 return property;
             }
@@ -627,29 +636,37 @@ public class CyBenchLauncher {
         return StringUtils.isBlank(prop) || "unspecified".equals(prop);
     }
 
-    private static void failBuildFromMissingMetaData(String metadata) {
+    private static void failBuildFromMissingMetadata(String metadata) {
         System.out.println("* ===[Build failed from lack of metadata: ("+ metadata + ")]===");
         System.out.println("* CyBench runner is unable to continue due to missing crucial metadata.");
         if (metadata.contains("Version")) {
             System.out.println("* Project version metadata was unable to be processed.");
             System.out.println("* Project version can be set or parsed dynamically a few different ways: \n");
+            System.out.println("*** The quickest and easiest (Gradle) solution is by adding an Ant task to 'build.gradle'"
+            		+ " to generate 'project.properties' file.");
+            System.out.println("*** This Ant task can be found in the README for CyBench Gradle Plugin"
+            				+ " (https://github.com/K2NIO/gocypher-cybench-gradle/blob/master/README.md) \n");
             System.out.println("*** For Gradle (groovy) projects, please set 'version = \"<yourProjectVersionNumber>\"' in either "
                             + "'build.gradle' or 'version.gradle'.");
             System.out.println("*** For Gradle (kotlin) projects, please set 'version = \"<yourProjectVersionNumber>\"' in either "
                             + "'build.gradle.kts' or 'version.gradle.kts'.");
             System.out.println("*** For Maven projects, please make sure '<version>' tag is set correctly.\n");
-            System.out.println("*** If running benchmarks from a class you compiled/generated yourself via IDE plugin (Eclipse, Intellij, etc..),");
-            System.out.println("*** please set the @BenchmarkMetaData projectVersion tag at the class level");
-            System.out.println("**** e.g.: '@BenchmarkMetaData(key = \"projectVersion\", value = \"1.6.0\")'");
-            System.out.println("*** Project version can also be detected from 'metadata.properties' in your project's 'config' folder.");
-            System.out.println("*** If setting project version via 'metadata.properties', please add the following: ");
-            System.out.println("*** 'class.version=<yourProjectVersionNumber>'\n");
+            System.out.println("* If running benchmarks from a class you compiled/generated yourself via IDE plugin (Eclipse, Intellij, etc..),");
+            System.out.println("* please set the @BenchmarkMetaData projectVersion tag at the class level");
+            System.out.println("* e.g.: '@BenchmarkMetaData(key = \"projectVersion\", value = \"1.6.0\")'");
+            System.out.println("* Project version can also be detected from 'metadata.properties' in your project's 'config' folder.");
+            System.out.println("* If setting project version via 'metadata.properties', please add the following: ");
+            System.out.println("* 'class.version=<yourProjectVersionNumber>'\n");
             System.out.println("* For more information and instructions on this process, please visit the CyBench wiki at "
                     + "https://github.com/K2NIO/gocypher-cybench-java/wiki/Getting-started-with-CyBench-annotations");
             System.exit(1);
         } else if (metadata.contains("Project")) {
             System.out.println("* Project name metadata was unable to be processed.");
             System.out.println("* Project name can be set or parsed dynamically a few different ways: \n");
+            System.out.println("*** The quickest and easiest (Gradle) solution is by adding an Ant task to 'build.gradle'"
+            		+ " to generate 'project.properties' file.");
+            System.out.println("*** This Ant task can be found in the README for CyBench Gradle Plugin"
+            				+ " (https://github.com/K2NIO/gocypher-cybench-gradle/blob/master/README.md) \n");
             System.out.println("*** For Gradle (groovy) projects, please set 'rootProject.name = \"<yourProjectName>\"' in 'settings.gradle'.");
             System.out.println("*** For Gradle (kotlin) projects, please set 'rootProject.name = \"<yourProjectName>\"' in 'settings.gradle.kts'.");
             System.out.println("**** Important note regarding Gradle project's name: This value is read-only in 'build.gradle(.kts)'. This value *MUST*"
@@ -667,7 +684,7 @@ public class CyBenchLauncher {
         }
     }
 
-    private static void failBuildFromMissingMetaData() {
+    private static void failBuildFromMissingMetadata() {
         System.out.println("* ===[Build failed from lack of metadata]===");
         System.out.println("* CyBench runner is unable to continue due to missing crucial metadata.");
         System.out.println("* Error while parsing Maven project's 'pom.xml' file.");

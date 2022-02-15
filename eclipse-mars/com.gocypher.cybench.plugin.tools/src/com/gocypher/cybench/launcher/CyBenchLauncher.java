@@ -642,23 +642,31 @@ public class CyBenchLauncher {
         if (metadata.contains("Version")) {
             System.out.println("* Project version metadata was unable to be processed.");
             System.out.println("* Project version can be set or parsed dynamically a few different ways: \n");
+            System.out.println("*** The quickest and easiest (Gradle) solution is by adding an Ant task to 'build.gradle'"
+            		+ " to generate 'project.properties' file.");
+            System.out.println("*** This Ant task can be found in the README for CyBench Gradle Plugin"
+            				+ " (https://github.com/K2NIO/gocypher-cybench-gradle/blob/master/README.md) \n");
             System.out.println("*** For Gradle (groovy) projects, please set 'version = \"<yourProjectVersionNumber>\"' in either "
                             + "'build.gradle' or 'version.gradle'.");
             System.out.println("*** For Gradle (kotlin) projects, please set 'version = \"<yourProjectVersionNumber>\"' in either "
                             + "'build.gradle.kts' or 'version.gradle.kts'.");
             System.out.println("*** For Maven projects, please make sure '<version>' tag is set correctly.\n");
-            System.out.println("*** If running benchmarks from a class you compiled/generated yourself via IDE plugin (Eclipse, Intellij, etc..),");
-            System.out.println("*** please set the @BenchmarkMetaData projectVersion tag at the class level");
-            System.out.println("**** e.g.: '@BenchmarkMetaData(key = \"projectVersion\", value = \"1.6.0\")'");
-            System.out.println("*** Project version can also be detected from 'metadata.properties' in your project's 'config' folder.");
-            System.out.println("*** If setting project version via 'metadata.properties', please add the following: ");
-            System.out.println("*** 'class.version=<yourProjectVersionNumber>'\n");
+            System.out.println("* If running benchmarks from a class you compiled/generated yourself via IDE plugin (Eclipse, Intellij, etc..),");
+            System.out.println("* please set the @BenchmarkMetaData projectVersion tag at the class level");
+            System.out.println("* e.g.: '@BenchmarkMetaData(key = \"projectVersion\", value = \"1.6.0\")'");
+            System.out.println("* Project version can also be detected from 'metadata.properties' in your project's 'config' folder.");
+            System.out.println("* If setting project version via 'metadata.properties', please add the following: ");
+            System.out.println("* 'class.version=<yourProjectVersionNumber>'\n");
             System.out.println("* For more information and instructions on this process, please visit the CyBench wiki at "
                     + "https://github.com/K2NIO/gocypher-cybench-java/wiki/Getting-started-with-CyBench-annotations");
             System.exit(1);
         } else if (metadata.contains("Project")) {
             System.out.println("* Project name metadata was unable to be processed.");
             System.out.println("* Project name can be set or parsed dynamically a few different ways: \n");
+            System.out.println("*** The quickest and easiest (Gradle) solution is by adding an Ant task to 'build.gradle'"
+            		+ " to generate 'project.properties' file.");
+            System.out.println("*** This Ant task can be found in the README for CyBench Gradle Plugin"
+            				+ " (https://github.com/K2NIO/gocypher-cybench-gradle/blob/master/README.md) \n");
             System.out.println("*** For Gradle (groovy) projects, please set 'rootProject.name = \"<yourProjectName>\"' in 'settings.gradle'.");
             System.out.println("*** For Gradle (kotlin) projects, please set 'rootProject.name = \"<yourProjectName>\"' in 'settings.gradle.kts'.");
             System.out.println("**** Important note regarding Gradle project's name: This value is read-only in 'build.gradle(.kts)'. This value *MUST*"
