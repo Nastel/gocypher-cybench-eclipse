@@ -231,37 +231,9 @@ public class CyBenchLauncher {
                     Optional<Method> benchmarkMethod = JMHUtils.getBenchmarkMethod(method, aClass);
                     appendMetadataFromMethod(benchmarkMethod, benchmarkReport);
                     appendMetadataFromClass(aClass, benchmarkReport);
+                    syncReportsMetadata(report, benchmarkReport);
                     System.out.println(report);
-                    try {
-                        if (StringUtils.isNotEmpty(benchmarkReport.getProject())) {
-                            report.setProject(benchmarkReport.getProject());
-                        } else {
-                            report.setProject(getMetadataFromBuildFile("artifactId"));
-                            benchmarkReport.setProject(getMetadataFromBuildFile("artifactId"));
-                        }
 
-                        if (StringUtils.isNotEmpty(benchmarkReport.getProjectVersion())) {
-                            report.setProjectVersion(benchmarkReport.getProjectVersion());
-                        } else {
-                            report.setProjectVersion(getMetadataFromBuildFile("version")); // default
-                            benchmarkReport.setProjectVersion(getMetadataFromBuildFile("version"));
-                        }
-						if (StringUtils.isEmpty(benchmarkReport.getVersion())) {
-                        	benchmarkReport.setVersion(benchmarkReport.getProjectVersion());
-                        }
-
-                        if (StringUtils.isEmpty(report.getBenchmarkSessionId())) {
-                            Map<String, String> bMetadata = benchmarkReport.getMetadata();
-                            if (bMetadata != null) {
-                                String sessionId = bMetadata.get("benchSession");
-                                if (StringUtils.isNotEmpty(sessionId)) {
-                                    report.setBenchmarkSessionId(sessionId);
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                    	System.out.println("Error grabbing metadata: " + e);
-                    }                    
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -458,7 +430,53 @@ public class CyBenchLauncher {
         	benchmarkReport.setProjectVersion(value);
         }
     }
-    
+  
+    public static void syncReportsMetadata(BenchmarkOverviewReport report, BenchmarkReport benchmarkReport) {
+        try {
+            if (StringUtils.isNotEmpty(benchmarkReport.getProject())) {
+                report.setProject(benchmarkReport.getProject());
+            } else {
+                report.setProject(getMetadataFromBuildFile("artifactId"));
+                benchmarkReport.setProject(getMetadataFromBuildFile("artifactId"));
+            }
+
+            if (StringUtils.isNotEmpty(benchmarkReport.getProjectVersion())) {
+                report.setProjectVersion(benchmarkReport.getProjectVersion());
+            } else {
+                report.setProjectVersion(getMetadataFromBuildFile("version")); // default
+                benchmarkReport.setProjectVersion(getMetadataFromBuildFile("version"));
+            }
+            if (StringUtils.isEmpty(benchmarkReport.getVersion())) {
+                benchmarkReport.setVersion(benchmarkReport.getProjectVersion());
+            }
+
+            if (StringUtils.isEmpty(report.getBenchmarkSessionId())) {
+                Map<String, String> bMetadata = benchmarkReport.getMetadata();
+                if (bMetadata != null) {
+                    String sessionId = bMetadata.get("benchSession");
+                    if (StringUtils.isNotEmpty(sessionId)) {
+                        report.setBenchmarkSessionId(sessionId);
+                    }
+                }
+            }
+            if (benchmarkReport.getCategory().equals("CUSTOM")) {
+                int classIndex = benchmarkReport.getName().lastIndexOf(".");
+                if (classIndex > 0) {
+                    String pckgAndClass = benchmarkReport.getName().substring(0, classIndex);
+                    int pckgIndex = pckgAndClass.lastIndexOf(".");
+                    if (pckgIndex > 0) {
+                        String pckg = pckgAndClass.substring(0, pckgIndex);
+                        benchmarkReport.setCategory(pckg);
+                    } else {
+                        benchmarkReport.setCategory(pckgAndClass);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error grabbing metadata: " + e);
+        }                    
+    }
+
     public static boolean checkValidMetadata(String prop) {
 		System.out.println("** Checking for valid metadata (" + prop + ") before proceeding...");
 
