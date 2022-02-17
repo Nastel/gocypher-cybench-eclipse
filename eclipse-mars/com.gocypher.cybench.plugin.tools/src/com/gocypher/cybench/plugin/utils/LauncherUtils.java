@@ -69,11 +69,11 @@ import com.gocypher.cybench.plugin.model.RunSelectionEntry;
 public class LauncherUtils {
 	public static String SRC_FOLDER_FOR_BENCHMARKS_JAVA="/src_benchmarks" ;
 	public static String SRC_FOLDER_FOR_BENCHMARKS_MVN="/src/test/java" ;
-	public static String GRADLE_JMH_DEPENDENCY="	implementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.26'"+ "\n";
-	public static String GRADLE_JMH_ANNOTATION_DEPENDENCY="	annotationProcessor  group: 'org.openjdk.jmh', name:'jmh-generator-annprocess', version:'1.26'"+ "\n";
+	public static String GRADLE_JMH_DEPENDENCY="	implementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.34'"+ "\n";
+	public static String GRADLE_JMH_ANNOTATION_DEPENDENCY="	annotationProcessor  group: 'org.openjdk.jmh', name:'jmh-generator-annprocess', version:'1.34'"+ "\n";
 	
-	public static String MAVEN_JMH_DEPENDENCY="\n    <dependency> \n      <groupId>org.openjdk.jmh</groupId> \n      <artifactId>jmh-core</artifactId> \n      <version> 1.26 </version> \n    </dependency>";
-	public static String MAVEN_JMH_ANNOTATION_DEPENDENCY="\n    <dependency> \n      <groupId>org.openjdk.jmh</groupId> \n      <artifactId>jmh-generator-annprocess</artifactId> \n      <version>1.26</version> \n      <scope>provided</scope> \n    </dependency>\n";
+	public static String MAVEN_JMH_DEPENDENCY="\n    <dependency> \n      <groupId>org.openjdk.jmh</groupId> \n      <artifactId>jmh-core</artifactId> \n      <version> 1.34 </version> \n    </dependency>";
+	public static String MAVEN_JMH_ANNOTATION_DEPENDENCY="\n    <dependency> \n      <groupId>org.openjdk.jmh</groupId> \n      <artifactId>jmh-generator-annprocess</artifactId> \n      <version>1.34</version> \n      <scope>provided</scope> \n    </dependency>\n";
 	 
 
 	

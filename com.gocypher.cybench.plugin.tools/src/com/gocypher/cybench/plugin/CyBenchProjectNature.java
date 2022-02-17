@@ -61,11 +61,11 @@ public class CyBenchProjectNature implements IProjectNature {
 	private static final String JMH_GROUP_ID="org.openjdk.jmh" ;
 	private static final String JMH_CORE_ARTIFACT_ID="jmh-core" ;
 	private static final String JMH_ANNOTATIONDS_ARTIFACT_ID="jmh-generator-annprocess" ;
-	private static final String JMH_VERSION = "1.26" ;
+	private static final String JMH_VERSION = "1.34" ;
 	private static File pomXML = null ;
 	
-	//private static final String fullPathHardcodedCore = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-core-1.26.jar" ;
-	//private static final String fullPathHardcodedAnnotations = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-generator-annprocess-1.26.jar" ;
+	//private static final String fullPathHardcodedCore = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-core-1.34.jar" ;
+	//private static final String fullPathHardcodedAnnotations = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-generator-annprocess-1.34.jar" ;
 	
 	private IProject project;
 	
@@ -108,8 +108,8 @@ public class CyBenchProjectNature implements IProjectNature {
 		GuiUtils.logInfo("Externals path:"+cyBenchExternalsPath);
 		
 		
-		//String fullPathHardcodedCore = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-core-1.26.jar" ;
-		//String fullPathHardcodedAnnotations = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-generator-annprocess-1.26.jar" ;
+		//String fullPathHardcodedCore = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-core-1.34.jar" ;
+		//String fullPathHardcodedAnnotations = "e:/benchmarks/eclipse_plugin/ext_libs/jmh-generator-annprocess-1.34.jar" ;
 		try {
 			//FIXME uncomment this for production usage Externals for real Eclipse test
 			this.deconfigureAptSettings (javaProject,cyBenchExternalsPath) ;
