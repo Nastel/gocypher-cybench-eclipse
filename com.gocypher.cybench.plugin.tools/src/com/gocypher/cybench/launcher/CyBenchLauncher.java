@@ -320,7 +320,9 @@ public class CyBenchLauncher {
             System.out.println("Your report is available at "+ resultURL);
             System.out.println("NOTE: It may take a few minutes for your report to appear online");
         }else{
-        	System.out.println((String) response.get("ERROR"));
+            if (response.containsKey("error")) {
+                System.out.println((String) response.get("ERROR"));
+            }
  			System.out.println("You may submit your report manually at "+Constants.CYB_UPLOAD_URL);
         }
         
