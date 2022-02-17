@@ -226,7 +226,7 @@ public class CyBenchLauncher {
                 	JMHUtils.ClassAndMethod classAndMethod = new JMHUtils.ClassAndMethod(name).invoke();
                     String clazz = classAndMethod.getClazz();
                     String method = classAndMethod.getMethod();
-                    System.out.println("Adding metadata for benchamrk: " + clazz + " test: " + method);
+                    System.out.println("Adding metadata for benchmark: " + clazz + " test: " + method);
                     Class<?> aClass = Class.forName(clazz);
                     Optional<Method> benchmarkMethod = JMHUtils.getBenchmarkMethod(method, aClass);
                     appendMetadataFromMethod(benchmarkMethod, benchmarkReport);
@@ -485,7 +485,6 @@ public class CyBenchLauncher {
     	tempPath = tempPath.getParent().getParent();
     	File pomCheck = new File(tempPath + "/pom.xml");
     	if (!pomCheck.exists()) {
-    		System.out.println("No pom.xml file detected, checking for Gradle files..");
     		tempProp = getMetadataFromGradle(prop);
     		if (isPropUnspecified(tempProp)) {
     			return false;
@@ -523,7 +522,6 @@ public class CyBenchLauncher {
         Path tempPath = Paths.get(filePath);
         tempPath = tempPath.getParent().getParent();
         File pom = new File(tempPath + "/pom.xml");
-        System.out.println("* Maven project detected, grabbing missing metadata from pom.xml");
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
@@ -554,9 +552,7 @@ public class CyBenchLauncher {
         return property;
     }
 
-    private static String getMetadataFromGradle(String prop) {
-        System.out.println("* Gradle project detected, grabbing missing metadata from gradle build files");
-        
+    private static String getMetadataFromGradle(String prop) {        
         String switcher;
         String property = "";
         Path tempPath = Paths.get(filePath);
