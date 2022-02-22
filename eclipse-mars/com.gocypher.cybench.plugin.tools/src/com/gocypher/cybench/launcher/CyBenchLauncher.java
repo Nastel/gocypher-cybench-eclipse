@@ -226,43 +226,12 @@ public class CyBenchLauncher {
                     JMHUtils.ClassAndMethod classAndMethod = new JMHUtils.ClassAndMethod(name).invoke();
                     String clazz = classAndMethod.getClazz();
                     String method = classAndMethod.getMethod();
-                    System.out.println("Adding metadata for benchamrk: " + clazz + " test: " + method);
+                    System.out.println("Adding metadata for benchmark: " + clazz + " test: " + method);
                     Class<?> aClass = Class.forName(clazz);
                     Optional<Method> benchmarkMethod = JMHUtils.getBenchmarkMethod(method, aClass);
                     appendMetadataFromMethod(benchmarkMethod, benchmarkReport);
                     appendMetadataFromClass(aClass, benchmarkReport);
-                    try {
-                        if (StringUtils.isNotEmpty(benchmarkReport.getProject())) {
-                            report.setProject(benchmarkReport.getProject());
-                        } else {
-                            report.setProject(getMetadataFromBuildFile("artifactId"));
-                            benchmarkReport.setProject(getMetadataFromBuildFile("artifactId"));
-                        }
-
-                        if (StringUtils.isNotEmpty(benchmarkReport.getProjectVersion())) {
-                            report.setProjectVersion(benchmarkReport.getProjectVersion());
-                        } else {
-                            report.setProjectVersion(getMetadataFromBuildFile("version")); // default
-                            benchmarkReport.setProjectVersion(getMetadataFromBuildFile("version"));
-                        }
-                        
-                        if (StringUtils.isEmpty(benchmarkReport.getVersion())) {
-                        	benchmarkReport.setVersion(benchmarkReport.getProjectVersion());
-                        }
-
-                        if (StringUtils.isEmpty(report.getBenchmarkSessionId())) {
-                            Map<String, String> bMetadata = benchmarkReport.getMetadata();
-                            if (bMetadata != null) {
-                                String sessionId = bMetadata.get("benchSession");
-                                if (StringUtils.isNotEmpty(sessionId)) {
-                                    report.setBenchmarkSessionId(sessionId);
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                    	System.out.println("Error grabbing metadata: " + e);
-                    } 
-                    
+                    syncReportsMetadata(report, benchmarkReport);                   
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -321,7 +290,9 @@ public class CyBenchLauncher {
             System.out.println("Your report is available at "+ resultURL);
             System.out.println("NOTE: It may take a few minutes for your report to appear online");
         }else{
+        	if (response.containsKey("error")) {
         	System.out.println((String) response.get("ERROR"));
+        	}
  			System.out.println("You may submit your report manually at "+Constants.CYB_UPLOAD_URL);
         }
         
@@ -458,6 +429,54 @@ public class CyBenchLauncher {
         }
     }
     
+	public static void syncReportsMetadata(BenchmarkOverviewReport report, BenchmarkReport benchmarkReport) {
+		try {
+			if (StringUtils.isNotEmpty(benchmarkReport.getProject())) {
+				report.setProject(benchmarkReport.getProject());
+			} else {
+				report.setProject(getMetadataFromBuildFile("artifactId"));
+				benchmarkReport.setProject(getMetadataFromBuildFile("artifactId"));
+			}
+
+			if (StringUtils.isNotEmpty(benchmarkReport.getProjectVersion())) {
+				report.setProjectVersion(benchmarkReport.getProjectVersion());
+			} else {
+				report.setProjectVersion(getMetadataFromBuildFile("version")); // default
+				benchmarkReport.setProjectVersion(getMetadataFromBuildFile("version"));
+			}
+
+			if (StringUtils.isEmpty(benchmarkReport.getVersion())) {
+				benchmarkReport.setVersion(benchmarkReport.getProjectVersion());
+			}
+
+			if (StringUtils.isEmpty(report.getBenchmarkSessionId())) {
+				Map<String, String> bMetadata = benchmarkReport.getMetadata();
+				if (bMetadata != null) {
+					String sessionId = bMetadata.get("benchSession");
+					if (StringUtils.isNotEmpty(sessionId)) {
+						report.setBenchmarkSessionId(sessionId);
+					}
+				}
+			}
+			if (benchmarkReport.getCategory().equals("CUSTOM")) {
+				int classIndex = benchmarkReport.getName().lastIndexOf(".");
+				if (classIndex > 0) {
+					String pckgAndClass = benchmarkReport.getName().substring(0, classIndex);
+					int pckgIndex = pckgAndClass.lastIndexOf(".");
+					if (pckgIndex > 0) {
+						String pckg = pckgAndClass.substring(0, pckgIndex);
+						benchmarkReport.setCategory(pckg);
+					} else {
+						benchmarkReport.setCategory(pckgAndClass);
+					}
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("Error grabbing metadata: " + e);
+		}
+
+	}
+    
     public static boolean checkValidMetadata(String prop) {
 		System.out.println("** Checking for valid metadata (" + prop + ") before proceeding...");
 
@@ -467,7 +486,6 @@ public class CyBenchLauncher {
     	
     	File pomCheck = new File(tempPath + "/pom.xml");
     	if (!pomCheck.exists()) {
-    		System.out.println("No pom.xml file detected, checking for Gradle files..");
         	tempProp = getMetadataFromGradle(prop);
         	if (isPropUnspecified(tempProp)) {
         		return false;
@@ -504,7 +522,6 @@ public class CyBenchLauncher {
         Path tempPath = Paths.get(filePath);
         tempPath = tempPath.getParent().getParent();
         File pom = new File(tempPath + "/pom.xml");
-        System.out.println("* Maven project detected, grabbing missing metadata from pom.xml");
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
@@ -535,9 +552,7 @@ public class CyBenchLauncher {
         return property;
     }
 
-    private static String getMetadataFromGradle(String prop) {
-        System.out.println("* Gradle project detected, attempting to grab missing metadata from gradle build files");
-        
+    private static String getMetadataFromGradle(String prop) {        
         String property = "";      
         Path tempPath = Paths.get(filePath);
         tempPath = tempPath.getParent().getParent();
