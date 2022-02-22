@@ -155,6 +155,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 	}
 	
     private void setEnvironmentProperties(ILaunchConfigurationWorkingCopy config, RunSelectionEntry selection) {
+    	String userHome = System.getProperty("user.home");
      	String start = " -D";
      	String classPaths = "";
      	if(!selection.getClassPaths().isEmpty()) {
@@ -168,7 +169,8 @@ public class LaunchShortcut implements ILaunchShortcut {
 //				+ " -DREPORT_CLASSES=\""+selection.getClassPaths().toString()+"\"");
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, 
 				start+Constants.BENCHMARK_REPORT_NAME+"=\""+reportName+"\""+
-    			start+Constants.SELECTED_CLASS_PATHS+"=\""+classPaths+"\"");
+    			start+Constants.SELECTED_CLASS_PATHS+"=\""+classPaths+"\""+
+				start+"log4j.logs.root.path=" + userHome + "\\cybenchLogs\"");
 //				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\" "
 //				+ " -DREPORT_NAME=\""+reportName+"\""
 //				+ " -DREPORT_CLASSES=\""+LauncherUtils.setToString(selection.getClassPaths())+"\"");
