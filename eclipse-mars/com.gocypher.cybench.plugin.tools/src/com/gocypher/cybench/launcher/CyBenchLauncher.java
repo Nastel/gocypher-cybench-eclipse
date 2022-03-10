@@ -87,7 +87,7 @@ public class CyBenchLauncher {
 	public static Map<String,String> resultsMap = new HashMap<>() ;
 	private static final  String benchSource = "Eclipse Mars plugin (v0.3-beta)";
     static Properties cfg = new Properties();
-    private static String filePath;
+    private static Path userDir;
 
     private static final Map<String, String> PROJECT_METADATA_MAP = new HashMap<>(5);
 	
@@ -105,7 +105,8 @@ public class CyBenchLauncher {
 				launcherConfiguration.setPathToEncryptedReportFile(args[1]);
 			}
 		}
-		filePath = launcherConfiguration.getPathToPlainReportFile();
+		
+		userDir = Paths.get(launcherConfiguration.getPathToPlainReportFile()).getParent().getParent();
 		//FIXME implement loading of custom benchmark meta data
 
     	System.out.println(System.getProperty("line.separator"));
@@ -548,7 +549,6 @@ public class CyBenchLauncher {
      */
     public static String getMetadataFromBuildFile(String prop) throws MissingResourceException {
         String property = "";
-        String userDir = System.getProperty("user.dir");
         File gradle = new File(userDir + "/build.gradle");
         File gradleKTS = new File(userDir + "/build.gradle.kts");
         File pom = new File(userDir + "/pom.xml");
@@ -573,7 +573,6 @@ public class CyBenchLauncher {
 
     private static String getMetadataFromMaven(String prop) throws MissingResourceException {
         String property = "";
-        String userDir = System.getProperty("user.dir");
         File pom = new File(userDir + "/pom.xml");
         System.out.println("* Maven project detected, grabbing missing metadata from pom.xml");
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
