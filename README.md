@@ -172,6 +172,8 @@ CyBench launcher using user defined settings.
           option plus “/reports” subdirectory.
         * “Bench Access Token” - by providing the "bench" token that you get after creating a workspace in CyBench UI,
           you can send reports to your private directory, which will be visible only to the users that you authorize.
+        * “Bench Query Token” - by providing the "query" token that you get after creating a workspace in CyBench UI,
+          you can run automated benchmark comparisons within your project when you send a report to your private directory. These comparisons will be visible in your directory only to the users that you authorize. 
         * “Send Report To CyBench” - flag which defines that either report should be sent to CyBench repository or not.
 
 ![](./docs/images/image18.png)

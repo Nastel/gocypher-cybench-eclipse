@@ -69,6 +69,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private boolean useCyBenchBenchmarkSettings;
 
 	private String accessToken;
+	private String queryToken;
 	private String userEmail;
 
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
@@ -208,6 +209,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				"  "+jvmProperties+
 				
     			start+Constants.USER_REPORT_TOKEN+"="+accessToken+
+				start+Constants.USER_QUERY_TOKEN+"="+queryToken+
     			start+Constants.SELECTED_CLASS_PATHS+"=\""+selectionFolderPath+"\"");
     			
 //				" -DTHREADS_COUNT="+thread+
@@ -245,6 +247,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				"  "+jvmProperties+
 				
     			start+Constants.USER_REPORT_TOKEN+"="+accessToken+
+				start+Constants.USER_QUERY_TOKEN+"="+queryToken+
     			start+Constants.USER_EMAIL_ADDRESS+"="+userEmail+
     			start+Constants.SELECTED_CLASS_PATHS+"=\""+selectionFolderPath+"\"");
 		
@@ -270,6 +273,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
    	   useCyBenchBenchmarkSettings = configuration.getAttribute(LaunchConfiguration.USE_CYBNECH_BENCHMARK_SETTINGS, false);
  	   classPathFromUser = configuration.getAttribute(LaunchConfiguration.ADD_CUSTOM_CLASS_PATH, "");
    	   accessToken = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, "");
+	   queryToken = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_QUERY_TOKEN, "");
    	   userEmail = configuration.getAttribute(LaunchConfiguration.USER_EMAIL_ADDRESS, "");
  	  
     }

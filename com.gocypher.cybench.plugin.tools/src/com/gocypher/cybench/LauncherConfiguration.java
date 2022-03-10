@@ -48,6 +48,7 @@ public class LauncherConfiguration {
 	private boolean useCyBenchBenchmarkSettings = false;
 	
 	private String remoteAccessToken = "";
+	private String remoteQueryToken = "";
 	private String emailAddress = "";
 	
 	
@@ -230,6 +231,18 @@ public class LauncherConfiguration {
 
 	public void setRemoteAccessToken(String remoteAccessToken) {
 		this.remoteAccessToken = remoteAccessToken;
+	}
+
+
+
+	public String getRemoteQueryToken() {
+		return remoteQueryToken;
+	}
+
+
+
+	public void setRemoteQueryToken(String remoteQueryToken) {
+		this.remoteQueryToken = remoteQueryToken;
 	}
 
 

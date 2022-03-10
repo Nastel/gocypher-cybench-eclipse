@@ -81,6 +81,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private Button browse;
 
     private Text accessToken;
+	private Text queryToken;
     private Text userEmail;
     private Label emailLabel;
     
@@ -183,6 +184,10 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         accessTokenLabel.setText("Bench Access Token:");
         accessToken = new Text(configuration, SWT.SINGLE | SWT.BORDER | SWT.PASSWORD);
 
+		Label  queryTokenLabel = new Label(configuration, SWT.NONE);
+		queryTokenLabel.setText("Bench Query Token:");
+		queryToken = new Text(configuration, SWT.SINGLE | SWT.BORDER | SWT.PASSWORD);
+
         Label  userEmailLabel = new Label(configuration, SWT.NONE);
         userEmailLabel.setText("Email Address:");
         userEmail = new Text(configuration, SWT.SINGLE | SWT.BORDER );
@@ -199,7 +204,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 		GridDataFactory.swtDefaults().span(2,1).applyTo(reportFolderLabel);
 		GridDataFactory.swtDefaults().span(2,1).applyTo(reportNameLabel);
 		GridDataFactory.swtDefaults().span(2,1).applyTo(reportlaunchPathLabel);
-		GridDataFactory.swtDefaults().span(2,1).applyTo(accessTokenLabel);     
+		GridDataFactory.swtDefaults().span(2,1).applyTo(accessTokenLabel);  
+		GridDataFactory.swtDefaults().span(2,1).applyTo(queryTokenLabel);     
 		GridDataFactory.swtDefaults().span(2,1).applyTo(userEmailLabel);   
 		GridDataFactory.swtDefaults().span(2,1).applyTo(emptyLabel);   
 		GridDataFactory.fillDefaults().grab(true, false).span(7,1).applyTo(reportsFolder);
@@ -207,6 +213,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(reportName);
 		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(launchPath);
 		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(accessToken);
+		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(queryToken);
 		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(userEmail);  	
 		GridDataFactory.fillDefaults().grab(true, false).span(8,1).applyTo(emailLabel);      	      
        
@@ -282,14 +289,16 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             }
         	
         	IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-        	String token = store.getString(PreferenceConstants.P_AUTH_TOKEN);
+        	String bToken = store.getString(PreferenceConstants.P_AUTH_TOKEN);
+			String qToken = store.getString(PreferenceConstants.P_QUERY_TOKEN);
         	String email = store.getString(PreferenceConstants.P_EMAIL);
         	
             String reportNameDef = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "");
             String pathToSourceSelectedDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_SELECTED_PATH, "");
             String pathToSourceNotSelectedDef = configuration.getAttribute(LaunchConfiguration.LAUNCH_NOT_SELECTED_PATH, "");
             
-            String accessTokenDef = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, token);
+            String accessTokenDef = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, bToken);
+			String queryTokenDef = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_QUERY_TOKEN, qToken);
             String userEmailDef = configuration.getAttribute(LaunchConfiguration.USER_EMAIL_ADDRESS, email);
             boolean sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
             boolean includehardwarePropeties = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
@@ -306,6 +315,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 
             accessToken.setText(accessTokenDef);
             accessToken.addModifyListener(modifyListener);
+			queryToken.setText(queryTokenDef);
+			queryToken.addModifyListener(modifyListener);
             
 //            onlySelectedLaunch.setText(pathToSourceSelectedDef);
             initializeSelectedBenchmarks(pathToSourceSelectedDef, pathToSourceNotSelectedDef);
@@ -341,6 +352,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         configuration.setAttribute(LaunchConfiguration.REPORT_FOLDER, reportsFolder.getText());
         
         configuration.setAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, accessToken.getText());
+		configuration.setAttribute(LaunchConfiguration.REMOTE_CYBENCH_QUERY_TOKEN, queryToken.getText());
         configuration.setAttribute(LaunchConfiguration.USER_EMAIL_ADDRESS,userEmail.getText());
         configuration.setAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, shouldSendReportToCyBench.getSelection());
         configuration.setAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, shouldDoHardwareSnapshot.getSelection());

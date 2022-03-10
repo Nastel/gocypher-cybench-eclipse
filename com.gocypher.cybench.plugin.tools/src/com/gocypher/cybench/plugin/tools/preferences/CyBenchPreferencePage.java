@@ -34,7 +34,8 @@ public class CyBenchPreferencePage extends FieldEditorPreferencePage implements 
 	 * restore itself.
 	 */
 	public void createFieldEditors() {
-		addField(new StringFieldEditor(PreferenceConstants.P_AUTH_TOKEN, "A &repository token:", getFieldEditorParent()));
+		addField(new StringFieldEditor(PreferenceConstants.P_AUTH_TOKEN, "A &repository bench token:", getFieldEditorParent()));
+		addField(new StringFieldEditor(PreferenceConstants.P_QUERY_TOKEN, "A $repository query token:", getFieldEditorParent()));
 		addField(new StringFieldEditor(PreferenceConstants.P_EMAIL, "&Email address:", getFieldEditorParent()));
 	}
 

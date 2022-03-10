@@ -13,6 +13,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		store.setDefault(PreferenceConstants.P_AUTH_TOKEN,"");
+		store.setDefault(PreferenceConstants.P_QUERY_TOKEN, "");
 		store.setDefault(PreferenceConstants.P_EMAIL,"");
 	}
 
