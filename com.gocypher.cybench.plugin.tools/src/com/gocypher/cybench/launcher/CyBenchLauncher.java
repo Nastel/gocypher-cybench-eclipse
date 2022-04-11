@@ -547,7 +547,6 @@ public class CyBenchLauncher {
 		 launcherConfiguration.setScope(checkNullAndReturnString(Constants.AUTO_SCOPE));
 		 launcherConfiguration.setDeviationsAllowed(checkNullAndReturnInt(Constants.AUTO_DEVIATIONS_ALLOWED));
 		 launcherConfiguration.setCompareVersion(checkNullAndReturnString(Constants.AUTO_COMPAREVERSION));
-		 launcherConfiguration.setUseAutoComparison(checkNullAndReturnBoolean(Constants.AUTO_USE_AUTO_COMP));
 	}
 	
 	

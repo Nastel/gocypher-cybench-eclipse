@@ -63,9 +63,7 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
 	private Spinner anomaliesAllowed;
 	private Spinner percentChange;
 	private Spinner deviationsAllowed;
-	
-	private Button useAutoComparison;
-	
+		
 //    private File myFile = SystemUtils.getUserHome();
 //    private String myFileHome = myFile.getAbsolutePath(); <-- this also works if you don't use System.getProperty("user.home")
 
@@ -85,12 +83,6 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
     	config = new Group(comp, SWT.NONE);
     	config.setText("Automated Comparison Config");
         config.setLayout(new GridLayout(10, false));
-        
-	        Label useAutoComparisonLabel = new Label(config, SWT.NONE);
-	        useAutoComparisonLabel.setText("Run Automatic Comparison:");
-	        useAutoComparison = new Button(config, SWT.CHECK);
-	        useAutoComparison.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 8, 1)); 
-
         
         	Label scopeLabel = new Label(config, SWT.None);
         	scopeLabel.setText("Scope: ");
@@ -126,13 +118,7 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
         	Label deviationsAllowedLabel = new Label(config, SWT.NONE);
         	deviationsAllowedLabel.setText("# of Deviations Allowed: ");
         	deviationsAllowed = new Spinner(config, SWT.BORDER);
-        	        
-        	useAutoComparison.addSelectionListener(new SelectionAdapter() {
- 	            public void widgetSelected(SelectionEvent e) {
- 	            	useCybenchEnableDisable();
- 	            }
-	        });
-        	
+        	            	
         	method.addSelectionListener(new SelectionAdapter() {
         		public void widgetSelected(SelectionEvent e) {
         			disableDeltaWidgets();
@@ -166,28 +152,6 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
 	        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(config);
 	        
 			return config;
-    }
-    private void useCybenchEnableDisable() {
-    	if (!useAutoComparison.getSelection()) {
-    		scope.setEnabled(false);
-    		compareVersion.setEnabled(false);
-    		threshold.setEnabled(false);
-    		latestReports.setEnabled(false);
-    		anomaliesAllowed.setEnabled(false);
-    		method.setEnabled(false);
-    		percentChange.setEnabled(false);
-    		deviationsAllowed.setEnabled(false);
-    	} else {
-    		scope.setEnabled(true);
-    		compareVersion.setEnabled(true);
-    		threshold.setEnabled(true);
-    		latestReports.setEnabled(true);
-    		anomaliesAllowed.setEnabled(true);
-    		method.setEnabled(true);
-    		percentChange.setEnabled(true);
-    		deviationsAllowed.setEnabled(true);
-    	
-    }
     }
     
     private void disableDeltaWidgets() {
@@ -262,10 +226,6 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
             percentChange.addModifyListener(modifyListener);
             deviationsAllowed.setValues(deviationsDef, 1, 1000, 0, 1, 1);
             deviationsAllowed.addModifyListener(modifyListener);                 
-            useAutoComparison.setSelection(useAutoComparisonDef);
-            useAutoComparison.addSelectionListener(selectionListener);
-
-            useCybenchEnableDisable();
             disableDeltaWidgets();
                        
         } catch (CoreException e) {
@@ -276,7 +236,6 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
     @Override
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_ANOMALIES_ALLOWED, anomaliesAllowed.getSelection());
-    	configuration.setAttribute(LaunchConfiguration.AUTO_USE_AUTO_COMP, useAutoComparison.getSelection());
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_COMPAREVERSION, compareVersion.getText()); //?
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_DEVIATIONSALLOWED, deviationsAllowed.getSelection());
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_LATESTREPORTS, latestReports.getSelection());
@@ -284,7 +243,6 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_PERCENTCHANGE, percentChange.getSelection());
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_SCOPE, scope.getText());
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_THRESHOLD, threshold.getText());
-    	configuration.setAttribute(LaunchConfiguration.AUTO_USE_AUTO_COMP, useAutoComparison.getSelection());
     }
     
 

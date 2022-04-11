@@ -41,7 +41,6 @@ public class LauncherConfiguration {
 	private String threshold = "GREATER";
 	private String compareVersion = "";
 	private String scope = "WITHIN";
-	private boolean useAutoComparison = true;
 	
 	private int forks = 1 ;
 	private int measurementIterations = 1 ;
@@ -333,14 +332,5 @@ public class LauncherConfiguration {
 	public void setScope(String scope) {
 		this.scope = scope;
 	}
-	
-	public boolean isUseAutoComparison() {
-		return useAutoComparison;
-	}
-
-	public void setUseAutoComparison(boolean useAutoComparison) {
-		this.useAutoComparison = useAutoComparison;
-	}
-	
 	
 }
