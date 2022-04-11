@@ -269,7 +269,6 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
     			start+Constants.AUTO_PERCENT_CHANGE+"="+percentChange+
     			start+Constants.AUTO_SCOPE+"="+scope+
     			start+Constants.AUTO_THRESHOLD+"="+threshold+
-    			start+Constants.AUTO_USE_AUTO_COMP+"="+useAutoComparison+
     			start+Constants.SELECTED_CLASS_PATHS+"=\""+selectionFolderPath+"\"");
 		
     }
