@@ -131,6 +131,12 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
         		}
         	});
         	
+        	scope.addSelectionListener(new SelectionAdapter() {
+        		public void widgetSelected(SelectionEvent e) {
+        			disableScopeWidgets();
+        		}
+        	});
+        	
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(scopeLabel);
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(compareVersionLabel);
 	        GridDataFactory.swtDefaults().span(2,1).applyTo(thresholdLabel);
@@ -154,6 +160,7 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
 			return config;
     }
     
+    // handling to disable irrelevant fields depending on selection
     private void disableDeltaWidgets() {
     	if (method.getSelectionIndex() == 0) {
     		threshold.setEnabled(true);
@@ -168,7 +175,19 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
     		percentChange.setEnabled(false);
     		deviationsAllowed.setEnabled(true);
     	}
+    	
+    	if (scope.getSelectionIndex() == 0) {
+    	}
     }
+    
+    private void disableScopeWidgets() {
+    	if (scope.getSelectionIndex() == 0) {
+    		compareVersion.setEnabled(false);
+    	} else {
+    		compareVersion.setEnabled(true);
+    	}
+    }
+    
     @Override
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
     }
@@ -198,7 +217,6 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
     public void initializeFrom(ILaunchConfiguration configuration) {
         try {
 
-//            String jvmArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "-Dlog4j.logs.root.path=" + userHome + "\\cybenchLogs");
             String scopeDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_SCOPE, "WITHIN");
             String compareVersionDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_COMPAREVERSION, "");
             String methodDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_METHOD, "DELTA");
@@ -215,9 +233,7 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
             int anomaliesAllowedDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_ANOMALIES_ALLOWED, 1);
             int percentChangeDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_PERCENTCHANGE, 15);
             int deviationsDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_DEVIATIONSALLOWED, 1);
-            
-            boolean useAutoComparisonDef = configuration.getAttribute(LaunchConfiguration.AUTO_USE_AUTO_COMP, true);
-            
+                        
             latestReports.setValues(latestReportsDef, 1, 100, 0, 1, 1);
             latestReports.addModifyListener(modifyListener);
             anomaliesAllowed.setValues(anomaliesAllowedDef, 1, 1000, 0, 1, 1);
@@ -227,6 +243,7 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
             deviationsAllowed.setValues(deviationsDef, 1, 1000, 0, 1, 1);
             deviationsAllowed.addModifyListener(modifyListener);                 
             disableDeltaWidgets();
+            disableScopeWidgets();
                        
         } catch (CoreException e) {
         	GuiUtils.logError("There was a problem on the run configuration initialization: ", e);

@@ -385,26 +385,7 @@ public class CyBenchLauncher {
 //	            System.out.println("added metadata " + singleAnnotation.key() + "=" + singleAnnotation.value());
 	        }
 
-	    }
-	 
-//	 private static void getAutoConfig(LauncherConfiguration launcherConfiguration) {
-//	//	 launcherConfiguration.setAnomaliesAllowed(checkNullAndReturnInt(Constants.AUTO_ANOMALIES_ALLOWED));
-//		 
-//		 launcherConfiguration.setAnomaliesAllowed(checkNullAndReturnInt(Constants.AUTO_ANOMALIES_ALLOWED));
-//		 launcherConfiguration.setMethod(checkNullAndReturnString(Constants.AUTO_METHOD));
-//		 launcherConfiguration.setLatestReports(checkNullAndReturnInt(Constants.AUTO_LATEST_REPORTS));
-//		 launcherConfiguration.setPercentChange(checkNullAndReturnInt(Constants.AUTO_PERCENT_CHANGE));
-//		 launcherConfiguration.setThreshold(checkNullAndReturnString(Constants.AUTO_THRESHOLD));
-//		 launcherConfiguration.setScope(checkNullAndReturnString(Constants.AUTO_SCOPE));
-//		 launcherConfiguration.setDeviationsAllowed(checkNullAndReturnInt(Constants.AUTO_DEVIATIONS_ALLOWED));
-//		 launcherConfiguration.setCompareVersion(checkNullAndReturnString(Constants.AUTO_COMPAREVERSION));
-//		 launcherConfiguration.setUseAutoComparison(checkNullAndReturnBoolean(Constants.AUTO_USE_AUTO_COMP));
-//	//	 launcherConfiguration.setMethod(checkNullAndReturnString(Constants.AUTO_METHOD));
-//	//	 String tmpMethod = launcherConfiguration.getMethod();
-//		 System.out.println("ANO : " + launcherConfiguration.getAnomaliesAllowed());
-//		 System.out.println("METHO : " + launcherConfiguration.getMethod());
-//	 }
-	 
+	    } 
 	 public static ComparisonConfig checkConfigValidity(LauncherConfiguration launcherConfiguration) throws Exception {
 	        ComparisonConfig verifiedComparisonConfig = new ComparisonConfig();
 
@@ -538,7 +519,7 @@ public class CyBenchLauncher {
 		}else{
 			launcherConfiguration.setReportUploadStatus("public");
 		}
-    	
+    	 // grab user auto comparison configs
 		 launcherConfiguration.setAnomaliesAllowed(checkNullAndReturnInt(Constants.AUTO_ANOMALIES_ALLOWED));
 		 launcherConfiguration.setMethod(checkNullAndReturnString(Constants.AUTO_METHOD));
 		 launcherConfiguration.setLatestReports(checkNullAndReturnInt(Constants.AUTO_LATEST_REPORTS));
