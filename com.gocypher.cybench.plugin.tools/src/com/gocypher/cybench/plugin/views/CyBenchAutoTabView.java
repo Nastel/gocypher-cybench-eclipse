@@ -63,10 +63,7 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
 	private Spinner anomaliesAllowed;
 	private Spinner percentChange;
 	private Spinner deviationsAllowed;
-		
-//    private File myFile = SystemUtils.getUserHome();
-//    private String myFileHome = myFile.getAbsolutePath(); <-- this also works if you don't use System.getProperty("user.home")
-
+	
     @Override
     public void createControl(Composite parent) {
         Composite comp = new Group(parent, SWT.BORDER);
@@ -74,7 +71,6 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
         
         GridLayoutFactory.swtDefaults().numColumns(10).applyTo(comp); 
         
-        /* Benchmarking settings GROUP */
         config = prepareBenchmarkConfigurationGroup(comp);       
      
     }
