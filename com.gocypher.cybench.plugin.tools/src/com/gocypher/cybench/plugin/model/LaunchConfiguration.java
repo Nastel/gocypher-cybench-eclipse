@@ -31,6 +31,17 @@ public interface LaunchConfiguration {
 	public static final String WARMUP_ITERATION = "com.cybench.warmupIterations";
 	public static final String WARMUP_SECONDS = "com.cybench.warmupSeconds";
 	public static final String MEASURMENT_SECONDS = "com.cybench.measurmentSeconds";
+	
+	
+	public static final String AUTO_COMPARE_SCOPE = "com.cybench.scope";
+	public static final String AUTO_COMPARE_COMPAREVERSION = "com.cybench.compareVersion";
+	public static final String AUTO_COMPARE_LATESTREPORTS = "com.cybench.latestReports";
+	public static final String AUTO_COMPARE_ANOMALIES_ALLOWED = "com.cybench.anomaliesAllowed";
+	public static final String AUTO_COMPARE_METHOD = "com.cybench.method";
+	public static final String AUTO_COMPARE_PERCENTCHANGE = "com.cybench.percentChange";
+	public static final String AUTO_COMPARE_THRESHOLD = "com.cybench.threshold";
+	public static final String AUTO_COMPARE_DEVIATIONSALLOWED = "com.cybench.deviations";
+	public static final String AUTO_USE_AUTO_COMP = "com.cybench.useAutoComparison";
 
 //	public static final String EXECUTION_SCORE = "com.cybench.executionScore";
 	public static final String SHOULD_SEND_REPORT_CYBENCH = "com.cybench.shouldSendReportToCyBench";

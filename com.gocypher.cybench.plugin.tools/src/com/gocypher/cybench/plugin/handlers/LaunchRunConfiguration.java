@@ -72,6 +72,18 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private String queryToken;
 	private String userEmail;
 
+	private int anomaliesAllowed;
+	private int latestReports;
+	private int percentChange;
+	private int deviationsAllowed;
+	
+	private String method;
+	private String threshold;
+	private String compareVersion;
+	private String scope;
+	
+	private boolean useAutoComparison;
+	
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
 			URL pluginURL = FileLocator.resolve(Platform.getBundle(bundleSymbolicName).getEntry("/"));
@@ -249,6 +261,15 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
     			start+Constants.USER_REPORT_TOKEN+"="+accessToken+
 				start+Constants.USER_QUERY_TOKEN+"="+queryToken+
     			start+Constants.USER_EMAIL_ADDRESS+"="+userEmail+
+    			start+Constants.AUTO_ANOMALIES_ALLOWED+"="+anomaliesAllowed+
+    			start+Constants.AUTO_COMPAREVERSION+"="+compareVersion+
+    			start+Constants.AUTO_DEVIATIONS_ALLOWED+"="+deviationsAllowed+
+    			start+Constants.AUTO_LATEST_REPORTS+"="+latestReports+
+    			start+Constants.AUTO_METHOD+"="+method+
+    			start+Constants.AUTO_PERCENT_CHANGE+"="+percentChange+
+    			start+Constants.AUTO_SCOPE+"="+scope+
+    			start+Constants.AUTO_THRESHOLD+"="+threshold+
+    			start+Constants.AUTO_USE_AUTO_COMP+"="+useAutoComparison+
     			start+Constants.SELECTED_CLASS_PATHS+"=\""+selectionFolderPath+"\"");
 		
     }
@@ -275,6 +296,19 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
    	   accessToken = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_ACCESS_TOKEN, "");
 	   queryToken = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_QUERY_TOKEN, "");
    	   userEmail = configuration.getAttribute(LaunchConfiguration.USER_EMAIL_ADDRESS, "");
+   	   
+   	   anomaliesAllowed = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_ANOMALIES_ALLOWED, 1);
+   	   latestReports = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_LATESTREPORTS, 1);
+   	   percentChange = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_PERCENTCHANGE, 15);
+   	   deviationsAllowed = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_DEVIATIONSALLOWED, 1);
+   	   method = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_METHOD, "DELTA");
+   	   threshold = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_THRESHOLD, "GREATER");
+   	   compareVersion = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_COMPAREVERSION, "");
+   	   scope = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_SCOPE, "WITHIN");
+       useAutoComparison = configuration.getAttribute(LaunchConfiguration.AUTO_USE_AUTO_COMP, true);
+   	   
+   	   
+   	   
  	  
     }
 }
