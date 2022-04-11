@@ -81,9 +81,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private String threshold;
 	private String compareVersion;
 	private String scope;
-	
-	private boolean useAutoComparison;
-	
+		
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
 			URL pluginURL = FileLocator.resolve(Platform.getBundle(bundleSymbolicName).getEntry("/"));
@@ -296,6 +294,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	   queryToken = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_QUERY_TOKEN, "");
    	   userEmail = configuration.getAttribute(LaunchConfiguration.USER_EMAIL_ADDRESS, "");
    	   
+   	   // Auto Comparison Config
    	   anomaliesAllowed = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_ANOMALIES_ALLOWED, 1);
    	   latestReports = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_LATESTREPORTS, 1);
    	   percentChange = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_PERCENTCHANGE, 15);
@@ -303,11 +302,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
    	   method = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_METHOD, "DELTA");
    	   threshold = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_THRESHOLD, "GREATER");
    	   compareVersion = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_COMPAREVERSION, "");
-   	   scope = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_SCOPE, "WITHIN");
-       useAutoComparison = configuration.getAttribute(LaunchConfiguration.AUTO_USE_AUTO_COMP, true);
-   	   
-   	   
-   	   
+   	   scope = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_SCOPE, "WITHIN");   	   
  	  
     }
 }
