@@ -32,15 +32,15 @@ public class LauncherConfiguration {
 	private String pathToEncryptedReportFile ;
 	
 	
-	private int latestReports = 1;
-	private int anomaliesAllowed = 1;
-	private int percentChange = 15;
-	private int deviationsAllowed = 1;
+	private int latestReports;
+	private int anomaliesAllowed;
+	private double percentChange;
+	private double deviationsAllowed;
 	
-	private String method = "DELTA";
-	private String threshold = "GREATER";
+	private String method = "";
+	private String threshold = "";
 	private String compareVersion = "";
-	private String scope = "WITHIN";
+	private String scope = "";
 	
 	private int forks = 1 ;
 	private int measurementIterations = 1 ;
@@ -286,19 +286,19 @@ public class LauncherConfiguration {
 		this.anomaliesAllowed = anomaliesAllowed;
 	}
 	
-	public int getPercentChange() {
+	public double getPercentChange() {
 		return percentChange;
 	}
 	
-	public void setPercentChange(int percentChange) {
+	public void setPercentChange(double percentChange) {
 		this.percentChange = percentChange;
 	}
 
-	public int getDeviationsAllowed() {
+	public double getDeviationsAllowed() {
 		return deviationsAllowed;
 	}
 	
-	public void setDeviationsAllowed(int deviationsAllowed) {
+	public void setDeviationsAllowed(double deviationsAllowed) {
 		this.deviationsAllowed = deviationsAllowed;
 	}
 	
