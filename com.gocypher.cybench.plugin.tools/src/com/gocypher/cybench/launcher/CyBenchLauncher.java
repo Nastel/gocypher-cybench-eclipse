@@ -307,6 +307,14 @@ public class CyBenchLauncher {
                 System.out.println("You can find all device benchmarks on "+ deviceReports);
                 System.out.println("Your report is available at "+ resultURL);
                 System.out.println("NOTE: It may take a few minutes for your report to appear online");
+                
+                if (response.containsKey("automatedComparisons")) {
+                    List<Map<String, Object>> automatedComparisons = (List<Map<String, Object>>) response
+                            .get("automatedComparisons");
+                    if (tooManyAnomalies(automatedComparisons)) {
+                        System.exit(1);
+                    }
+                }               
             } else {
                 String errMsg = getErrorResponseMessage(response);
                 if (errMsg != null) {
@@ -459,7 +467,7 @@ public class CyBenchLauncher {
 	                if (DEVIATIONS_ALLOWED <= 0) {
 	                    throw new Exception("Method specified as SD but not enough deviations allowed were specified!");
 	                }
-	                verifiedComparisonConfig.setDeviationsAllowed(DEVIATIONS_ALLOWED);
+	                verifiedComparisonConfig.setDeviationsAllowed((DEVIATIONS_ALLOWED/Math.pow(10, 2.0)));
 	            } else {
 	                throw new Exception("Method specified as SD but deviations allowed was not specified!");
 	            }
@@ -478,7 +486,7 @@ public class CyBenchLauncher {
 	                        throw new Exception(
 	                                "Threshold specified as PERCENT_CHANGE but percent change is not high enough!");
 	                    }
-	                    verifiedComparisonConfig.setPercentChangeAllowed(PERCENT_CHANGE_ALLOWED);
+	                    verifiedComparisonConfig.setPercentChangeAllowed((PERCENT_CHANGE_ALLOWED/Math.pow(10, 2.0)));
 	                } else {
 	                    throw new Exception(
 	                            "Threshold specified as PERCENT_CHANGE but percent change allowed was not specified!");
@@ -523,11 +531,11 @@ public class CyBenchLauncher {
 		 launcherConfiguration.setAnomaliesAllowed(checkNullAndReturnInt(Constants.AUTO_ANOMALIES_ALLOWED));
 		 launcherConfiguration.setMethod(checkNullAndReturnString(Constants.AUTO_METHOD));
 		 launcherConfiguration.setLatestReports(checkNullAndReturnInt(Constants.AUTO_LATEST_REPORTS));
-		 launcherConfiguration.setPercentChange(checkNullAndReturnInt(Constants.AUTO_PERCENT_CHANGE));
+		 launcherConfiguration.setPercentChange(checkNullAndReturnDouble(Constants.AUTO_PERCENT_CHANGE));
 		 launcherConfiguration.setThreshold(checkNullAndReturnString(Constants.AUTO_THRESHOLD));
 		 launcherConfiguration.setScope(checkNullAndReturnString(Constants.AUTO_SCOPE));
-		 launcherConfiguration.setDeviationsAllowed(checkNullAndReturnInt(Constants.AUTO_DEVIATIONS_ALLOWED));
-		 launcherConfiguration.setCompareVersion(checkNullAndReturnString(Constants.AUTO_COMPAREVERSION));
+		 launcherConfiguration.setDeviationsAllowed(checkNullAndReturnDouble(Constants.AUTO_DEVIATIONS_ALLOWED));
+		 launcherConfiguration.setCompareVersion(checkNullAndReturnString(Constants.AUTO_COMPARE_VERSION));
 	}
 	
 	
@@ -541,6 +549,13 @@ public class CyBenchLauncher {
 	private static int checkNullAndReturnInt(String propertyName)  {
 		if(System.getProperty(propertyName)!= null) {
 			return Integer.parseInt(System.getProperty(propertyName));
+		}
+		return 1;
+	}
+	
+	private static double checkNullAndReturnDouble(String propertyName)  {
+		if(System.getProperty(propertyName)!= null) {
+			return Double.parseDouble(System.getProperty(propertyName));
 		}
 		return 1;
 	}
@@ -560,6 +575,23 @@ public class CyBenchLauncher {
 		}
 		return classesToInclude;
 	}
+	
+    @SuppressWarnings("unchecked")
+    public static boolean tooManyAnomalies(List<Map<String, Object>> automatedComparisons) {
+        for (Map<String, Object> automatedComparison : automatedComparisons) {
+            Integer totalFailedBenchmarks = (Integer) automatedComparison.get("totalFailedBenchmarks");
+            Map<String, Object> config = (Map<String, Object>) automatedComparison.get("config");
+            if (config.containsKey("anomaliesAllowed")) {
+                Integer anomaliesAllowed = (Integer) config.get("anomaliesAllowed");
+                if (totalFailedBenchmarks != null && totalFailedBenchmarks > anomaliesAllowed) {
+                    System.out.println(
+                            "There were more anomaly benchmarks than your specified anomalies allowed in one of your automated comparison configurations!");
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 	
     /**
      * Synchronizes overview and benchmark reports metadata.
