@@ -52,11 +52,14 @@ import com.gocypher.cybench.plugin.utils.GuiUtils;
 public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
 	
 	private Group config;
-	
+	private Group infoText;
+	private Group scopeGroup;
+	private Group methodGroup;
 	
 	private Combo scope;
 	private Combo method;
 	private Combo threshold;
+	
 	private Text compareVersion;
 	
 	private Spinner latestReports;
@@ -71,14 +74,24 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
         
         GridLayoutFactory.swtDefaults().numColumns(10).applyTo(comp); 
         
-        config = prepareBenchmarkConfigurationGroup(comp);       
+        config = prepareBenchmarkConfigurationGroup(comp);
+        
+        scopeGroup = prepareScopeGroup(comp);
+        
+        methodGroup = prepareMethodGroup(comp);  
+        
+//        infoText = prepareAutoComparisonText(comp);
+        
+        
      
     }
     
-    private Group  prepareBenchmarkConfigurationGroup(Composite comp) {
+    private Group prepareBenchmarkConfigurationGroup(Composite comp) {
     	config = new Group(comp, SWT.NONE);
     	config.setText("Automated Comparison Config");
         config.setLayout(new GridLayout(10, false));
+        
+        
         
         	Label scopeLabel = new Label(config, SWT.None);
         	scopeLabel.setText("Scope: ");
@@ -114,7 +127,7 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
         	Label deviationsAllowedLabel = new Label(config, SWT.NONE);
         	deviationsAllowedLabel.setText("# of Deviations Allowed: ");
         	deviationsAllowed = new Spinner(config, SWT.BORDER);
-        	            	
+        	
         	method.addSelectionListener(new SelectionAdapter() {
         		public void widgetSelected(SelectionEvent e) {
         			disableDeltaWidgets();
@@ -154,6 +167,91 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
 	        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(config);
 	        
 			return config;
+    }
+    
+    
+    private Group prepareScopeGroup(Composite comp) {
+    	scopeGroup = new Group(comp, SWT.NONE);
+    	scopeGroup.setText("Scope Options Info");
+    	scopeGroup.setLayout(new GridLayout(1, false));
+    	
+    	Label scopeHelp = new Label(scopeGroup, SWT.None);
+    	scopeHelp.setText("Scope: Determines which version of your project to compare to. Options are WITHIN and BETWEEN");
+    	
+    	Label withinHelp = new Label(scopeGroup, SWT.None);
+    	withinHelp.setText("   - WITHIN: Comparison will be made against reports with the same version. Compare Version field is disabled.");
+    	
+    	Label betweenHelp = new Label(scopeGroup, SWT.None);
+    	betweenHelp.setText("   - BETWEEN: Comparison will be made against reports with a previous version. Compare Version field is enabled, and is required.");
+    	
+    	Label compareVersionHelp = new Label(scopeGroup, SWT.None);
+    	compareVersionHelp.setText("Compare Version: Version of your project to compare to, if using the BETWEEN scope.");
+    	
+    	Label numOfReportsHelp = new Label(scopeGroup, SWT.None);
+    	numOfReportsHelp.setText("# of Latest Reports: Set the number of previous reports to compare to. Setting this to"
+    			+ " 1 would compare to the most recent report, 5 would check the last 5, etc.");
+    	
+    	Label numOfAnomaliesAllowedHelp = new Label(scopeGroup, SWT.None);
+    	numOfAnomaliesAllowedHelp.setText("# of Anomalies Allowed: Set the number of anomalies allowed in the comparison before failing CI/CD pipeline builds.");
+    	
+
+    	GridDataFactory.swtDefaults().span(1,4).applyTo(numOfReportsHelp);
+    	GridDataFactory.swtDefaults().span(1,4).applyTo(numOfAnomaliesAllowedHelp);
+    	GridDataFactory.swtDefaults().span(1,4).applyTo(scopeHelp);
+    	GridDataFactory.swtDefaults().span(1,4).applyTo(withinHelp);
+    	GridDataFactory.swtDefaults().span(1,4).applyTo(betweenHelp);
+    	GridDataFactory.swtDefaults().span(1,4).applyTo(compareVersionHelp);
+    	
+        GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(scopeGroup);
+        
+        return scopeGroup;
+    	
+    }
+    
+    private Group prepareMethodGroup(Composite comp) {
+    	methodGroup = new Group(comp, SWT.NONE);
+    	methodGroup.setText("Method Options Info");
+    	methodGroup.setLayout(new GridLayout(1, false));
+    	
+    	Label methodHelp = new Label(methodGroup, SWT.None);
+    	methodHelp.setText("Method: Determines comparison method. Options are DELTA and SD.");
+    	
+    	Label deltaHelp = new Label(methodGroup, SWT.None);
+    	deltaHelp.setText("   - DELTA: Compares the overall change in score. When selected, deviations allowed is disabled, and threshold is enabled.");
+    	
+    	Label sdHelp = new Label(methodGroup, SWT.NONE);
+    	sdHelp.setText("   - SD: Tests for Standard Deviation of new score, compared to the average of previous N scores, where N is # of Latest Reports.");
+    	
+    	Label thresholdHelp = new Label(methodGroup, SWT.NONE);
+    	thresholdHelp.setText("Threshold: Used when the DELTA method is selected. Options are GREATER and PERCENT_CHANGE. Disabled when SD method is selected.");
+    	
+    	Label greaterHelp = new Label(methodGroup, SWT.NONE);
+    	greaterHelp.setText("   - GREATER: Finds the change in score between reports, if # of Latest Reports is higher than 1,"
+    			+ " will compare against the average score of those reports.");
+    	
+    	Label pcHelp = new Label(methodGroup, SWT.NONE);
+    	pcHelp.setText("   - PERCENT_CHANGE: Finds the percent change in score between reports. Percent Change Allowed field is enabled and required.");
+    	
+    	Label pcaHelp = new Label(methodGroup, SWT.NONE);
+    	pcaHelp.setText("Percent Change Allowed: Set the percent change allowed value. Required if threshold PERCENT_CHANGE is selected, otherwise disabled.");
+    	
+    	Label deviationsHelp = new Label(methodGroup, SWT.None);
+    	deviationsHelp.setText("Deviations Allowed: Set the deviations allowed value, benchmarks beyond this value will report as an anomaly."
+    			+ " Required if method SD is selected, otherwise disabled.");
+    	
+    	GridDataFactory.swtDefaults().span(5,5).applyTo(methodHelp);
+    	GridDataFactory.swtDefaults().span(5,5).applyTo(deltaHelp);
+    	GridDataFactory.swtDefaults().span(5,5).applyTo(sdHelp);
+    	GridDataFactory.swtDefaults().span(5,5).applyTo(thresholdHelp);
+    	GridDataFactory.swtDefaults().span(5,5).applyTo(greaterHelp);
+    	GridDataFactory.swtDefaults().span(5,5).applyTo(pcHelp);
+    	GridDataFactory.swtDefaults().span(5,5).applyTo(pcaHelp);
+    	GridDataFactory.swtDefaults().span(5,5).applyTo(deviationsHelp);
+    	
+    	GridDataFactory.fillDefaults().grab(true, false).span(10,1).applyTo(methodGroup);
+    	
+    	return methodGroup;
+    	
     }
     
     // handling to disable irrelevant fields depending on selection
@@ -217,6 +315,7 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
             String compareVersionDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_COMPAREVERSION, "");
             String methodDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_METHOD, "DELTA");
             String thresholdDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_THRESHOLD, "GREATER");
+            
             scope.setText(scopeDef);
             scope.addModifyListener(modifyListener);
             compareVersion.addModifyListener(modifyListener);
@@ -225,18 +324,20 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
             threshold.setText(thresholdDef);
             threshold.addModifyListener(modifyListener);
             
-            int latestReportsDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_LATESTREPORTS, 1);
-            int anomaliesAllowedDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_ANOMALIES_ALLOWED, 1);
-            int percentChangeDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_PERCENTCHANGE, 15);
-            int deviationsDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_DEVIATIONSALLOWED, 1);
+            
+            
+            int latestReportsDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_LATESTREPORTS, 0);
+            int anomaliesAllowedDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_ANOMALIES_ALLOWED, 0);
+            int percentChangeDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_PERCENTCHANGE, 0);
+            int deviationsDef = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_DEVIATIONSALLOWED, 0);
                         
             latestReports.setValues(latestReportsDef, 1, 100, 0, 1, 1);
             latestReports.addModifyListener(modifyListener);
-            anomaliesAllowed.setValues(anomaliesAllowedDef, 1, 1000, 0, 1, 1);
+            anomaliesAllowed.setValues(anomaliesAllowedDef, 0, 99, 0, 1, 1);
             anomaliesAllowed.addModifyListener(modifyListener);
-            percentChange.setValues(percentChangeDef, 1, 99, 0, 1, 1);
+            percentChange.setValues(percentChangeDef, 0, 9999, 2, 10, 100);
             percentChange.addModifyListener(modifyListener);
-            deviationsAllowed.setValues(deviationsDef, 1, 1000, 0, 1, 1);
+            deviationsAllowed.setValues(deviationsDef, 0, 9999, 2, 10, 100);
             deviationsAllowed.addModifyListener(modifyListener);                 
             disableDeltaWidgets();
             disableScopeWidgets();
@@ -248,6 +349,7 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
     
     @Override
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+    	
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_ANOMALIES_ALLOWED, anomaliesAllowed.getSelection());
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_COMPAREVERSION, compareVersion.getText()); //?
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_DEVIATIONSALLOWED, deviationsAllowed.getSelection());
