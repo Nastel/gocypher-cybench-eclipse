@@ -260,7 +260,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				start+Constants.USER_QUERY_TOKEN+"="+queryToken+
     			start+Constants.USER_EMAIL_ADDRESS+"="+userEmail+
     			start+Constants.AUTO_ANOMALIES_ALLOWED+"="+anomaliesAllowed+
-    			start+Constants.AUTO_COMPAREVERSION+"="+compareVersion+
+    			start+Constants.AUTO_COMPARE_VERSION+"="+compareVersion+
     			start+Constants.AUTO_DEVIATIONS_ALLOWED+"="+deviationsAllowed+
     			start+Constants.AUTO_LATEST_REPORTS+"="+latestReports+
     			start+Constants.AUTO_METHOD+"="+method+
