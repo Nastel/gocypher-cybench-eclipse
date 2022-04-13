@@ -107,7 +107,8 @@ public class ReportHandlerService {
 		if (timestamp != null) {
 			model.addToListOfOverview(GuiUtils.getKeyName("timestamp"), CybenchUtils.formatTimestamp(timestamp)); 
 		}
-		Double totalScore = (Double)reportProperties.get("totalScore") ;
+		
+		Double totalScore = ((Number)reportProperties.get("totalScore")).doubleValue();		
 		if (totalScore != null) {
 			model.addToListOfOverview(GuiUtils.getKeyName("totalScore"), GuiUtils.convertNumToStringByLength(totalScore.toString()) ); 
 		}
@@ -185,7 +186,8 @@ public class ReportHandlerService {
 		if (timestamp != null) {
 			model.addBaseProperty("timestamp", CybenchUtils.formatTimestamp(timestamp)); 
 		}
-		Double totalScore = (Double)reportProperties.get("totalScore") ;
+		
+		Double totalScore = ((Number)reportProperties.get("totalScore")).doubleValue();
 		if (totalScore != null) {
 			model.addBaseProperty("totalScore", GuiUtils.convertNumToStringByLength(totalScore.toString()) ); 
 		}
