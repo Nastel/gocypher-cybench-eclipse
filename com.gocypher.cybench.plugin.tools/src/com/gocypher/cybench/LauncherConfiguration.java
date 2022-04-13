@@ -42,6 +42,8 @@ public class LauncherConfiguration {
 	private String compareVersion = "";
 	private String scope = "";
 	
+	private boolean runAutoComparison;
+	
 	private int forks = 1 ;
 	private int measurementIterations = 1 ;
 	private int warmUpIterations = 1 ;
@@ -331,6 +333,14 @@ public class LauncherConfiguration {
 	
 	public void setScope(String scope) {
 		this.scope = scope;
+	}
+	
+	public boolean isRunAutoComparison() {
+		return runAutoComparison;
+	}
+
+	public void setRunAutoComparison(boolean runAutoComparison) {
+		this.runAutoComparison = runAutoComparison;
 	}
 	
 }
