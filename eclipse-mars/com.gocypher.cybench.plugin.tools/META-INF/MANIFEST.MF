@@ -22,7 +22,8 @@ Automatic-Module-Name: com.gocypher.cybench.plugin.tools
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Import-Package: javax.annotation,
- javax.inject
+ javax.inject,
+ org.apache.commons.lang3;version="3.1.0"
 Bundle-Vendor: K2N.IO
 Export-Package: com.gocypher.cybench,
  com.gocypher.cybench.launcher,
