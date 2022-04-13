@@ -52,7 +52,6 @@ import com.gocypher.cybench.plugin.utils.GuiUtils;
 public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
 	
 	private Group config;
-	private Group infoText;
 	private Group scopeGroup;
 	private Group methodGroup;
 	
@@ -67,6 +66,8 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
 	private Spinner percentChange;
 	private Spinner deviationsAllowed;
 	
+	private Button runAutoComparison;
+	
     @Override
     public void createControl(Composite parent) {
         Composite comp = new Group(parent, SWT.BORDER);
@@ -79,10 +80,8 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
         scopeGroup = prepareScopeGroup(comp);
         
         methodGroup = prepareMethodGroup(comp);  
-        
-//        infoText = prepareAutoComparisonText(comp);
-        
-        
+                
+      
      
     }
     
@@ -91,7 +90,10 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
     	config.setText("Automated Comparison Config");
         config.setLayout(new GridLayout(10, false));
         
-        
+        Label runAutoComparisonLabel = new Label(config, SWT.NONE);
+        runAutoComparisonLabel.setText("Run Automatic Comparison");
+        runAutoComparison = new Button(config, SWT.CHECK);
+        runAutoComparison.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 8, 1)); 
         
         	Label scopeLabel = new Label(config, SWT.None);
         	scopeLabel.setText("Scope: ");
@@ -127,6 +129,12 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
         	Label deviationsAllowedLabel = new Label(config, SWT.NONE);
         	deviationsAllowedLabel.setText("# of Deviations Allowed: ");
         	deviationsAllowed = new Spinner(config, SWT.BORDER);
+        	
+        	runAutoComparison.addSelectionListener(new SelectionAdapter() {
+        		public void widgetSelected(SelectionEvent e) {
+        			runAutoComparison();
+        		}
+        	});
         	
         	method.addSelectionListener(new SelectionAdapter() {
         		public void widgetSelected(SelectionEvent e) {
@@ -282,6 +290,28 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
     	}
     }
     
+    private void runAutoComparison() {
+    	if(!runAutoComparison.getSelection()) {
+    		scope.setEnabled(false);
+    		compareVersion.setEnabled(false);
+    		threshold.setEnabled(false);
+    		latestReports.setEnabled(false);
+    		anomaliesAllowed.setEnabled(false);
+    		method.setEnabled(false);
+    		percentChange.setEnabled(false);
+    		deviationsAllowed.setEnabled(false);
+    	}else {
+    		scope.setEnabled(true);
+    		compareVersion.setEnabled(false);
+    		threshold.setEnabled(true);
+    		latestReports.setEnabled(true);
+    		anomaliesAllowed.setEnabled(true);
+    		method.setEnabled(true);
+    		percentChange.setEnabled(false);
+    		deviationsAllowed.setEnabled(false);
+    	}
+    }
+    
     @Override
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
     }
@@ -338,9 +368,17 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
             percentChange.setValues(percentChangeDef, 0, 9999, 2, 10, 100);
             percentChange.addModifyListener(modifyListener);
             deviationsAllowed.setValues(deviationsDef, 0, 9999, 2, 10, 100);
-            deviationsAllowed.addModifyListener(modifyListener);                 
+            deviationsAllowed.addModifyListener(modifyListener);   
+            
+            boolean runAutoComparisonDef = configuration.getAttribute(LaunchConfiguration.AUTO_USE_AUTO_COMP, true);
+            
+            runAutoComparison.setSelection(runAutoComparisonDef);
+            runAutoComparison.addSelectionListener(selectionListener);
+            
+            runAutoComparison();
             disableDeltaWidgets();
             disableScopeWidgets();
+            
                        
         } catch (CoreException e) {
         	GuiUtils.logError("There was a problem on the run configuration initialization: ", e);
@@ -358,6 +396,7 @@ public class CyBenchAutoTabView extends AbstractLaunchConfigurationTab {
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_PERCENTCHANGE, percentChange.getSelection());
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_SCOPE, scope.getText());
     	configuration.setAttribute(LaunchConfiguration.AUTO_COMPARE_THRESHOLD, threshold.getText());
+    	configuration.setAttribute(LaunchConfiguration.AUTO_USE_AUTO_COMP, runAutoComparison.getSelection());
     }
     
 
