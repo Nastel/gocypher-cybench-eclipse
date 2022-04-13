@@ -471,6 +471,9 @@ public class CyBenchLauncher {
 	            } else {
 	                throw new Exception("Method specified as SD but deviations allowed was not specified!");
 	            }
+                if (verifiedComparisonConfig.getCompareLatestReports() < 2) {
+                    throw new Exception("Method SD requires at least 2 reports to compare against! Not enough latest reports specified to compare to!");
+                }
 	        } else if (METHOD.equals(ComparisonConfig.Method.DELTA)) {
 	            if (!EnumUtils.isValidEnum(ComparisonConfig.Threshold.class, THRESHOLD_STR) || StringUtils.isBlank(THRESHOLD_STR)) {
 	                throw new Exception(
