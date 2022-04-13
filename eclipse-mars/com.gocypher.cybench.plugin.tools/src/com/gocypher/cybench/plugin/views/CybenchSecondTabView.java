@@ -215,7 +215,7 @@ public class CybenchSecondTabView extends AbstractLaunchConfigurationTab {
     public void initializeFrom(ILaunchConfiguration configuration) {
         try {
 
-            String jvmArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "-Dlog4j.logs.root.path=" + userHome + "\\cybenchLogs");
+            String jvmArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "");
             int threadDef = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
             int forksDef  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
             int warmupIterationsDef  = configuration.getAttribute(LaunchConfiguration.WARMUP_ITERATION, 1);
