@@ -67,12 +67,25 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
     
 	private Boolean sendReportCybnech;
 	private Boolean includeHardware;
-	private  Boolean useCyBenchBenchmarkSettings;
+	private Boolean useCyBenchBenchmarkSettings;
 	
 	private String accessToken;
 	private String queryToken;
 	private String userEmail;
     
+	/* Auto Comparison Variables */
+	private int anomaliesAllowed;
+	private int latestReports;
+	private int percentChange;
+	private int deviationsAllowed;
+	
+	private String method;
+	private String threshold;
+	private String compareVersion;
+	private String scope;
+	
+	private boolean runAutoComparison;
+	
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
 			URL pluginURL = FileLocator.resolve(Platform.getBundle(bundleSymbolicName).getEntry("/"));
@@ -209,23 +222,6 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 				start+Constants.USER_QUERY_TOKEN+"="+queryToken+
     			start+Constants.SELECTED_CLASS_PATHS+"=\""+selectionFolderPath+"\"");
     			
-//				" -DTHREADS_COUNT="+thread+
-//				" -DREPORT_NAME=\""+reportName+"\""+
-//				" -DBENCHMARK_REPORT_STATUS=\""+reportUploadStatus+"\""+
-//				" -DWARMUP_ITERATION="+warmupIterations+
-//				" -DMEASURMENT_ITERATIONS="+measurmentIterations+
-//				" -DWARMUP_SECONDS="+warmupSeconds+
-//				" -DMEASURMENT_SECONDS="+mesurmentSeconds+
-//				" -DSHOULD_SAVE_REPOT_TO_FILE="+storeReportInFile+
-//				" -DSHOULD_SEND_REPORT_CYBENCH="+sendReportCybnech+
-//				" -DINCLUDE_HARDWARE_PROPERTIES="+includeHardware+
-//				" -DUSE_CYBNECH_BENCHMARK_SETTINGS="+useCyBenchBenchmarkSettings+
-//				" -DEXECUTION_SCORE="+excutionScoreBoundary+
-//				"  "+jvmProperties+
-//				" -DCUSTOM_USER_PROPERTIES=\""+userProperties+"\""+
-//				" -DREMOTE_CYBENCH_ACCESS_TOKEN="+accessToken+
-//				" -DREPORT_CLASSES=\""+selectionFolderPath+"\"");
-		
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, 
     			start+Constants.NUMBER_OF_FORKS+"="+forks+
     			start+Constants.RUN_THREAD_COUNT+"="+thread+
@@ -246,6 +242,15 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
     			start+Constants.USER_REPORT_TOKEN+"="+accessToken+
 				start+Constants.USER_QUERY_TOKEN+"="+queryToken+
     			start+Constants.USER_EMAIL_ADDRESS+"="+userEmail+
+    			start+Constants.AUTO_ANOMALIES_ALLOWED+"="+anomaliesAllowed+
+    			start+Constants.AUTO_COMPARE_VERSION+"="+compareVersion+
+    			start+Constants.AUTO_DEVIATIONS_ALLOWED+"="+deviationsAllowed+
+    			start+Constants.AUTO_LATEST_REPORTS+"="+latestReports+
+    			start+Constants.AUTO_METHOD+"="+method+
+    			start+Constants.AUTO_PERCENT_CHANGE+"="+percentChange+
+    			start+Constants.AUTO_SCOPE+"="+scope+
+    			start+Constants.AUTO_THRESHOLD+"="+threshold+
+    			start+Constants.AUTO_SHOULD_RUN_COMPARISON+"="+runAutoComparison+    			
     			start+Constants.SELECTED_CLASS_PATHS+"=\""+selectionFolderPath+"\"");
 		
     }
@@ -278,5 +283,17 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 		queryToken = configuration.getAttribute(LaunchConfiguration.REMOTE_CYBENCH_QUERY_TOKEN,"");
    	    userEmail = configuration.getAttribute(LaunchConfiguration.USER_EMAIL_ADDRESS, "");
 //   	   launchConfigurationMemento = configuration.getMemento();
+   	    
+    	   // Auto Comparison Config
+    	anomaliesAllowed = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_ANOMALIES_ALLOWED, 1);
+    	latestReports = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_LATESTREPORTS, 1);
+    	percentChange = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_PERCENTCHANGE, 15);
+    	deviationsAllowed = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_DEVIATIONSALLOWED, 1);
+    	method = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_METHOD, "DELTA");
+    	threshold = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_THRESHOLD, "GREATER");
+    	compareVersion = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_COMPAREVERSION, "");
+    	scope = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_SCOPE, "WITHIN");
+    	runAutoComparison = configuration.getAttribute(LaunchConfiguration.AUTO_USE_AUTO_COMP, false);
+  	     	    
     }
 }

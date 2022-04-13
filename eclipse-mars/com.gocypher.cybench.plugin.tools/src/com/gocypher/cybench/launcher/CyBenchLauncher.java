@@ -48,6 +48,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import com.gocypher.cybench.core.utils.SecurityUtils;
 import com.gocypher.cybench.launcher.model.BenchmarkReport;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.openjdk.jmh.profile.GCProfiler;
 import org.openjdk.jmh.profile.HotspotRuntimeProfiler;
@@ -79,6 +80,8 @@ import com.gocypher.cybench.launcher.utils.ComputationUtils;
 import com.gocypher.cybench.launcher.utils.Constants;
 import com.gocypher.cybench.launcher.utils.CybenchUtils;
 import com.gocypher.cybench.launcher.utils.SecurityBuilder;
+import com.gocypher.cybench.model.ComparisonConfig;
+import com.gocypher.cybench.model.ComparisonConfig.Scope;
 
 
 //import com.gocypher.cybench.launcher.utils.ComputationUtils;
@@ -87,6 +90,8 @@ public class CyBenchLauncher {
 	public static Map<String,String> resultsMap = new HashMap<>() ;
 	private static final  String benchSource = "Eclipse Mars plugin (v0.3-beta)";
     static Properties cfg = new Properties();
+    static ComparisonConfig automatedComparisonCfg;
+    
     private static Path userDir;
 
     private static final Map<String, String> PROJECT_METADATA_MAP = new HashMap<>(5);
@@ -97,6 +102,12 @@ public class CyBenchLauncher {
 		System.out.println("-----------------------------------------------------------------------------------------");
 		LauncherConfiguration launcherConfiguration = new LauncherConfiguration () ;
 		fillLaunchConfigurations(launcherConfiguration);
+		
+		if (launcherConfiguration.isRunAutoComparison()) {
+			System.out.println("*** Auto Comparison Settings Detected..");
+			automatedComparisonCfg = checkConfigValidity(launcherConfiguration);			
+		}
+		
 		
 		if (args != null && args.length > 0) {
 			System.out.println("Launcher program arguments:"+args[0]);
@@ -209,6 +220,16 @@ public class CyBenchLauncher {
             report.getEnvironmentSettings().put("userDefinedProperties", customUserDefinedProperties(launcherConfiguration.getUserProperties()));
             report.setBenchmarkSettings(benchmarkSettings);
 
+            if (automatedComparisonCfg != null) {
+                if (automatedComparisonCfg.getScope().equals(Scope.WITHIN)) {
+                    automatedComparisonCfg.setCompareVersion(PROJECT_METADATA_MAP.get(Constants.PROJECT_VERSION));
+                }
+                automatedComparisonCfg.setRange(String.valueOf(automatedComparisonCfg.getCompareLatestReports()));
+                automatedComparisonCfg.setProjectName(PROJECT_METADATA_MAP.get(Constants.PROJECT_NAME));
+                automatedComparisonCfg.setProjectVersion(PROJECT_METADATA_MAP.get(Constants.PROJECT_VERSION));
+                report.setAutomatedComparisonConfig(automatedComparisonCfg);
+            }
+            
             Iterator<String>it = report.getBenchmarks().keySet().iterator() ;
 
             while (it.hasNext()) {
@@ -222,7 +243,7 @@ public class CyBenchLauncher {
                         JMHUtils.ClassAndMethod classAndMethod = new JMHUtils.ClassAndMethod(name).invoke();
                         String clazz = classAndMethod.getClazz();
                         String method = classAndMethod.getMethod();
-                        System.out.println("Adding metadata for benchmark: " + clazz + " test: " + method);
+                      //  System.out.println("Adding metadata for benchmark: " + clazz + " test: " + method);
                         Class<?> aClass = Class.forName(clazz);
                         Optional<Method> benchmarkMethod = JMHUtils.getBenchmarkMethod(method, aClass);
                         appendMetadataFromMethod(benchmarkMethod, benchmarkReport);
@@ -235,8 +256,10 @@ public class CyBenchLauncher {
             }
             List<BenchmarkReport> customBenchmarksCategoryCheck = report.getBenchmarks().get("CUSTOM");
             report.getBenchmarks().remove("CUSTOM");
-            for(BenchmarkReport benchReport : customBenchmarksCategoryCheck) {
-                report.addToBenchmarks(benchReport);
+            if(customBenchmarksCategoryCheck != null) {
+                for(BenchmarkReport benchReport : customBenchmarksCategoryCheck) {
+                    report.addToBenchmarks(benchReport);
+                }
             }
             report.computeScores();
     //        getReportUploadStatus(report);
@@ -287,6 +310,14 @@ public class CyBenchLauncher {
                 System.out.println("You can find all device benchmarks on "+ deviceReports);
                 System.out.println("Your report is available at "+ resultURL);
                 System.out.println("NOTE: It may take a few minutes for your report to appear online");
+                
+                if (response.containsKey("automatedComparisons")) {
+                    List<Map<String, Object>> automatedComparisons = (List<Map<String, Object>>) response
+                            .get("automatedComparisons");
+                    if (tooManyAnomalies(automatedComparisons)) {
+                        System.exit(1);
+                    }
+                }  
             } else {
                 String errMsg = getErrorResponseMessage(response);
                 if (errMsg != null) {
@@ -340,14 +371,12 @@ public class CyBenchLauncher {
             Arrays.stream(annotation.value()).forEach(annot -> {
                 checkSetOldMetadataProps(annot.key(), annot.value(), benchmarkReport);
                 benchmarkReport.addMetadata(annot.key(), annot.value());
-//                System.out.println("added metadata " + annot.key() + "=" + annot.value());
             });
         }
         BenchmarkMetaData singleAnnotation = aClass.getDeclaredAnnotation(BenchmarkMetaData.class);
         if (singleAnnotation != null) {
             checkSetOldMetadataProps(singleAnnotation.key(), singleAnnotation.value(), benchmarkReport);
             benchmarkReport.addMetadata(singleAnnotation.key(), singleAnnotation.value());
-//            System.out.println("added metadata " + singleAnnotation.key() + "=" + singleAnnotation.value());
         }
     }
 	 private static void appendMetadataFromMethod(Optional<Method> benchmarkMethod, BenchmarkReport benchmarkReport) {
@@ -356,18 +385,118 @@ public class CyBenchLauncher {
 	            Arrays.stream(annotation.value()).forEach(annot -> {
 	                checkSetOldMetadataProps(annot.key(), annot.value(), benchmarkReport);
 	                benchmarkReport.addMetadata(annot.key(), annot.value());
-//	                System.out.println("added metadata " + annot.key() + "=" + annot.value());
 	            });
 	        }
 	        BenchmarkMetaData singleAnnotation = benchmarkMethod.get().getDeclaredAnnotation(BenchmarkMetaData.class);
 	        if (singleAnnotation != null) {
 	            checkSetOldMetadataProps(singleAnnotation.key(), singleAnnotation.value(), benchmarkReport);
 	            benchmarkReport.addMetadata(singleAnnotation.key(), singleAnnotation.value());
-//	            System.out.println("added metadata " + singleAnnotation.key() + "=" + singleAnnotation.value());
 	        }
 
 	    }
-	
+	 public static ComparisonConfig checkConfigValidity(LauncherConfiguration launcherConfiguration) throws Exception {
+	        ComparisonConfig verifiedComparisonConfig = new ComparisonConfig();
+	                
+	        String SCOPE_STR = launcherConfiguration.getScope();
+	        if (StringUtils.isBlank(SCOPE_STR)) {
+	            throw new Exception("Scope is not specified!");
+	        } else {
+	            SCOPE_STR = SCOPE_STR.toUpperCase();
+	        }
+	        ComparisonConfig.Scope SCOPE;
+	        String COMPARE_VERSION = launcherConfiguration.getCompareVersion();
+	        Integer NUM_LATEST_REPORTS = launcherConfiguration.getLatestReports();
+	        Integer ANOMALIES_ALLOWED = launcherConfiguration.getAnomaliesAllowed();
+	        String METHOD_STR = launcherConfiguration.getMethod();
+	        if (StringUtils.isBlank(METHOD_STR)) {
+	            throw new Exception("Method is not specified!");
+	        } else {
+	            METHOD_STR = METHOD_STR.toUpperCase();
+	        }
+	        ComparisonConfig.Method METHOD;
+	        String THRESHOLD_STR = launcherConfiguration.getThreshold();
+	        if (StringUtils.isNotBlank(THRESHOLD_STR)) {
+	            THRESHOLD_STR = THRESHOLD_STR.toUpperCase();
+	        }
+	        ComparisonConfig.Threshold THRESHOLD;
+	        Double PERCENT_CHANGE_ALLOWED = (double) launcherConfiguration.getPercentChange();
+	        Double DEVIATIONS_ALLOWED = (double) launcherConfiguration.getDeviationsAllowed();
+
+	        if (NUM_LATEST_REPORTS != null) {
+	            if (NUM_LATEST_REPORTS < 1) {
+	                throw new Exception("Not enough latest reports specified to compare to! (Must select at least 1!)");
+	            }
+	            verifiedComparisonConfig.setCompareLatestReports(NUM_LATEST_REPORTS);
+	        } else {
+	            throw new Exception("Number of latest reports to compare to was not specified!");
+	        }
+	        if (ANOMALIES_ALLOWED != null) {
+	            if (ANOMALIES_ALLOWED < 0) {
+	                throw new Exception("Not enough anomalies allowed specified!");
+	            }
+	            verifiedComparisonConfig.setAnomaliesAllowed(ANOMALIES_ALLOWED);
+	        } else {
+	            throw new Exception("Anomalies allowed was not specified!");
+	        }
+
+	        if (!EnumUtils.isValidEnum(ComparisonConfig.Scope.class, SCOPE_STR)) {
+	            throw new Exception("Scope is invalid!");
+	        } else {
+	            SCOPE = ComparisonConfig.Scope.valueOf(SCOPE_STR);
+	            verifiedComparisonConfig.setScope(SCOPE);
+	        }
+	        if (!EnumUtils.isValidEnum(ComparisonConfig.Method.class, METHOD_STR)) {
+	            throw new Exception("Method is invalid!");
+	        } else {
+	            METHOD = ComparisonConfig.Method.valueOf(METHOD_STR);
+	            verifiedComparisonConfig.setMethod(METHOD);
+	        }
+
+	        if (SCOPE.equals(ComparisonConfig.Scope.WITHIN) && StringUtils.isNotEmpty(COMPARE_VERSION)) {
+	            COMPARE_VERSION = "";
+	            System.out.println("Automated comparison config scoped specified as WITHIN"
+	            		+ " but compare version was also specified, will compare WITHIN the currently tested version.");
+	        } else if (SCOPE.equals(ComparisonConfig.Scope.BETWEEN) && StringUtils.isBlank(COMPARE_VERSION)) {
+	            throw new Exception("Scope specified as BETWEEN but no compare version specified!");
+	        } else if (SCOPE.equals(ComparisonConfig.Scope.BETWEEN)) {
+	            verifiedComparisonConfig.setCompareVersion(COMPARE_VERSION);
+	        }
+
+	        if (METHOD.equals(ComparisonConfig.Method.SD)) {
+	            if (DEVIATIONS_ALLOWED != null) {
+	                if (DEVIATIONS_ALLOWED <= 0) {
+	                    throw new Exception("Method specified as SD but not enough deviations allowed were specified!");
+	                }
+	                verifiedComparisonConfig.setDeviationsAllowed((DEVIATIONS_ALLOWED/Math.pow(10, 2.0)));
+	            } else {
+	                throw new Exception("Method specified as SD but deviations allowed was not specified!");
+	            }
+	        } else if (METHOD.equals(ComparisonConfig.Method.DELTA)) {
+	            if (!EnumUtils.isValidEnum(ComparisonConfig.Threshold.class, THRESHOLD_STR) || StringUtils.isBlank(THRESHOLD_STR)) {
+	                throw new Exception(
+	                        "Method specified as DELTA but no threshold specified or threshold is invalid!");
+	            } else {
+	                THRESHOLD = ComparisonConfig.Threshold.valueOf(THRESHOLD_STR);
+	                verifiedComparisonConfig.setThreshold(THRESHOLD);
+	            }
+
+	            if (THRESHOLD.equals(ComparisonConfig.Threshold.PERCENT_CHANGE)) {
+	                if (PERCENT_CHANGE_ALLOWED != null) {
+	                    if (PERCENT_CHANGE_ALLOWED <= 0) {
+	                        throw new Exception(
+	                                "Threshold specified as PERCENT_CHANGE but percent change is not high enough!");
+	                    }
+	                    verifiedComparisonConfig.setPercentChangeAllowed((PERCENT_CHANGE_ALLOWED/Math.pow(10, 2.0)));
+	                } else {
+	                    throw new Exception(
+	                            "Threshold specified as PERCENT_CHANGE but percent change allowed was not specified!");
+	                }
+	            }
+	        }
+
+	        return verifiedComparisonConfig;
+	    }
+
 	private static void fillLaunchConfigurations(LauncherConfiguration launcherConfiguration) {
 		
 		launcherConfiguration.setReportName(checkNullAndReturnString(Constants.BENCHMARK_REPORT_NAME));
@@ -395,6 +524,17 @@ public class CyBenchLauncher {
 		}else{
 			launcherConfiguration.setReportUploadStatus("public");
 		}
+		
+		// Set Auto Comparison Configs
+		 launcherConfiguration.setAnomaliesAllowed(checkNullAndReturnInt(Constants.AUTO_ANOMALIES_ALLOWED));
+		 launcherConfiguration.setMethod(checkNullAndReturnString(Constants.AUTO_METHOD));
+		 launcherConfiguration.setLatestReports(checkNullAndReturnInt(Constants.AUTO_LATEST_REPORTS));
+		 launcherConfiguration.setPercentChange(checkNullAndReturnDouble(Constants.AUTO_PERCENT_CHANGE));
+		 launcherConfiguration.setThreshold(checkNullAndReturnString(Constants.AUTO_THRESHOLD));
+		 launcherConfiguration.setScope(checkNullAndReturnString(Constants.AUTO_SCOPE));
+		 launcherConfiguration.setDeviationsAllowed(checkNullAndReturnDouble(Constants.AUTO_DEVIATIONS_ALLOWED));
+		 launcherConfiguration.setCompareVersion(checkNullAndReturnString(Constants.AUTO_COMPARE_VERSION));
+		 launcherConfiguration.setRunAutoComparison(checkNullAndReturnBoolean(Constants.AUTO_SHOULD_RUN_COMPARISON));
 	}
 	
 	private static String checkNullAndReturnString(String propertyName)  {
@@ -409,6 +549,13 @@ public class CyBenchLauncher {
 			return Integer.parseInt(System.getProperty(propertyName));
 		}
 		return 1;
+	}
+	 
+	private static Double checkNullAndReturnDouble(String propertyName) {
+		if(System.getProperty(propertyName)!= null){
+			return Double.parseDouble(System.getProperty(propertyName));
+		}
+		return 1.0;
 	}
 	
 	private static boolean checkNullAndReturnBoolean(String propertyName)  {
@@ -427,6 +574,27 @@ public class CyBenchLauncher {
 		return classesToInclude;
 	}
 	
+    @SuppressWarnings("unchecked")
+    public static boolean tooManyAnomalies(List<Map<String, Object>> automatedComparisons) {
+        for (Map<String, Object> automatedComparison : automatedComparisons) {
+            Integer totalFailedBenchmarks = (Integer) automatedComparison.get("totalFailedBenchmarks");
+            Map<String, Object> config = (Map<String, Object>) automatedComparison.get("config");
+            if (config.containsKey("anomaliesAllowed")) {
+                Integer anomaliesAllowed = (Integer) config.get("anomaliesAllowed");
+                if (totalFailedBenchmarks != null && totalFailedBenchmarks > anomaliesAllowed) {
+                    System.out.println(
+                            "*** There were more anomaly benchmarks than configured anomalies allowed in one of your automated comparison configurations!\n" + 
+                    "*** Your report has still been generated, but your pipeline (if applicable) has failed.");
+                    System.out.println("-----------------------------------------------------------------------------------------");
+                    System.out.println("                                 Finished CyBench benchmarks                             ");
+                    System.out.println("-----------------------------------------------------------------------------------------");
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+	
     /**
      * Synchronizes overview and benchmark reports metadata.
      * 
@@ -443,7 +611,7 @@ public class CyBenchLauncher {
             if (StringUtils.isNotEmpty(benchmarkReport.getProject())) {
                 report.setProject(benchmarkReport.getProject());
             } else {
-                System.out.println("* Project name metadata not defined, grabbing it from build files...");
+            //    System.out.println("* Project name metadata not defined, grabbing it from build files...");
                 report.setProject(projectArtifactId);
                 benchmarkReport.setProject(projectArtifactId);
             }
@@ -451,7 +619,7 @@ public class CyBenchLauncher {
             if (StringUtils.isNotEmpty(benchmarkReport.getProjectVersion())) {
                 report.setProjectVersion(benchmarkReport.getProjectVersion());
             } else {
-                System.out.println("* Project version metadata not defined, grabbing it from build files...");
+           //     System.out.println("* Project version metadata not defined, grabbing it from build files...");
                 report.setProjectVersion(projectVersion); // default
                 benchmarkReport.setProjectVersion(projectVersion);
             }
@@ -559,7 +727,7 @@ public class CyBenchLauncher {
         boolean propsAvailable = projectProps.exists();
 
         if (gradleAvailable && pomAvailable) {
-            System.out.println("Multiple build instructions detected, resolving to pom.xml...");
+          //  System.out.println("Multiple build instructions detected, resolving to pom.xml...");
             property = getMetadataFromMaven(prop);
         } else if (gradleAvailable) {
             property = getMetadataFromGradle(prop);
@@ -574,7 +742,7 @@ public class CyBenchLauncher {
     private static String getMetadataFromMaven(String prop) throws MissingResourceException {
         String property = "";
         File pom = new File(userDir + "/pom.xml");
-        System.out.println("* Maven project detected, grabbing missing metadata from pom.xml");
+       // System.out.println("* Maven project detected, grabbing missing metadata from pom.xml");
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
