@@ -53,12 +53,14 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private String reportName;
 	private String launchPath;
 	private String reportUploadStatus;
+	
 	private int thread;
 	private int forks;
 	private int warmupIterations;
 	private int measurmentIterations;
 	private int warmupSeconds;
 	private int mesurmentSeconds;
+	
 	private boolean sendReportCybnech; 
 	private boolean includeHardware;
 //	private String userProperties;
@@ -71,7 +73,8 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private String accessToken;
 	private String queryToken;
 	private String userEmail;
-
+	
+	/* Auto Comparison Variables */
 	private int anomaliesAllowed;
 	private int latestReports;
 	private int percentChange;
@@ -81,6 +84,8 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
 	private String threshold;
 	private String compareVersion;
 	private String scope;
+	
+	private boolean runAutoComparison;
 		
 	public static String resolveBundleLocation (String bundleSymbolicName, boolean shouldAddBin) {
 		try {
@@ -267,6 +272,7 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
     			start+Constants.AUTO_PERCENT_CHANGE+"="+percentChange+
     			start+Constants.AUTO_SCOPE+"="+scope+
     			start+Constants.AUTO_THRESHOLD+"="+threshold+
+    			start+Constants.AUTO_SHOULD_RUN_COMPARISON+"="+runAutoComparison+
     			start+Constants.SELECTED_CLASS_PATHS+"=\""+selectionFolderPath+"\"");
 		
     }
@@ -302,7 +308,8 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
    	   method = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_METHOD, "DELTA");
    	   threshold = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_THRESHOLD, "GREATER");
    	   compareVersion = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_COMPAREVERSION, "");
-   	   scope = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_SCOPE, "WITHIN");   	   
+   	   scope = configuration.getAttribute(LaunchConfiguration.AUTO_COMPARE_SCOPE, "WITHIN");
+   	   runAutoComparison = configuration.getAttribute(LaunchConfiguration.AUTO_USE_AUTO_COMP, false);
  	  
     }
 }
