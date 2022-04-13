@@ -187,6 +187,21 @@ CyBench launcher using user defined settings.
 
 ![](./docs/images/image20.png)
 
+* New to v0.3+ of the Eclipse Plugin, an automatic comparison can also be configured within the plugin.
+  * Automated comparisons will take the results of the current run and compare it to previous benchmarks automatically, configurable in this tab.
+      * Automatic comparison configuration can be found to the right of the `Execution Settings` tab.
+      * Comparison configuration is identical to the settings found when making comparisons on the [CyBench UI](https://app.cybench.io/cybench/).
+      * You can also configure an automatic comparison for your project on the UI.
+  * The Automated Comparison tab itself contains information on what each option does.
+      * Certain options become disabled depending on your selction.
+      * Example: When comparing the overall difference (DELTA) in percent change, the field for deviations allowed (used by method SD) will disable.
+      * **NOTE:** When selecting the SD method, you must compare at least 2 reports! (i.e., # of Latest Reports must be greater than 1)
+* All comparisons, including automated ones through the Eclipse plug-in, are accessible on the [CyBench UI](https://app.cybench.io/cybench/), categorized via project.
+* Automatic comparisons can be disabled by unticking the `Run Automatic Comparison` checkbox above the configurable settings.
+* When 'quick launching' CyBench (`Run As -> Run on Cybench`), no automatic comparison is made from Eclipse.
+
+![](./docs/images/autoComparisonTab.PNG)
+
 * Click “Apply” → “Run” to start execution of the selected project benchmarks.
 * CyBench launcher will start display messages in the console view.
 * After launcher finishes its work:
