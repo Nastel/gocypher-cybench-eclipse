@@ -100,7 +100,11 @@ public class CyBenchLauncher {
 		System.out.println("-----------------------------------------------------------------------------------------");
 		LauncherConfiguration launcherConfiguration = new LauncherConfiguration () ;
 		fillLaunchConfigurations(launcherConfiguration);
-		automatedComparisonCfg = checkConfigValidity(launcherConfiguration);
+		
+		if (launcherConfiguration.isRunAutoComparison()) {
+			System.out.println("*** Auto Comparison Settings Detected..");
+			automatedComparisonCfg = checkConfigValidity(launcherConfiguration);
+		}
 				
 		if (args != null && args.length > 0) {
 			System.out.println("Launcher program arguments:"+args[0]);
@@ -396,7 +400,7 @@ public class CyBenchLauncher {
 	    } 
 	 public static ComparisonConfig checkConfigValidity(LauncherConfiguration launcherConfiguration) throws Exception {
 	        ComparisonConfig verifiedComparisonConfig = new ComparisonConfig();
-
+	                
 	        String SCOPE_STR = launcherConfiguration.getScope();
 	        if (StringUtils.isBlank(SCOPE_STR)) {
 	            throw new Exception("Scope is not specified!");
@@ -424,14 +428,14 @@ public class CyBenchLauncher {
 
 	        if (NUM_LATEST_REPORTS != null) {
 	            if (NUM_LATEST_REPORTS < 1) {
-	                throw new Exception("Not enough latest reports specified to compare to!");
+	                throw new Exception("Not enough latest reports specified to compare to! (Must select at least 1!)");
 	            }
 	            verifiedComparisonConfig.setCompareLatestReports(NUM_LATEST_REPORTS);
 	        } else {
 	            throw new Exception("Number of latest reports to compare to was not specified!");
 	        }
 	        if (ANOMALIES_ALLOWED != null) {
-	            if (ANOMALIES_ALLOWED < 1) {
+	            if (ANOMALIES_ALLOWED < 0) {
 	                throw new Exception("Not enough anomalies allowed specified!");
 	            }
 	            verifiedComparisonConfig.setAnomaliesAllowed(ANOMALIES_ALLOWED);
@@ -536,6 +540,8 @@ public class CyBenchLauncher {
 		 launcherConfiguration.setScope(checkNullAndReturnString(Constants.AUTO_SCOPE));
 		 launcherConfiguration.setDeviationsAllowed(checkNullAndReturnDouble(Constants.AUTO_DEVIATIONS_ALLOWED));
 		 launcherConfiguration.setCompareVersion(checkNullAndReturnString(Constants.AUTO_COMPARE_VERSION));
+		 launcherConfiguration.setRunAutoComparison(checkNullAndReturnBoolean(Constants.AUTO_SHOULD_RUN_COMPARISON));
+		 
 	}
 	
 	
@@ -585,14 +591,18 @@ public class CyBenchLauncher {
                 Integer anomaliesAllowed = (Integer) config.get("anomaliesAllowed");
                 if (totalFailedBenchmarks != null && totalFailedBenchmarks > anomaliesAllowed) {
                     System.out.println(
-                            "There were more anomaly benchmarks than your specified anomalies allowed in one of your automated comparison configurations!");
+                            "*** There were more anomaly benchmarks than configured anomalies allowed in one of your automated comparison configurations!\n" + 
+                    "*** Your report has still been generated, but your pipeline (if applicable) has failed.");
+                    System.out.println("-----------------------------------------------------------------------------------------");
+                    System.out.println("                                 Finished CyBench benchmarks                             ");
+                    System.out.println("-----------------------------------------------------------------------------------------");
                     return true;
                 }
             }
         }
         return false;
     }
-	
+
     /**
      * Synchronizes overview and benchmark reports metadata.
      * 
