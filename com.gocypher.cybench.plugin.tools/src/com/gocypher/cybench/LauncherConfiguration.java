@@ -22,12 +22,27 @@ package com.gocypher.cybench;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.eclipse.swt.widgets.Button;
+
 public class LauncherConfiguration {
 	
 	private String reportName = "CyBench Report" ;
 	
 	private String pathToPlainReportFile ;
 	private String pathToEncryptedReportFile ;
+	
+	
+	private int latestReports;
+	private int anomaliesAllowed;
+	private double percentChange;
+	private double deviationsAllowed;
+	
+	private String method = "";
+	private String threshold = "";
+	private String compareVersion = "";
+	private String scope = "";
+	
+	private boolean runAutoComparison;
 	
 	private int forks = 1 ;
 	private int measurementIterations = 1 ;
@@ -256,4 +271,76 @@ public class LauncherConfiguration {
 	public void setEmailAddress(String emailAddress) {
 		this.emailAddress = emailAddress;
 	}
+	
+	public int getLatestReports() {
+		return latestReports;
+	}
+	
+	public void setLatestReports(int latestReports) {
+		this.latestReports = latestReports;
+	}
+	
+	public int getAnomaliesAllowed() {
+		return anomaliesAllowed;
+	}
+	
+	public void setAnomaliesAllowed(int anomaliesAllowed) {
+		this.anomaliesAllowed = anomaliesAllowed;
+	}
+	
+	public double getPercentChange() {
+		return percentChange;
+	}
+	
+	public void setPercentChange(double percentChange) {
+		this.percentChange = percentChange;
+	}
+
+	public double getDeviationsAllowed() {
+		return deviationsAllowed;
+	}
+	
+	public void setDeviationsAllowed(double deviationsAllowed) {
+		this.deviationsAllowed = deviationsAllowed;
+	}
+	
+	public String getMethod() {
+		return method;
+	}
+	
+	public void setMethod(String method) {
+		this.method = method;
+	}
+	
+	public String getThreshold() {
+		return threshold;
+	}
+	
+	public void setThreshold(String threshold) {
+		this.threshold = threshold;
+	}
+	
+	public String getCompareVersion() {
+		return compareVersion;
+	}
+	
+	public void setCompareVersion(String compareVersion) {
+		this.compareVersion = compareVersion;
+	}
+	public String getScope() {
+		return scope;
+	}
+	
+	public void setScope(String scope) {
+		this.scope = scope;
+	}
+	
+	public boolean isRunAutoComparison() {
+		return runAutoComparison;
+	}
+
+	public void setRunAutoComparison(boolean runAutoComparison) {
+		this.runAutoComparison = runAutoComparison;
+	}
+	
 }

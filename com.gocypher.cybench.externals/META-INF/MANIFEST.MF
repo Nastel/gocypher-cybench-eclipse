@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Cybench Externals
 Bundle-SymbolicName: com.gocypher.cybench.externals
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.1.qualifier
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.gocypher.cybench.externals
@@ -241,6 +241,8 @@ Export-Package: com.fasterxml.jackson.annotation;version="2.11.2",
    com.fasterxml.jackson.databind.introspect,
    com.fasterxml.jackson.databind.jsontype,
    com.fasterxml.jackson.databind.type",
+ com.gocypher.cybench,
+ com.gocypher.cybench.core,
  com.gocypher.cybench.core.annotation,
  com.gocypher.cybench.core.model,
  com.gocypher.cybench.core.utils,
@@ -249,9 +251,10 @@ Export-Package: com.fasterxml.jackson.annotation;version="2.11.2",
  com.gocypher.cybench.launcher.environment.services,
  com.gocypher.cybench.launcher.model,
  com.gocypher.cybench.launcher.report,
- com.gocypher.cybench.launcher.scores,
- com.gocypher.cybench.launcher.services,
  com.gocypher.cybench.launcher.utils,
+ com.gocypher.cybench.model,
+ com.gocypher.cybench.services,
+ com.gocypher.cybench.utils,
  com.jcabi.log,
  com.jcabi.manifests,
  com.profesorfalken.jpowershell,

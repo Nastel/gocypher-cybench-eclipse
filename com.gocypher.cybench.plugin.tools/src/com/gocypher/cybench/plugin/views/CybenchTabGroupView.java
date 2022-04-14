@@ -31,6 +31,7 @@ public class CybenchTabGroupView extends AbstractLaunchConfigurationTabGroup {
     	ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
     			new CybenchTabView(),
     			new CybenchSecondTabView(),
+    			new CyBenchAutoTabView(),
     			new CommonTab()
     	};
         setTabs(tabs);
