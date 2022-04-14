@@ -6,7 +6,7 @@
 
 * File `CyBenchTools-0.2-beta.zip` contains Eclipse update site for Eclipse 2020-09.
 * File `CyBenchTools-0.3-beta.zip` contains Eclipse update site for Eclipse 2021-09.
-* File `CyBenchToolsForEclipseMars-0.3-beta.zip` contains Eclipse update site for Eclipse Mars 2.
+* File `CyBenchToolsMars-0.3-beta.zip` contains Eclipse update site for Eclipse Mars 2.
 
 **Prerequisites**
 
@@ -26,7 +26,7 @@
     * JAVA - JDK-1.8.0_311,
     * Eclipse Version: Eclipse Mars 2 (4.5.2). 
 
-**Note:** For the CyBench Eclipse Plugin, previous version of JAVA (Before Java 8) or Eclipse (Before v2020-09 (4.17.0) or before Mars 2 (v4.5.2)) are unsupported
+**Note:** For the CyBench Eclipse Plugin, previous versions of JAVA (Before Java 8) or Eclipse (Before v2020-09 (4.17.0) or before Mars 2 (v4.5.2)) are unsupported.
 
 ### Installation from local file system
 
