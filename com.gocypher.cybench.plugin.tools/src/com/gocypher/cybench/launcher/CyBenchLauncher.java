@@ -48,6 +48,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.gocypher.cybench.core.utils.SecurityUtils;
 import com.gocypher.cybench.launcher.model.BenchmarkReport;
+import com.gocypher.cybench.launcher.model.TooManyAnomaliesException;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.codehaus.plexus.util.StringUtils;
@@ -95,6 +96,7 @@ public class CyBenchLauncher {
     private static final Map<String, String> PROJECT_METADATA_MAP = new HashMap<>(5);
     
 	public static void main(String[] args) throws Exception{
+		int exitCode = 0;
 		System.out.println("-----------------------------------------------------------------------------------------");
 		System.out.println("                                 Starting CyBench benchmarks                             ");
 		System.out.println("-----------------------------------------------------------------------------------------");
@@ -299,6 +301,7 @@ public class CyBenchLauncher {
             if(reportScore == null) {
                 reportScore = new BigDecimal(0);
             }
+            try {
             String reportJSON = JSONUtils.marshalToPrettyJson(report);
             System.out.println(reportJSON);
             String pathToReportFile = launcherConfiguration.getPathToPlainReportFile();
@@ -315,9 +318,7 @@ public class CyBenchLauncher {
                 if (response.containsKey("automatedComparisons")) {
                     List<Map<String, Object>> automatedComparisons = (List<Map<String, Object>>) response
                             .get("automatedComparisons");
-                    if (tooManyAnomalies(automatedComparisons)) {
-                        System.exit(1);
-                    }
+                    verifyAnomalies(automatedComparisons);
                 }               
             } else {
                 String errMsg = getErrorResponseMessage(response);
@@ -326,12 +327,21 @@ public class CyBenchLauncher {
                 }
                 System.out.println("You may submit your report manually at "+Constants.CYB_UPLOAD_URL);
             }
+		} catch (TooManyAnomaliesException e) {
+			System.out.println("Too many anomalies found during benchmarks run" + e.getMessage());
+			exitCode = 1;
+		} catch (Throwable e) {
+			System.out.println("Failed to save test results" + e);
+            exitCode = 2;
+		   }
         } catch (MissingResourceException exc) {
-        }
+        } finally {
         
         System.out.println("-----------------------------------------------------------------------------------------");
         System.out.println("                                 Finished CyBench benchmarks                             ");
         System.out.println("-----------------------------------------------------------------------------------------");
+        System.exit(exitCode);
+	}
 	}
 
     public static boolean isErrorResponse(Map<?, ?> response) {
@@ -586,24 +596,20 @@ public class CyBenchLauncher {
 	}
 	
     @SuppressWarnings("unchecked")
-    public static boolean tooManyAnomalies(List<Map<String, Object>> automatedComparisons) {
+    public static void verifyAnomalies(List<Map<String, Object>> automatedComparisons)
+            throws TooManyAnomaliesException {
         for (Map<String, Object> automatedComparison : automatedComparisons) {
             Integer totalFailedBenchmarks = (Integer) automatedComparison.get("totalFailedBenchmarks");
             Map<String, Object> config = (Map<String, Object>) automatedComparison.get("config");
             if (config.containsKey("anomaliesAllowed")) {
                 Integer anomaliesAllowed = (Integer) config.get("anomaliesAllowed");
                 if (totalFailedBenchmarks != null && totalFailedBenchmarks > anomaliesAllowed) {
-                    System.out.println(
-                            "*** There were more anomaly benchmarks than configured anomalies allowed in one of your automated comparison configurations!\n" + 
-                    "*** Your report has still been generated, but your pipeline (if applicable) has failed.");
-                    System.out.println("-----------------------------------------------------------------------------------------");
-                    System.out.println("                                 Finished CyBench benchmarks                             ");
-                    System.out.println("-----------------------------------------------------------------------------------------");
-                    return true;
+                    System.out.println("*** There were more anomaly benchmarks than configured anomalies allowed in one of your automated comparison configurations!");
+                    System.out.println("*** Your report has still been generated, but your pipeline (if applicable) has failed.");
+                    throw new TooManyAnomaliesException(totalFailedBenchmarks + ">" + anomaliesAllowed);
                 }
             }
         }
-        return false;
     }
 
     /**
