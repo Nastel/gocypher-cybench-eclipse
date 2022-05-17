@@ -87,7 +87,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     
     private Button shouldSendReportToCyBench;
     private Button shouldDoHardwareSnapshot;
-   
+    private Button shouldSendReportToPublicRepo;
+    private Label repoHintText;
+    
     private List leftList;
     private List rightList;
     private Button moveLeft;
@@ -99,6 +101,9 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     
     private final String textForHint = ">>> If no benchmark classes will be "
     		+ "selected all project benchmarks will be executed. <<<";
+    
+    private final String publicRepoHint = ">>> Note: Reports sent to the public repository will be viewable by all, and you will "
+    		+ "not have the ability to make comparisons or organize results. <<<";
 
     
 	private Map<String, String> paths =  new HashMap<>();
@@ -132,7 +137,6 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         doHardwarePropertiesSnapshotLabel.setText("Include Hardware Propeties");
         shouldDoHardwareSnapshot = new Button(configuration, SWT.CHECK);
         shouldDoHardwareSnapshot.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 3, 1)); 
-        shouldSendReportEnableDisable();
         
         shouldSendReportToCyBench.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -140,9 +144,44 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             }
         });
         
+
+        
+        
         /* Empty field 3 */
         Label emptyField3 = new Label(configuration, SWT.NONE);
 		GridDataFactory.swtDefaults().span(2,1).applyTo(emptyField3);
+		
+		
+        Label shouldSendReportToPublicRepoLabel = new Label(configuration, SWT.NONE);
+        shouldSendReportToPublicRepoLabel.setText("Send Report to the Public workspace:");
+        shouldSendReportToPublicRepo = new Button(configuration, SWT.CHECK);
+        shouldSendReportToPublicRepo.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 3, 1));
+        
+        shouldSendReportToPublicRepo.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected(SelectionEvent e) {
+        		shouldSendReportPublicEnableDisable();
+        	}
+        });
+        
+        shouldSendReportEnableDisable();
+
+        
+        repoHintText = new Label(configuration, SWT.NONE);
+        FontData[] fD = repoHintText.getFont().getFontData();
+        repoHintText.setText(publicRepoHint);
+        fD[0].setHeight(8);
+        repoHintText.setFont(new Font(configuration.getDisplay(), fD[0]));
+        GridDataFactory.swtDefaults().span(2,1).applyTo(repoHintText);
+        
+        
+ //       Label emptyField5 = new Label(configuration, SWT.NONE);
+//		GridDataFactory.swtDefaults().span(2,1).applyTo(emptyField5);
+		
+        Label emptyField4 = new Label(configuration, SWT.NONE);
+		GridDataFactory.swtDefaults().span(2,1).applyTo(emptyField4);
+		
+        Label emptyField6 = new Label(configuration, SWT.NONE);
+		GridDataFactory.swtDefaults().span(2,1).applyTo(emptyField6);
         
         /* Report launch path input field */
         Label reportlaunchPathLabel = new Label(configuration, SWT.NONE);
@@ -230,9 +269,31 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private void shouldSendReportEnableDisable() {
     	if(shouldSendReportToCyBench.getSelection()) {
     		shouldDoHardwareSnapshot.setSelection(true);
+    		shouldSendReportToPublicRepo.setSelection(false);
+			accessToken.setEnabled(true);
+			queryToken.setEnabled(true);
+
     		shouldDoHardwareSnapshot.setEnabled(false);
+    		shouldSendReportToPublicRepo.setEnabled(true);
     	}else {
     		shouldDoHardwareSnapshot.setEnabled(true);
+    		shouldSendReportToPublicRepo.setSelection(false);
+    		shouldSendReportToPublicRepo.setEnabled(false);
+
+    	}
+    }
+    
+    private void shouldSendReportPublicEnableDisable() {
+    	if (shouldSendReportToCyBench.getSelection()) {
+    		if (shouldSendReportToPublicRepo.getSelection()) {
+    			accessToken.setEnabled(false);
+    			repoHintText.setVisible(true);
+    			queryToken.setEnabled(false);
+    		} else {
+    			accessToken.setEnabled(true);
+    			repoHintText.setVisible(false);
+    			queryToken.setEnabled(true);
+    		}
     	}
     }
 
@@ -303,6 +364,8 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             boolean sendReportCybnech = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, true);
             boolean includehardwarePropeties = configuration.getAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, true);
             
+            boolean shouldPublicUpload = configuration.getAttribute(LaunchConfiguration.SHOULD_SEND_PUBLIC_WORKSPACE, true);
+            
 
             userEmail.setText(userEmailDef);
             userEmail.addModifyListener(modifyEmailListener);
@@ -328,9 +391,13 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
             
             shouldDoHardwareSnapshot.setSelection(includehardwarePropeties);
             shouldDoHardwareSnapshot.addSelectionListener(selectionListener);
+            
+            shouldSendReportToPublicRepo.setSelection(shouldPublicUpload);
+            shouldSendReportToPublicRepo.addSelectionListener(selectionListener);
+            
             shouldSendReportEnableDisable();
-
-			checkIfThereAreSelectedBenchmarks();
+            checkIfThereAreSelectedBenchmarks();
+            checkIfPublicUploadSelected();
             
         } catch (CoreException e) {
         	GuiUtils.logError("There was a problem on the run configuration initialization: ", e);
@@ -356,10 +423,20 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         configuration.setAttribute(LaunchConfiguration.USER_EMAIL_ADDRESS,userEmail.getText());
         configuration.setAttribute(LaunchConfiguration.SHOULD_SEND_REPORT_CYBENCH, shouldSendReportToCyBench.getSelection());
         configuration.setAttribute(LaunchConfiguration.INCLUDE_HARDWARE_PROPERTIES, shouldDoHardwareSnapshot.getSelection());
+        String uploadStatus;
+        
+        if (shouldSendReportToPublicRepo.getSelection()) {
+        	uploadStatus = "public";
+        } else {
+        	uploadStatus = "private";
+        }
+        configuration.setAttribute(LaunchConfiguration.REPORT_UPLOAD_STATUS, uploadStatus);
+  
         String buildPath = getBuildPath(launchPath.getText());
     	configuration.setAttribute(LaunchConfiguration.BUILD_PATH,  buildPath);
 
-		checkIfThereAreSelectedBenchmarks();
+    	checkIfThereAreSelectedBenchmarks();
+    	checkIfPublicUploadSelected();
     }
     
     private String getBuildPath(String buildProjectPath) {
@@ -622,6 +699,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 				rightList.add(leftList.getItem(selectedField));
 				leftList.remove(selectedField);
 			}
+			checkIfPublicUploadSelected();
 			checkIfThereAreSelectedBenchmarks();
 		}
 	};
@@ -640,6 +718,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 				leftList.add(rightList.getItem(selectedField));
 				rightList.remove(selectedField);
 			}
+			checkIfPublicUploadSelected();
 			checkIfThereAreSelectedBenchmarks();
 		}
 	};
@@ -658,6 +737,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 			}
 			leftList.removeAll();
 			setChangeHappened();
+			checkIfPublicUploadSelected();
 			checkIfThereAreSelectedBenchmarks();
 		}
 	};
@@ -677,6 +757,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 			}
 			rightList.removeAll();
 			setChangeHappened();
+			checkIfPublicUploadSelected();
 			checkIfThereAreSelectedBenchmarks();
 		}
 	};
@@ -712,13 +793,21 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
 		return String.join(",",selectedItems);
 	}
 	
+	private void checkIfPublicUploadSelected() {
+		if (shouldSendReportToPublicRepo.getSelection()) {
+			repoHintText.setVisible(true);
+		} else {
+			repoHintText.setVisible(false);
+		}
+	}
+	
 	private void checkIfThereAreSelectedBenchmarks() {
 		 if(rightList.getItemCount()>0) {
 			hintText.setVisible(false);
 	    }else {
 			hintText.setVisible(true);
 	    }
-	}
+	}	
 	
 	private void setChangeHappened() {
 		setDirty(true);

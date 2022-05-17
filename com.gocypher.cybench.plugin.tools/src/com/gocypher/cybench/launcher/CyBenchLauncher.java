@@ -50,6 +50,7 @@ import com.gocypher.cybench.core.utils.SecurityUtils;
 import com.gocypher.cybench.launcher.model.BenchmarkReport;
 import com.gocypher.cybench.launcher.model.TooManyAnomaliesException;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.openjdk.jmh.profile.GCProfiler;
@@ -102,6 +103,7 @@ public class CyBenchLauncher {
 		System.out.println("-----------------------------------------------------------------------------------------");
 		LauncherConfiguration launcherConfiguration = new LauncherConfiguration () ;
 		fillLaunchConfigurations(launcherConfiguration);
+		
 		
 		if (launcherConfiguration.isRunAutoComparison()) {
 			System.out.println("*** Auto Comparison Settings Detected..");
@@ -210,8 +212,10 @@ public class CyBenchLauncher {
     //      Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
             Map<String, Map<String, String>> customBenchmarksMetadata = new HashMap<String, Map<String, String>>();
             BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results, customBenchmarksMetadata);
-
+            System.out.println("UPLOAD STATUS: " + report.getUploadStatus());
             report.updateUploadStatus(launcherConfiguration.getReportUploadStatus());
+            System.out.println("UPLOAD STATUS (AFTER UPDATE): " + report.getUploadStatus());
+
             if(launcherConfiguration.isIncludeHardware()) {
                 report.getEnvironmentSettings().put("environment", hwProperties);
                 report.getEnvironmentSettings().put("jvmEnvironment", jvmProperties);
@@ -219,7 +223,6 @@ public class CyBenchLauncher {
             report.getEnvironmentSettings().put("unclassifiedProperties", CollectSystemInformation.getUnclassifiedProperties());
             report.getEnvironmentSettings().put("userDefinedProperties", customUserDefinedProperties(launcherConfiguration.getUserProperties()));
             report.setBenchmarkSettings(benchmarkSettings);
-
 
             if (automatedComparisonCfg != null) {
                 if (automatedComparisonCfg.getScope().equals(Scope.WITHIN)) {
@@ -303,27 +306,40 @@ public class CyBenchLauncher {
             }
             try {
             String reportJSON = JSONUtils.marshalToPrettyJson(report);
-            System.out.println(reportJSON);
+
             String pathToReportFile = launcherConfiguration.getPathToPlainReportFile();
             System.out.println("Store file at: "+pathToReportFile+reportScore+".cybench");
             CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cybench", reportJSON);
             CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cyb", reportEncrypted);
 
+
+            
             if (!response.isEmpty() && !isErrorResponse(response)) {
                 System.out.println("Benchmark report submitted successfully to "+ Constants.REPORT_URL);
                 System.out.println("You can find all device benchmarks on "+ deviceReports);
                 System.out.println("Your report is available at "+ resultURL);
                 System.out.println("NOTE: It may take a few minutes for your report to appear online");
-                
+                if (report.getUploadStatus().equals(Constants.REPORT_PRIVATE)) {
+                	System.out.println("-----------------------------------------------------------------------------------------\r\n"
+                			+ "");
+                    System.out.println("*** Total Reports in repository/allowed: " + response.get(Constants.NUM_REPORTS_IN_REPO)
+                    + " / " + response.get(Constants.REPORTS_ALLOWED_FROM_SUB));
+                }
                 if (response.containsKey("automatedComparisons")) {
                     List<Map<String, Object>> automatedComparisons = (List<Map<String, Object>>) response
                             .get("automatedComparisons");
                     verifyAnomalies(automatedComparisons);
-                }               
+                }
+
+                
             } else {
                 String errMsg = getErrorResponseMessage(response);
                 if (errMsg != null) {
                     System.out.println("CyBench backend service sent error response: "+ errMsg);
+                }
+                if (getAllowedToUploadBasedOnSubscription(response)) {
+                	System.out.println("You may submit your report manually at " + Constants.CYB_UPLOAD_URL);
+                	
                 }
                 System.out.println("You may submit your report manually at "+Constants.CYB_UPLOAD_URL);
             }
@@ -518,8 +534,7 @@ public class CyBenchLauncher {
 	private static void fillLaunchConfigurations(LauncherConfiguration launcherConfiguration) {
 		
 		launcherConfiguration.setReportName(checkNullAndReturnString(Constants.BENCHMARK_REPORT_NAME));
-//		launcherConfiguration.setReportUploadStatus(checkNullAndReturnString(Constants.REPORT_UPLOAD_STATUS));
-
+		launcherConfiguration.setReportUploadStatus(checkNullAndReturnString(Constants.REPORT_UPLOAD_STATUS));
 		launcherConfiguration.setThreads(checkNullAndReturnInt(Constants.RUN_THREAD_COUNT));
 		launcherConfiguration.setForks(checkNullAndReturnInt(Constants.NUMBER_OF_FORKS));
 		launcherConfiguration.setWarmUpIterations(checkNullAndReturnInt(Constants.WARM_UP_ITERATIONS));
@@ -539,11 +554,11 @@ public class CyBenchLauncher {
         launcherConfiguration.setRemoteQueryToken(checkNullAndReturnString(Constants.USER_QUERY_TOKEN));
 		launcherConfiguration.setEmailAddress(checkNullAndReturnString(Constants.USER_EMAIL_ADDRESS));
 		
-    	if(launcherConfiguration.getRemoteAccessToken() != null && !launcherConfiguration.getRemoteAccessToken().equals("")){
-    		launcherConfiguration.setReportUploadStatus("private");
-		}else{
-			launcherConfiguration.setReportUploadStatus("public");
-		}
+//    	if(launcherConfiguration.getRemoteAccessToken() != null && !launcherConfiguration.getRemoteAccessToken().equals("")){
+//    		launcherConfiguration.setReportUploadStatus("private");
+//		}else{
+//			launcherConfiguration.setReportUploadStatus("public");
+//		}
     	 // grab user auto comparison configs
 		 launcherConfiguration.setAnomaliesAllowed(checkNullAndReturnInt(Constants.AUTO_ANOMALIES_ALLOWED));
 		 launcherConfiguration.setMethod(checkNullAndReturnString(Constants.AUTO_METHOD));
@@ -611,7 +626,7 @@ public class CyBenchLauncher {
             }
         }
     }
-
+    
     /**
      * Synchronizes overview and benchmark reports metadata.
      * 
@@ -908,6 +923,14 @@ public class CyBenchLauncher {
 
     private static boolean isPropUnspecified(String prop) {
         return StringUtils.isBlank(prop) || "unspecified".equals(prop);
+    }
+    
+    public static Boolean getAllowedToUploadBasedOnSubscription(Map<?, ?> response) {
+        if (response == null) {
+            return false;
+        }
+        Boolean allowUpload = (Boolean) response.get(Constants.ALLOW_UPLOAD);
+        return BooleanUtils.toBooleanDefaultIfNull(allowUpload, false);
     }
 
     public static void failBuildFromMissingMetadata(String metadata) throws MissingResourceException {

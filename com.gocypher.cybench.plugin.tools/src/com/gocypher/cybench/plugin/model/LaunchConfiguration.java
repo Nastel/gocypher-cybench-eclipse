@@ -49,6 +49,7 @@ public interface LaunchConfiguration {
 	public static final String SHOULD_SAVE_REPOT_TO_FILE = "com.cybench.ShouldSaveReportToFile";
 //	public static final String CUSTOM_USER_PROPERTIES = "com.cybench.customUserProperties";
 	public static final String CUSTOM_JVM_PROPERTIES = "com.cybench.customJVMProperties";
+	public static final String REPORT_UPLOAD_STATUS = "com.cybench.reportUploadStatus";
 	
 
 	public static final String LAUNCH_SELECTED_PATH = "com.cybench.launchPathSetFolderFileSelection";
@@ -63,4 +64,7 @@ public interface LaunchConfiguration {
 	public static final String REMOTE_CYBENCH_QUERY_TOKEN = "com.cybench.remoteQueryToken";
 	public static final String USER_EMAIL_ADDRESS ="com.cybench.userEmailAddress";
 	
+	public static final String SHOULD_SEND_PUBLIC_WORKSPACE = "com.cybench.shouldSendPublicWorkspace";
+    
+		
 }
