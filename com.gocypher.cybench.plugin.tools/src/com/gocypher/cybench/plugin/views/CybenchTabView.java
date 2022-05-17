@@ -430,7 +430,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         } else {
         	uploadStatus = "private";
         }
-        configuration.setAttribute(LaunchConfiguration.REPORT_UPLOAD_STATUS, uploadStatus);
+        configuration.setAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, uploadStatus);
   
         String buildPath = getBuildPath(launchPath.getText());
     	configuration.setAttribute(LaunchConfiguration.BUILD_PATH,  buildPath);

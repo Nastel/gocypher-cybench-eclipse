@@ -279,7 +279,9 @@ public class LaunchRunConfiguration extends org.eclipse.debug.core.model.LaunchC
     private void setRunConfigurationProperties(ILaunchConfiguration configuration) throws CoreException {
 	   reportFolder = configuration.getAttribute(LaunchConfiguration.REPORT_FOLDER, "/report");
        reportName = configuration.getAttribute(LaunchConfiguration.REPORT_NAME, "");
-       reportUploadStatus = configuration.getAttribute(LaunchConfiguration.REPORT_UPLOAD_STATUS, "");
+       reportUploadStatus = configuration.getAttribute(LaunchConfiguration.BENCHMARK_REPORT_STATUS, "public");
+
+      // reportUploadStatus = configuration.getAttribute(LaunchConfiguration.REPORT_UPLOAD_STATUS, "");
        thread = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
        forks  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
        warmupIterations  = configuration.getAttribute(LaunchConfiguration.WARMUP_ITERATION, 1);

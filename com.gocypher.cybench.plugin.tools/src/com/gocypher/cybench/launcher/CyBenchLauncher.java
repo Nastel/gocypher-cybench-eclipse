@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.Properties;
@@ -212,9 +213,7 @@ public class CyBenchLauncher {
     //      Map<String, Map<String, String>> customBenchmarksMetadata = CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
             Map<String, Map<String, String>> customBenchmarksMetadata = new HashMap<String, Map<String, String>>();
             BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results, customBenchmarksMetadata);
-            System.out.println("UPLOAD STATUS: " + report.getUploadStatus());
-            report.updateUploadStatus(launcherConfiguration.getReportUploadStatus());
-            System.out.println("UPLOAD STATUS (AFTER UPDATE): " + report.getUploadStatus());
+            report.updateUploadStatus(launcherConfiguration.getReportUploadStatus());   
 
             if(launcherConfiguration.isIncludeHardware()) {
                 report.getEnvironmentSettings().put("environment", hwProperties);
@@ -286,10 +285,10 @@ public class CyBenchLauncher {
                 String tokenAndEmail = ComputationUtils.getRequestHeader(launcherConfiguration.getRemoteAccessToken(), launcherConfiguration.getEmailAddress());
                 String queryToken = launcherConfiguration.getRemoteQueryToken();
                 responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted, tokenAndEmail, queryToken);
-
                 if (StringUtils.isNotEmpty(responseWithUrl)) {
                     response = JSONUtils.parseJsonIntoMap(responseWithUrl);
                 }
+
                 if (!response.isEmpty() && !isErrorResponse(response)) {
                     deviceReports = String.valueOf(response.get(Constants.REPORT_USER_URL));
                     resultURL = String.valueOf(response.get(Constants.REPORT_URL));
