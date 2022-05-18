@@ -154,7 +154,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 				start+Constants.BENCHMARK_REPORT_NAME+"=\""+reportName+"\""+
     			start+Constants.SELECTED_CLASS_PATHS+"=\""+classPaths+"\""+
     			start+Constants.AUTO_SHOULD_RUN_COMPARISON+"=\"false\""+
-    			start+"log4j.logs.root.path=" + userHome + "\\cybenchLogs\"");
+    			start+Constants.SEND_REPORT+"=\"false\"");
 //				" -DREPORT_FOLDER=\""+selection.getProjectReportsPath()+"\" "
 //				+ " -DREPORT_NAME=\""+reportName+"\""
 //				+ " -DREPORT_CLASSES=\""+LauncherUtils.setToString(selection.getClassPaths())+"\"");
