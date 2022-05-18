@@ -63,4 +63,7 @@ public interface LaunchConfiguration {
 	public static final String REMOTE_CYBENCH_QUERY_TOKEN = "com.cybench.remoteQueryToken";
 	public static final String USER_EMAIL_ADDRESS ="com.cybench.userEmailAddress";
 	
+	public static final String SHOULD_SEND_PUBLIC_WORKSPACE = "com.cybench.shouldSendPublicWorkspace";
+
+	
 }
