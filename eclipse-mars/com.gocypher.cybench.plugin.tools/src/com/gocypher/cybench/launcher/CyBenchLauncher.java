@@ -312,7 +312,7 @@ public class CyBenchLauncher {
 	                if (report.getUploadStatus().equals(Constants.REPORT_PRIVATE)) {
 	                	System.out.println("-----------------------------------------------------------------------------------------\r\n"
 	                			+ "");
-	                    System.out.println("*** Total Reports in repository/allowed: " + response.get(Constants.NUM_REPORTS_IN_REPO)
+	                    System.out.println("*** Total Reports in repository/allowed: " + ((Integer) response.get(Constants.NUM_REPORTS_IN_REPO) + 1)
 	                    + " / " + response.get(Constants.REPORTS_ALLOWED_FROM_SUB));
 	                }
 	                
