@@ -311,19 +311,19 @@ public class CyBenchLauncher {
             CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cybench", reportJSON);
             CybenchUtils.storeResultsToFile(pathToReportFile+reportScore+".cyb", reportEncrypted);
 
-
+            if (report.getUploadStatus().equals(Constants.REPORT_PRIVATE)) {
+            	System.out.println("-----------------------------------------------------------------------------------------\r\n"
+            			+ "");
+                System.out.println("*** Total Reports in repository/allowed: " + response.get(Constants.NUM_REPORTS_IN_REPO)
+                + " / " + response.get(Constants.REPORTS_ALLOWED_FROM_SUB));
+            }
             
             if (!response.isEmpty() && !isErrorResponse(response)) {
                 System.out.println("Benchmark report submitted successfully to "+ Constants.REPORT_URL);
                 System.out.println("You can find all device benchmarks on "+ deviceReports);
                 System.out.println("Your report is available at "+ resultURL);
                 System.out.println("NOTE: It may take a few minutes for your report to appear online");
-                if (report.getUploadStatus().equals(Constants.REPORT_PRIVATE)) {
-                	System.out.println("-----------------------------------------------------------------------------------------\r\n"
-                			+ "");
-                    System.out.println("*** Total Reports in repository/allowed: " + ((Integer) response.get(Constants.NUM_REPORTS_IN_REPO) + 1)
-                    + " / " + response.get(Constants.REPORTS_ALLOWED_FROM_SUB));
-                }
+
                 if (response.containsKey("automatedComparisons")) {
                     List<Map<String, Object>> automatedComparisons = (List<Map<String, Object>>) response
                             .get("automatedComparisons");
@@ -334,7 +334,7 @@ public class CyBenchLauncher {
             } else {
                 String errMsg = getErrorResponseMessage(response);
                 if (errMsg != null) {
-                    System.out.println("CyBench backend service sent error response: "+ errMsg);
+                    System.out.println("*** CyBench backend service sent error response: "+ errMsg);
                 }
                 if (getAllowedToUploadBasedOnSubscription(response)) {
                 	System.out.println("You may submit your report manually at " + Constants.CYB_UPLOAD_URL);
