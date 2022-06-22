@@ -101,7 +101,6 @@ public class CyBenchLauncher {
 	private static final String benchSource = "Eclipse plugin (v0.3-beta)";
 	private static Path userDir;
 	static Properties cfg = new Properties();
-	static ComparisonConfig automatedComparisonCfg;
 //	private static final Map<String, String> PROJECT_METADATA_MAP = new HashMap<>(5);
 
 	public static void main(String[] args) throws Exception {
@@ -112,6 +111,7 @@ public class CyBenchLauncher {
 		LauncherConfiguration launcherConfiguration = new LauncherConfiguration();
 		fillLaunchConfigurations(launcherConfiguration);
 		
+		ComparisonConfig automatedComparisonCfg;
 		if (launcherConfiguration.isRunAutoComparison()) {
 			System.out.println("*** Auto Comparison Settings Detected..");
 			automatedComparisonCfg = checkConfigValidity(launcherConfiguration);
@@ -142,11 +142,10 @@ public class CyBenchLauncher {
 
 
 		BenchmarkingContext benchContext = new BenchmarkingContext();
-
 		benchContext.setStartTime(start);
-		benchContext.setBenchSource("Test Source");
+		benchContext.setBenchSource(benchSource);
 		benchContext.setAutomatedComparisonCfg(automatedComparisonCfg);
-		///////////////////////////////////////////////////////////////
+
 		try {
 			initContext(benchContext, launcherConfiguration);
 
@@ -164,13 +163,12 @@ public class CyBenchLauncher {
 			benchmarkSettings.put("benchReportName", launcherConfiguration.getReportName());
 
 			checkProjectMetadataExists(benchContext.getProjectMetadata());
-			/////////////////////////////////////////////////////////////////
 
 			analyzeBenchmarkClasses(benchContext);
 
 			buildOptions(benchContext, launcherConfiguration);
 
-			Collection<RunResult> results = runBenchmarks(benchContext, userDir);
+			Collection<RunResult> results = runBenchmarks(benchContext);
 
 			BenchmarkOverviewReport report = processResults(benchContext, benchmarkSettings, results,
 					launcherConfiguration);
@@ -188,6 +186,159 @@ public class CyBenchLauncher {
 			System.out.println(
 					"-----------------------------------------------------------------------------------------");
 		}
+	}
+
+	private static void initContext(BenchmarkingContext benchContext, LauncherConfiguration launcherConfiguration) {
+		if (launcherConfiguration.isIncludeHardware()) {
+			System.out.println("Collecting hardware, software information...");
+			benchContext.setHWProperties(CollectSystemInformation.getEnvironmentProperties());
+		}
+		System.out.println("Collecting JVM properties..");
+		benchContext.setJVMProperties(CollectSystemInformation.getJavaVirtualMachineProperties());
+
+		Map<String, Map<String, String>> customBenchmarksMetadata = new HashMap<String, Map<String, String>>();
+		benchContext.setDefaultBenchmarksMetadata(ComputationUtils.parseBenchmarkMetadata(customBenchmarksMetadata));
+	}
+
+	private static void analyzeBenchmarkClasses(BenchmarkingContext benchContext) {
+		benchContext.setSecurityBuilder(new SecurityBuilder());
+
+		List<String> benchmarkNames = JMHUtils.getAllBenchmarkClasses();
+		for (String benchmarkClass : benchmarkNames) {
+			try {
+				Class<?> classObj = Class.forName(benchmarkClass);
+                SecurityUtils.generateMethodFingerprints(classObj, benchContext.getManualFingerprints(),
+                        benchContext.getClassFingerprints());
+                SecurityUtils.computeClassHashForMethods(classObj, benchContext.getGeneratedFingerprints());
+			} catch (ClassNotFoundException exc) {
+				System.out.println("Class not found in the classpath for execution");
+				exc.printStackTrace();
+			}
+		}
+	}
+
+	private static void buildOptions(BenchmarkingContext benchContext, LauncherConfiguration launcherConfiguration) {
+		System.out.println("Executing benchmarks...");
+
+		if (launcherConfiguration.getClassCalled().size() > 0) {
+			for (String classname : launcherConfiguration.getClassCalled()) {
+				System.out.println("Classes selected to run: " + classname);
+				benchContext.getOptBuilder().include(classname + "\\b");
+			}
+		}
+		Options opt;
+		if (launcherConfiguration.isUseCyBenchBenchmarkSettings()) {
+			opt = benchContext.getOptBuilder().forks(launcherConfiguration.getForks())
+					.measurementIterations(launcherConfiguration.getMeasurementIterations())
+					.warmupIterations(launcherConfiguration.getWarmUpIterations())
+					.warmupTime(TimeValue.seconds(launcherConfiguration.getWarmUpSeconds()))
+					.threads(launcherConfiguration.getThreads())
+					.measurementTime(TimeValue.seconds(launcherConfiguration.getMeasurmentSeconds())).shouldDoGC(true)
+					.detectJvmArgs().addProfiler(GCProfiler.class).addProfiler(HotspotThreadProfiler.class)
+					.addProfiler(HotspotRuntimeProfiler.class).addProfiler(SafepointsProfiler.class).build();
+		} else {
+			opt = benchContext.getOptBuilder().shouldDoGC(true).detectJvmArgs().addProfiler(GCProfiler.class)
+					.addProfiler(HotspotThreadProfiler.class).addProfiler(HotspotRuntimeProfiler.class)
+					.addProfiler(SafepointsProfiler.class).build();
+		}
+
+		benchContext.setOptions(opt);
+	}
+
+	private static Collection<RunResult> runBenchmarks(BenchmarkingContext benchContext) throws Exception {
+		Runner runner = new Runner(benchContext.getOptions());
+		Collection<RunResult> results = runner.run();
+		benchContext.getResults().addAll(results);
+		return results;
+	}
+
+	private static BenchmarkOverviewReport processResults(BenchmarkingContext benchContext,
+			Map<String, Object> benchmarkSettings, Collection<RunResult> results,
+			LauncherConfiguration launcherConfiguration) {
+
+				
+		BenchmarkOverviewReport report;
+		List<BenchmarkReport> benchReports;
+		if (benchContext.getReport() == null) {
+			BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results,
+					benchContext.getDefaultBenchmarksMetadata());
+			benchContext.setReport(report);
+            benchReports = report.getBenchmarksList();
+
+			if (launcherConfiguration.isIncludeHardware()) {
+				report.getEnvironmentSettings().put("environment", benchContext.getHWProperties());
+				report.getEnvironmentSettings().put("jvmEnvironment", benchContext.getJVMProperties());
+			}
+			report.getEnvironmentSettings().put("unclassifiedProperties",
+					CollectSystemInformation.getUnclassifiedProperties());
+			report.getEnvironmentSettings().put("userDefinedProperties",
+					customUserDefinedProperties(launcherConfiguration.getUserProperties()));
+
+					
+			ComparisonConfig automatedComparisonCfg = benchContext.getAutomatedComparisonCfg();
+			if (automatedComparisonCfg != null) {
+				if (automatedComparisonCfg.getScope().equals(Scope.WITHIN)) {
+					automatedComparisonCfg.setCompareVersion(benchContext.getProjectMetadata(Constants.PROJECT_VERSION));
+				}
+				automatedComparisonCfg.setRange(String.valueOf(automatedComparisonCfg.getCompareLatestReports()));
+				automatedComparisonCfg.setProjectName(benchContext.getProjectMetadata(Constants.PROJECT_NAME));
+				automatedComparisonCfg.setProjectVersion(benchContext.getProjectMetadata(Constants.PROJECT_VERSION));
+				report.setAutomatedComparisonConfig(automatedComparisonCfg);
+			}
+		} else {
+			report = benchContext.getReport();
+            benchReports = ReportingService.getInstance().updateBenchmarkReport(report, results,
+                    benchContext.getDefaultBenchmarksMetadata()); 
+		}
+		report.setBenchmarkSettings(benchmarkSettings);
+		
+
+		for (BenchmarkReport benchmarkReport : benchReports) {
+			String name = benchmarkReport.getName();
+			benchmarkReport.setClassFingerprint(benchContext.getClassFingerprints().get(name));
+			benchmarkReport.setGeneratedFingerprint(benchContext.getGeneratedFingerprints().get(name));
+			benchmarkReport.setManualFingerprint(benchContext.getManualFingerprints().get(name));
+			try {
+				JMHUtils.ClassAndMethod classAndMethod = new JMHUtils.ClassAndMethod(name).invoke();
+				String clazz = classAndMethod.getClazz();
+				String method = classAndMethod.getMethod();
+				System.out.println("Adding metadata for benchmark: " + clazz + " test: " + method);
+				Class<?> aClass = Class.forName(clazz);
+				Optional<Method> benchmarkMethod = JMHUtils.getBenchmarkMethod(method, aClass);
+				appendMetadataFromMethod(benchmarkMethod, benchmarkReport);
+				appendMetadataFromClass(aClass, benchmarkReport);
+				syncReportsMetadata(benchContext, report, benchmarkReport);
+				System.out.println(report);
+
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return report;
+	}
+
+	private static void completeReport(BenchmarkingContext benchContext, BenchmarkOverviewReport report,
+			LauncherConfiguration launcherConfiguration) {
+		List<BenchmarkReport> customBenchmarksCategoryCheck = report.getBenchmarks().get("CUSTOM");
+		report.getBenchmarks().remove("CUSTOM");
+		if (customBenchmarksCategoryCheck != null) {
+			for (BenchmarkReport benchReport : customBenchmarksCategoryCheck) {
+				report.addToBenchmarks(benchReport);
+			}
+		}
+		report.computeScores();
+		report.updateUploadStatus(launcherConfiguration.getReportUploadStatus());
+//        getReportUploadStatus(report);
+		// FIXME add all missing custom properties including public/private flag
+
+		report.setTimestamp(System.currentTimeMillis());
+        report.setTimestampUTC(ZonedDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
+
+		System.out.println("-----------------------------------------------------------------------------------------");
+		System.out.println("Report score - " + report.getTotalScore());
+		System.out.println("-----------------------------------------------------------------------------------------");
+
 	}
 
 	private static void sendReport(BenchmarkingContext benchContext, BenchmarkOverviewReport report,
@@ -271,161 +422,6 @@ public class CyBenchLauncher {
 		}
 
 		// TODO Auto-generated method stub
-
-	}
-
-	private static void completeReport(BenchmarkingContext benchContext, BenchmarkOverviewReport report,
-			LauncherConfiguration launcherConfiguration) {
-		List<BenchmarkReport> customBenchmarksCategoryCheck = report.getBenchmarks().get("CUSTOM");
-		report.getBenchmarks().remove("CUSTOM");
-		if (customBenchmarksCategoryCheck != null) {
-			for (BenchmarkReport benchReport : customBenchmarksCategoryCheck) {
-				report.addToBenchmarks(benchReport);
-			}
-		}
-		report.computeScores();
-//        getReportUploadStatus(report);
-		// FIXME add all missing custom properties including public/private flag
-
-		report.setTimestamp(System.currentTimeMillis());
-        report.setTimestampUTC(ZonedDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
-
-		System.out.println("-----------------------------------------------------------------------------------------");
-		System.out.println("Report score - " + report.getTotalScore());
-		System.out.println("-----------------------------------------------------------------------------------------");
-
-	}
-
-	private static BenchmarkOverviewReport processResults(BenchmarkingContext benchContext,
-			Map<String, Object> benchmarkSettings, Collection<RunResult> results,
-			LauncherConfiguration launcherConfiguration) {
-		Map<String, Map<String, String>> customBenchmarksMetadata = new HashMap<String, Map<String, String>>();
-		BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results,
-				customBenchmarksMetadata);
-		report.updateUploadStatus(launcherConfiguration.getReportUploadStatus());
-		System.out.println("Reports status updated...?");
-		if (launcherConfiguration.isIncludeHardware()) {
-			report.getEnvironmentSettings().put("environment", benchContext.getHWProperties());
-			report.getEnvironmentSettings().put("jvmEnvironment", benchContext.getJVMProperties());
-		}
-		report.getEnvironmentSettings().put("unclassifiedProperties",
-				CollectSystemInformation.getUnclassifiedProperties());
-		report.getEnvironmentSettings().put("userDefinedProperties",
-				customUserDefinedProperties(launcherConfiguration.getUserProperties()));
-		report.setBenchmarkSettings(benchmarkSettings);
-		
-		System.out.println("Benchmark settings set... somehow?");
-
-		if (automatedComparisonCfg != null) {
-			System.out.println("AUTO COMPARISON NOT NULL!!");
-			if (automatedComparisonCfg.getScope().equals(Scope.WITHIN)) {
-				automatedComparisonCfg.setCompareVersion(benchContext.getProjectMetadata(Constants.PROJECT_VERSION));
-			}
-			automatedComparisonCfg.setRange(String.valueOf(automatedComparisonCfg.getCompareLatestReports()));
-			automatedComparisonCfg.setProjectName(benchContext.getProjectMetadata(Constants.PROJECT_NAME));
-			automatedComparisonCfg.setProjectVersion(benchContext.getProjectMetadata(Constants.PROJECT_VERSION));
-			
-		//	report.setAutomatedComparisonConfig(automatedComparisonCfg);
-			report.setAutomatedComparisonConfig(automatedComparisonCfg);
-		}
-		Iterator<String> it = report.getBenchmarks().keySet().iterator();
-
-		while (it.hasNext()) {
-			List<BenchmarkReport> custom = report.getBenchmarks().get(it.next()).stream().collect(Collectors.toList());
-			custom.stream().forEach(benchmarkReport -> {
-				String name = benchmarkReport.getName();
-				benchmarkReport.setClassFingerprint(benchContext.getClassFingerprints().get(name));
-				benchmarkReport.setGeneratedFingerprint(benchContext.getGeneratedFingerprints().get(name));
-				benchmarkReport.setManualFingerprint(benchContext.getManualFingerprints().get(name));
-				try {
-					JMHUtils.ClassAndMethod classAndMethod = new JMHUtils.ClassAndMethod(name).invoke();
-					String clazz = classAndMethod.getClazz();
-					String method = classAndMethod.getMethod();
-					System.out.println("Adding metadata for benchmark: " + clazz + " test: " + method);
-					Class<?> aClass = Class.forName(clazz);
-					Optional<Method> benchmarkMethod = JMHUtils.getBenchmarkMethod(method, aClass);
-					appendMetadataFromMethod(benchmarkMethod, benchmarkReport);
-					appendMetadataFromClass(aClass, benchmarkReport);
-					syncReportsMetadata(benchContext, report, benchmarkReport);
-					System.out.println(report);
-
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-
-			});
-		}
-		return report;
-	}
-
-	private static Collection<RunResult> runBenchmarks(BenchmarkingContext benchContext, Path userDir2)
-			throws RunnerException {
-		Runner runner = new Runner(benchContext.getOptions());
-
-		Map<String, String> generatedFingerprints = new HashMap<>();
-		Map<String, String> manualFingerprints = new HashMap<>();
-		Map<String, String> classFingerprints = new HashMap<>();
-
-		List<String> benchmarkNames = JMHUtils.getAllBenchmarkClasses();
-		for (String benchmarkClass : benchmarkNames) {
-			try {
-				Class<?> classObj = Class.forName(benchmarkClass);
-				SecurityUtils.generateMethodFingerprints(classObj, manualFingerprints, classFingerprints);
-				SecurityUtils.computeClassHashForMethods(classObj, generatedFingerprints);
-			} catch (ClassNotFoundException exc) {
-				System.out.println("Class not found in the classpath for execution");
-				exc.printStackTrace();
-			}
-
-		}
-
-		Collection<RunResult> results = runner.run();
-		benchContext.getResults().addAll(results);
-		return results;
-	}
-
-	private static void buildOptions(BenchmarkingContext benchContext, LauncherConfiguration launcherConfiguration) {
-		System.out.println("Executing benchmarks...");
-		OptionsBuilder optBuild = new OptionsBuilder();
-
-		if (launcherConfiguration.getClassCalled().size() > 0) {
-			for (String classname : launcherConfiguration.getClassCalled()) {
-				System.out.println("Classes selected to run: " + classname);
-				optBuild.include(classname + "\\b");
-			}
-		}
-		Options opt;
-		if (launcherConfiguration.isUseCyBenchBenchmarkSettings()) {
-			opt = optBuild.forks(launcherConfiguration.getForks())
-					.measurementIterations(launcherConfiguration.getMeasurementIterations())
-					.warmupIterations(launcherConfiguration.getWarmUpIterations())
-					.warmupTime(TimeValue.seconds(launcherConfiguration.getWarmUpSeconds()))
-					.threads(launcherConfiguration.getThreads())
-					.measurementTime(TimeValue.seconds(launcherConfiguration.getMeasurmentSeconds())).shouldDoGC(true)
-					.detectJvmArgs().addProfiler(GCProfiler.class).addProfiler(HotspotThreadProfiler.class)
-					.addProfiler(HotspotRuntimeProfiler.class).addProfiler(SafepointsProfiler.class).build();
-		} else {
-			opt = optBuild.shouldDoGC(true).detectJvmArgs().addProfiler(GCProfiler.class)
-					.addProfiler(HotspotThreadProfiler.class).addProfiler(HotspotRuntimeProfiler.class)
-					.addProfiler(SafepointsProfiler.class).build();
-		}
-
-		benchContext.setOptions(opt);
-
-	}
-
-	private static void analyzeBenchmarkClasses(BenchmarkingContext benchContext) {
-		benchContext.setSecurityBuilder(new SecurityBuilder());
-
-	}
-
-	private static void initContext(BenchmarkingContext benchContext, LauncherConfiguration launcherConfiguration) {
-		if (launcherConfiguration.isIncludeHardware()) {
-			System.out.println("Collecting hardware, software information...");
-			benchContext.setHWProperties(CollectSystemInformation.getEnvironmentProperties());
-		}
-		System.out.println("Collecting JVM properties..");
-		benchContext.setJVMProperties(CollectSystemInformation.getJavaVirtualMachineProperties());
 
 	}
 
