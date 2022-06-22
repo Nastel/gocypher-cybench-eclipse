@@ -111,7 +111,7 @@ public class CyBenchLauncher {
 		LauncherConfiguration launcherConfiguration = new LauncherConfiguration();
 		fillLaunchConfigurations(launcherConfiguration);
 		
-		ComparisonConfig automatedComparisonCfg;
+		ComparisonConfig automatedComparisonCfg = null;
 		if (launcherConfiguration.isRunAutoComparison()) {
 			System.out.println("*** Auto Comparison Settings Detected..");
 			automatedComparisonCfg = checkConfigValidity(launcherConfiguration);
@@ -197,7 +197,7 @@ public class CyBenchLauncher {
 		benchContext.setJVMProperties(CollectSystemInformation.getJavaVirtualMachineProperties());
 
 		Map<String, Map<String, String>> customBenchmarksMetadata = new HashMap<String, Map<String, String>>();
-		benchContext.setDefaultBenchmarksMetadata(ComputationUtils.parseBenchmarkMetadata(customBenchmarksMetadata));
+		benchContext.setDefaultBenchmarksMetadata(customBenchmarksMetadata);
 	}
 
 	private static void analyzeBenchmarkClasses(BenchmarkingContext benchContext) {
@@ -260,7 +260,7 @@ public class CyBenchLauncher {
 		BenchmarkOverviewReport report;
 		List<BenchmarkReport> benchReports;
 		if (benchContext.getReport() == null) {
-			BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results,
+			report = ReportingService.getInstance().createBenchmarkReport(results,
 					benchContext.getDefaultBenchmarksMetadata());
 			benchContext.setReport(report);
             benchReports = report.getBenchmarksList();
