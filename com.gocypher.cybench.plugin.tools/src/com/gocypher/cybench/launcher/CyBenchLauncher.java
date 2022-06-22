@@ -29,6 +29,8 @@ import java.math.BigDecimal;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -283,6 +285,9 @@ public class CyBenchLauncher {
 		report.computeScores();
 //        getReportUploadStatus(report);
 		// FIXME add all missing custom properties including public/private flag
+
+		report.setTimestamp(System.currentTimeMillis());
+        report.setTimestampUTC(ZonedDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
 
 		System.out.println("-----------------------------------------------------------------------------------------");
 		System.out.println("Report score - " + report.getTotalScore());
