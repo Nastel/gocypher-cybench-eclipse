@@ -43,6 +43,7 @@ import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -737,6 +738,8 @@ public class CyBenchLauncher {
 					String sessionId = bMetadata.get("benchSession");
 					if (StringUtils.isNotEmpty(sessionId)) {
 						report.setBenchmarkSessionId(sessionId);
+					} else {
+						report.setBenchmarkSessionId(UUID.randomUUID().toString());
 					}
 				}
 			}
