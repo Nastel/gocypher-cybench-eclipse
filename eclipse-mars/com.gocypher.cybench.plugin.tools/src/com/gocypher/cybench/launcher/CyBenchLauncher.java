@@ -716,6 +716,8 @@ public class CyBenchLauncher {
 					} else {
 						report.setBenchmarkSessionId(UUID.randomUUID().toString());
 					}
+				} else {
+					report.setBenchmarkSessionId(UUID.randomUUID().toString());
 				}
 			}
 
