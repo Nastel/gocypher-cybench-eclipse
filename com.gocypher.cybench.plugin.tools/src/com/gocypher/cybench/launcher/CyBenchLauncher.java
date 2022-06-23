@@ -124,22 +124,7 @@ public class CyBenchLauncher {
 				launcherConfiguration.setPathToEncryptedReportFile(args[1]);
 			}
 		}
-		if (!launcherConfiguration.getPathToPlainReportFile().equals(null)) {
-			System.out.println("PlainReportFile: " + launcherConfiguration.getPathToPlainReportFile());
-		} else {
-			System.out.println("Plain Report Path Null");
-		}
-		
-		if (!launcherConfiguration.getPathToEncryptedReportFile().equals(null)) {
-			System.out.println("enc rep file: " + launcherConfiguration.getPathToEncryptedReportFile());
-		} else {
-			System.out.println("enc Report Path Null");
-		}
-		
-		System.out.println("Enc Report File: " + launcherConfiguration.getPathToEncryptedReportFile());
 		userDir = Paths.get(launcherConfiguration.getPathToPlainReportFile()).getParent().getParent();
-
-
 
 		BenchmarkingContext benchContext = new BenchmarkingContext();
 		benchContext.setStartTime(start);
