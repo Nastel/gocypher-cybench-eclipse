@@ -737,6 +737,8 @@ public class CyBenchLauncher {
 					} else {
 						report.setBenchmarkSessionId(UUID.randomUUID().toString());
 					}
+				} else {
+					report.setBenchmarkSessionId(UUID.randomUUID().toString());
 				}
 			}
 
@@ -793,13 +795,13 @@ public class CyBenchLauncher {
 		if (StringUtils.isEmpty(metaProp)) {
 			failBuildFromMissingMetadata("Project");
 		} else {
-			System.out.println("MetaData - Project name:    {}" + metaProp);
+			System.out.println("MetaData - Project name:    {" + metaProp + "}");
 		}
 		metaProp = projectMetadata.get(Constants.PROJECT_VERSION);
 		if (StringUtils.isEmpty(metaProp)) {
 			failBuildFromMissingMetadata("Version");
 		} else {
-			System.out.println("MetaData - Project version: {}" + metaProp);
+			System.out.println("MetaData - Project version: {" + metaProp + "}");
 		}
 	}
 
