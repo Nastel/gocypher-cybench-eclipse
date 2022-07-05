@@ -28,6 +28,8 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,6 +41,7 @@ import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -47,7 +50,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.gocypher.cybench.core.utils.SecurityUtils;
 import com.gocypher.cybench.launcher.model.BenchmarkReport;
+import com.gocypher.cybench.launcher.model.BenchmarkingContext;
 import com.gocypher.cybench.launcher.model.TooManyAnomaliesException;
+import com.gocypher.cybench.launcher.model.BenchmarkOverviewReport;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.EnumUtils;
@@ -75,7 +80,6 @@ import com.gocypher.cybench.core.utils.JSONUtils;
 import com.gocypher.cybench.launcher.environment.model.HardwareProperties;
 import com.gocypher.cybench.launcher.environment.model.JVMProperties;
 import com.gocypher.cybench.launcher.environment.services.CollectSystemInformation;
-import com.gocypher.cybench.launcher.model.BenchmarkOverviewReport;
 import com.gocypher.cybench.launcher.report.DeliveryService;
 import com.gocypher.cybench.launcher.report.ReportingService;
 import com.gocypher.cybench.launcher.utils.ComputationUtils;
@@ -91,20 +95,17 @@ public class CyBenchLauncher {
 	public static Map<String, String> resultsMap = new HashMap<>();
 	private static final String benchSource = "Eclipse Mars plugin (v0.3-beta)";
 	static Properties cfg = new Properties();
-	static ComparisonConfig automatedComparisonCfg;
-
 	private static Path userDir;
 
-	private static final Map<String, String> PROJECT_METADATA_MAP = new HashMap<>(5);
-
 	public static void main(String[] args) throws Exception {
-		int exitCode = 0;
+		long start = System.currentTimeMillis();
 		System.out.println("-----------------------------------------------------------------------------------------");
 		System.out.println("                                 Starting CyBench benchmarks                             ");
 		System.out.println("-----------------------------------------------------------------------------------------");
 		LauncherConfiguration launcherConfiguration = new LauncherConfiguration();
 		fillLaunchConfigurations(launcherConfiguration);
 
+		ComparisonConfig automatedComparisonCfg = null;
 		if (launcherConfiguration.isRunAutoComparison()) {
 			System.out.println("*** Auto Comparison Settings Detected..");
 			automatedComparisonCfg = checkConfigValidity(launcherConfiguration);
@@ -119,228 +120,41 @@ public class CyBenchLauncher {
 		}
 
 		userDir = Paths.get(launcherConfiguration.getPathToPlainReportFile()).getParent().getParent();
-		// FIXME implement loading of custom benchmark meta data
 
-		System.out.println(System.getProperty("line.separator"));
-		HardwareProperties hwProperties = new HardwareProperties();
-		JVMProperties jvmProperties = new JVMProperties();
-		if (launcherConfiguration.isIncludeHardware()) {
-			System.out.println("Collecting hardware, software information...");
-			hwProperties = CollectSystemInformation.getEnvironmentProperties();
-		}
-
-		System.out.println("Collecting JVM properties...");
-		jvmProperties = CollectSystemInformation.getJavaVirtualMachineProperties();
-		SecurityBuilder securityBuilder = new SecurityBuilder();
-		Map<String, Object> benchmarkSettings = new HashMap<>();
-
-		benchmarkSettings.put("benchSource", benchSource);
-		benchmarkSettings.put("benchWarmUpIteration", launcherConfiguration.getWarmUpIterations());
-		benchmarkSettings.put("benchWarmUpSeconds", launcherConfiguration.getWarmUpSeconds());
-		benchmarkSettings.put("benchMeasurementIteration", launcherConfiguration.getMeasurementIterations());
-		benchmarkSettings.put("benchMeasurementSeconds", launcherConfiguration.getMeasurmentSeconds());
-		benchmarkSettings.put("benchForkCount", launcherConfiguration.getForks());
-		benchmarkSettings.put("benchThreadCount", launcherConfiguration.getThreads());
-		benchmarkSettings.put("benchReportName", launcherConfiguration.getReportName());
+		BenchmarkingContext benchContext = new BenchmarkingContext();
+		benchContext.setStartTime(start);
+		benchContext.setBenchSource(benchSource);
+		benchContext.setAutomatedComparisonCfg(automatedComparisonCfg);
 
 		try {
-			checkProjectMetadataExists();
-			System.out.println("Executing benchmarks...");
+			initContext(benchContext, launcherConfiguration);
 
-			OptionsBuilder optBuild = new OptionsBuilder();
+			Map<String, Object> benchmarkSettings = new HashMap<>();
 
-			if (launcherConfiguration.getClassCalled().size() > 0) {
-				for (String classname : launcherConfiguration.getClassCalled()) {
-					System.out.println("Classes selected to run: " + classname);
-					optBuild.include(classname + "\\b");
-				}
-			}
+			benchmarkSettings.put("benchSource", benchSource);
+			benchmarkSettings.put("benchWarmUpIteration", launcherConfiguration.getWarmUpIterations());
+			benchmarkSettings.put("benchWarmUpSeconds", launcherConfiguration.getWarmUpSeconds());
+			benchmarkSettings.put("benchMeasurementIteration", launcherConfiguration.getMeasurementIterations());
+			benchmarkSettings.put("benchMeasurementSeconds", launcherConfiguration.getMeasurmentSeconds());
+			benchmarkSettings.put("benchForkCount", launcherConfiguration.getForks());
+			benchmarkSettings.put("benchThreadCount", launcherConfiguration.getThreads());
+			benchmarkSettings.put("benchReportName", launcherConfiguration.getReportName());
 
-			Options opt;
-			if (launcherConfiguration.isUseCyBenchBenchmarkSettings()) {
-				opt = optBuild.forks(launcherConfiguration.getForks())
-						.measurementIterations(launcherConfiguration.getMeasurementIterations())
-						.warmupIterations(launcherConfiguration.getWarmUpIterations())
-						.warmupTime(TimeValue.seconds(launcherConfiguration.getWarmUpSeconds()))
-						.threads(launcherConfiguration.getThreads())
-						.measurementTime(TimeValue.seconds(launcherConfiguration.getMeasurmentSeconds()))
-						.shouldDoGC(true).detectJvmArgs().addProfiler(GCProfiler.class)
-						.addProfiler(HotspotThreadProfiler.class).addProfiler(HotspotRuntimeProfiler.class)
-						.addProfiler(SafepointsProfiler.class).build();
-			} else {
-				opt = optBuild.shouldDoGC(true).detectJvmArgs().addProfiler(GCProfiler.class)
-						.addProfiler(HotspotThreadProfiler.class).addProfiler(HotspotRuntimeProfiler.class)
-						.addProfiler(SafepointsProfiler.class).build();
-			}
+			checkProjectMetadataExists(benchContext.getProjectMetadata());
 
-			Runner runner = new Runner(opt);
+			analyzeBenchmarkClasses(benchContext);
 
-			Map<String, String> generatedFingerprints = new HashMap<>();
-			Map<String, String> manualFingerprints = new HashMap<>();
-			Map<String, String> classFingerprints = new HashMap<>();
+			buildOptions(benchContext, launcherConfiguration);
 
-			List<String> benchmarkNames = JMHUtils.getAllBenchmarkClasses();
-			for (String benchmarkClass : benchmarkNames) {
-				try {
-					Class<?> classObj = Class.forName(benchmarkClass);
-					SecurityUtils.generateMethodFingerprints(classObj, manualFingerprints, classFingerprints);
-					SecurityUtils.computeClassHashForMethods(classObj, generatedFingerprints);
-				} catch (ClassNotFoundException exc) {
-					System.out.println("Class not found in the classpath for execution");
-					exc.printStackTrace();
-				}
+			Collection<RunResult> results = runBenchmarks(benchContext);
 
-			}
+			BenchmarkOverviewReport report = processResults(benchContext, benchmarkSettings, results,
+					launcherConfiguration);
 
-			Collection<RunResult> results = runner.run();
-			// Map<String, Map<String, String>> customBenchmarksMetadata =
-			// CybenchUtils.parseCustomBenchmarkMetadata(launcherConfiguration.getUserBenchmarkMetadata());
-			Map<String, Map<String, String>> customBenchmarksMetadata = new HashMap<String, Map<String, String>>();
-			BenchmarkOverviewReport report = ReportingService.getInstance().createBenchmarkReport(results,
-					customBenchmarksMetadata);
-
-			report.updateUploadStatus(launcherConfiguration.getReportUploadStatus());
-			if (launcherConfiguration.isIncludeHardware()) {
-				report.getEnvironmentSettings().put("environment", hwProperties);
-				report.getEnvironmentSettings().put("jvmEnvironment", jvmProperties);
-			}
-			report.getEnvironmentSettings().put("unclassifiedProperties",
-					CollectSystemInformation.getUnclassifiedProperties());
-			report.getEnvironmentSettings().put("userDefinedProperties",
-					customUserDefinedProperties(launcherConfiguration.getUserProperties()));
-			report.setBenchmarkSettings(benchmarkSettings);
-
-			if (automatedComparisonCfg != null) {
-				if (automatedComparisonCfg.getScope().equals(Scope.WITHIN)) {
-					automatedComparisonCfg.setCompareVersion(PROJECT_METADATA_MAP.get(Constants.PROJECT_VERSION));
-				}
-				automatedComparisonCfg.setRange(String.valueOf(automatedComparisonCfg.getCompareLatestReports()));
-				automatedComparisonCfg.setProjectName(PROJECT_METADATA_MAP.get(Constants.PROJECT_NAME));
-				automatedComparisonCfg.setProjectVersion(PROJECT_METADATA_MAP.get(Constants.PROJECT_VERSION));
-				report.setAutomatedComparisonConfig(automatedComparisonCfg);
-			}
-
-			Iterator<String> it = report.getBenchmarks().keySet().iterator();
-
-			while (it.hasNext()) {
-				List<BenchmarkReport> custom = report.getBenchmarks().get(it.next()).stream()
-						.collect(Collectors.toList());
-				custom.stream().forEach(benchmarkReport -> {
-					String name = benchmarkReport.getName();
-					benchmarkReport.setClassFingerprint(classFingerprints.get(name));
-					benchmarkReport.setGeneratedFingerprint(generatedFingerprints.get(name));
-					benchmarkReport.setManualFingerprint(manualFingerprints.get(name));
-					try {
-						JMHUtils.ClassAndMethod classAndMethod = new JMHUtils.ClassAndMethod(name).invoke();
-						String clazz = classAndMethod.getClazz();
-						String method = classAndMethod.getMethod();
-						// System.out.println("Adding metadata for benchmark: "
-						// + clazz + " test: " + method);
-						Class<?> aClass = Class.forName(clazz);
-						Optional<Method> benchmarkMethod = JMHUtils.getBenchmarkMethod(method, aClass);
-						appendMetadataFromMethod(benchmarkMethod, benchmarkReport);
-						appendMetadataFromClass(aClass, benchmarkReport);
-						syncReportsMetadata(report, benchmarkReport);
-					} catch (ClassNotFoundException e) {
-						e.printStackTrace();
-					}
-				});
-			}
-			List<BenchmarkReport> customBenchmarksCategoryCheck = report.getBenchmarks().get("CUSTOM");
-			report.getBenchmarks().remove("CUSTOM");
-			if (customBenchmarksCategoryCheck != null) {
-				for (BenchmarkReport benchReport : customBenchmarksCategoryCheck) {
-					report.addToBenchmarks(benchReport);
-				}
-			}
-			report.computeScores();
-			// getReportUploadStatus(report);
-			// FIXME add all missing custom properties including public/private
-			// flag
-
-			System.out.println(
-					"-----------------------------------------------------------------------------------------");
-			System.out.println("Report score - " + report.getTotalScore());
-			System.out.println(
-					"-----------------------------------------------------------------------------------------");
-
-			String reportEncrypted = ReportingService.getInstance().prepareReportForDelivery(securityBuilder, report);
-
-			String responseWithUrl = null;
-			String deviceReports = null;
-			String resultURL = null;
-			Map<?, ?> response = new HashMap<>();
-
-			if (report.isEligibleForStoringExternally() && launcherConfiguration.isShouldSendReportToCyBench()) {
-				String tokenAndEmail = ComputationUtils.getRequestHeader(launcherConfiguration.getRemoteAccessToken(),
-						launcherConfiguration.getEmailAddress());
-				String queryToken = launcherConfiguration.getRemoteQueryToken();
-				responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted, tokenAndEmail,
-						queryToken);
-
-				if (StringUtils.isNotEmpty(responseWithUrl)) {
-					response = JSONUtils.parseJsonIntoMap(responseWithUrl);
-				}
-				if (!response.isEmpty() && !isErrorResponse(response)) {
-					deviceReports = String.valueOf(response.get(Constants.REPORT_USER_URL));
-					resultURL = String.valueOf(response.get(Constants.REPORT_URL));
-					report.setDeviceReportsURL(deviceReports);
-					report.setReportURL(resultURL);
-				}
-
-			} else {
-				System.out.println("You may submit your report manually at " + Constants.CYB_UPLOAD_URL);
-			}
-			BigDecimal reportScore = report.getTotalScore();
-			if (reportScore == null) {
-				reportScore = new BigDecimal(0);
-			}
-			try {
-				String reportJSON = JSONUtils.marshalToPrettyJson(report);
-				System.out.println(reportJSON);
-				String pathToReportFile = launcherConfiguration.getPathToPlainReportFile();
-				System.out.println("Store file at: " + pathToReportFile + reportScore + ".cybench");
-				CybenchUtils.storeResultsToFile(pathToReportFile + reportScore + ".cybench", reportJSON);
-				CybenchUtils.storeResultsToFile(pathToReportFile + reportScore + ".cyb", reportEncrypted);
-				
-	            if (report.getUploadStatus().equals(Constants.REPORT_PRIVATE)) {
-	            	System.out.println("-----------------------------------------------------------------------------------------\r\n"
-	            			+ "");
-	                System.out.println("*** Total Reports in repository/allowed: " + response.get(Constants.NUM_REPORTS_IN_REPO)
-	                + " / " + response.get(Constants.REPORTS_ALLOWED_FROM_SUB));
-	            }
-
-				if (!response.isEmpty() && !isErrorResponse(response)) {
-					System.out.println("Benchmark report submitted successfully to " + Constants.REPORT_URL);
-					System.out.println("You can find all device benchmarks on " + deviceReports);
-					System.out.println("Your report is available at " + resultURL);
-					System.out.println("NOTE: It may take a few minutes for your report to appear online");					
-	                
-					if (response.containsKey("automatedComparisons")) {
-						List<Map<String, Object>> automatedComparisons = (List<Map<String, Object>>) response
-								.get("automatedComparisons");
-						verifyAnomalies(automatedComparisons);
-			}
-				} else {
-					String errMsg = getErrorResponseMessage(response);
-					if (errMsg != null) {
-						System.out.println("*** CyBench backend service sent error response: " + errMsg);
-					}
-					
-					if (getAllowedToUploadBasedOnSubscription(response)) {
-						System.out.println("You may submit your report manually at " + Constants.CYB_UPLOAD_URL);
-					}
-				}
-			} catch (TooManyAnomaliesException e) {
-				System.out.println("Too many anomalies found during benchmarks run" + e.getMessage());
-				exitCode = 1;
-			} catch (Throwable e) {
-				System.out.println("Failed to save test results" + e);
-				exitCode = 2;
-			}
-		} catch (MissingResourceException exc) {
+			sendReport(benchContext, report, launcherConfiguration);
+		} catch (Exception e) {
+			System.out.println("Failed to save test results: " + e);
 		} finally {
-
 			System.out.println(
 					"-----------------------------------------------------------------------------------------");
 			System.out.println(
@@ -348,6 +162,244 @@ public class CyBenchLauncher {
 			System.out.println(
 					"-----------------------------------------------------------------------------------------");
 		}
+
+	}
+
+
+	private static void completeReport(BenchmarkingContext benchContext, BenchmarkOverviewReport report,
+			LauncherConfiguration launcherConfiguration) {
+		
+		List<BenchmarkReport> customBenchmarksCategoryCheck = report.getBenchmarks().get("CUSTOM");
+		report.getBenchmarks().remove("CUSTOM");
+		if (customBenchmarksCategoryCheck != null) {
+			for (BenchmarkReport benchReport : customBenchmarksCategoryCheck) {
+				report.addToBenchmarks(benchReport);
+			}
+		}
+		report.computeScores();
+		report.updateUploadStatus(launcherConfiguration.getReportUploadStatus());
+
+		report.setTimestamp(System.currentTimeMillis());
+		report.setTimestampUTC(ZonedDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
+
+		System.out.println("-----------------------------------------------------------------------------------------");
+		System.out.println("Report score - " + report.getTotalScore());
+		System.out.println("-----------------------------------------------------------------------------------------");
+
+	}
+
+	private static void sendReport(BenchmarkingContext benchContext, BenchmarkOverviewReport report,
+			LauncherConfiguration launcherConfiguration) {
+
+		completeReport(benchContext, report, launcherConfiguration);
+
+		String reportEncrypted = ReportingService.getInstance()
+				.prepareReportForDelivery(benchContext.getSecurityBuilder(), report);
+
+		String responseWithUrl = null;
+		String deviceReports = null;
+		String resultURL = null;
+		Map<?, ?> response = new HashMap<>();
+
+		if (report.isEligibleForStoringExternally() && launcherConfiguration.isShouldSendReportToCyBench()) {
+			String tokenAndEmail = ComputationUtils.getRequestHeader(launcherConfiguration.getRemoteAccessToken(),
+					launcherConfiguration.getEmailAddress());
+			String queryToken = launcherConfiguration.getRemoteQueryToken();
+			responseWithUrl = DeliveryService.getInstance().sendReportForStoring(reportEncrypted, tokenAndEmail,
+					queryToken);
+
+			if (StringUtils.isNotEmpty(responseWithUrl)) {
+				response = JSONUtils.parseJsonIntoMap(responseWithUrl);
+			}
+			if (!response.isEmpty() && !isErrorResponse(response)) {
+				deviceReports = String.valueOf(response.get(Constants.REPORT_USER_URL));
+				resultURL = String.valueOf(response.get(Constants.REPORT_URL));
+				report.setDeviceReportsURL(deviceReports);
+				report.setReportURL(resultURL);
+			}
+
+		} else {
+			System.out.println("You may submit your report manually at " + Constants.CYB_UPLOAD_URL);
+		}
+		BigDecimal reportScore = report.getTotalScore();
+		if (reportScore == null) {
+			reportScore = new BigDecimal(0);
+		}
+		try {
+			String reportJSON = JSONUtils.marshalToPrettyJson(report);
+			System.out.println(reportJSON);
+			String pathToReportFile = launcherConfiguration.getPathToPlainReportFile();
+			System.out.println("Store file at: " + pathToReportFile + reportScore + ".cybench");
+			CybenchUtils.storeResultsToFile(pathToReportFile + reportScore + ".cybench", reportJSON);
+			CybenchUtils.storeResultsToFile(pathToReportFile + reportScore + ".cyb", reportEncrypted);
+
+			if (report.getUploadStatus().equals(Constants.REPORT_PRIVATE)) {
+				System.out.println(
+						"-----------------------------------------------------------------------------------------\r\n"
+								+ "");
+				System.out.println(
+						"*** Total Reports in repository/allowed: " + response.get(Constants.NUM_REPORTS_IN_REPO)
+								+ " / " + response.get(Constants.REPORTS_ALLOWED_FROM_SUB));
+			}
+
+			if (!response.isEmpty() && !isErrorResponse(response)) {
+				System.out.println("Benchmark report submitted successfully to " + Constants.REPORT_URL);
+				System.out.println("You can find all device benchmarks on " + deviceReports);
+				System.out.println("Your report is available at " + resultURL);
+				System.out.println("NOTE: It may take a few minutes for your report to appear online");
+
+				if (response.containsKey("automatedComparisons")) {
+					List<Map<String, Object>> automatedComparisons = (List<Map<String, Object>>) response
+							.get("automatedComparisons");
+					verifyAnomalies(automatedComparisons);
+				}
+			} else {
+				String errMsg = getErrorResponseMessage(response);
+				if (errMsg != null) {
+					System.out.println("*** CyBench backend service sent error response: " + errMsg);
+				}
+
+				if (getAllowedToUploadBasedOnSubscription(response)) {
+					System.out.println("You may submit your report manually at " + Constants.CYB_UPLOAD_URL);
+				}
+			}
+		} catch (TooManyAnomaliesException e) {
+			System.out.println("Too many anomalies found during benchmarks run" + e.getMessage());
+		} catch (Throwable e) {
+			System.out.println("Failed to save test results" + e);
+		}
+	}
+
+	private static BenchmarkOverviewReport processResults(BenchmarkingContext benchContext,
+			Map<String, Object> benchmarkSettings, Collection<RunResult> results,
+			LauncherConfiguration launcherConfiguration) {
+		// may need adjustment. look here first.
+		BenchmarkOverviewReport report;
+		List<BenchmarkReport> benchReports;
+		if (benchContext.getReport() == null) {
+			report = ReportingService.getInstance().createBenchmarkReport(results,
+					benchContext.getDefaultBenchmarksMetadata());
+			benchContext.setReport(report);
+			benchReports = report.getBenchmarksList();
+
+			if (launcherConfiguration.isIncludeHardware()) {
+				report.getEnvironmentSettings().put("environment", benchContext.getHWProperties());
+				report.getEnvironmentSettings().put("jvmEnvironment", benchContext.getJVMProperties());
+			}
+			report.getEnvironmentSettings().put("unclassifiedProperties",
+					CollectSystemInformation.getUnclassifiedProperties());
+			report.getEnvironmentSettings().put("userDefinedProperties",
+					customUserDefinedProperties(launcherConfiguration.getUserProperties()));
+
+			ComparisonConfig automatedComparisonCfg = benchContext.getAutomatedComparisonCfg();
+			if (automatedComparisonCfg != null) {
+				if (automatedComparisonCfg.getScope().equals(Scope.WITHIN)) {
+					automatedComparisonCfg
+							.setCompareVersion(benchContext.getProjectMetadata(Constants.PROJECT_VERSION));
+				}
+				automatedComparisonCfg.setRange(String.valueOf(automatedComparisonCfg.getCompareLatestReports()));
+				automatedComparisonCfg.setProjectName(benchContext.getProjectMetadata(Constants.PROJECT_NAME));
+				automatedComparisonCfg.setProjectVersion(benchContext.getProjectMetadata(Constants.PROJECT_VERSION));
+				report.setAutomatedComparisonConfig(automatedComparisonCfg);
+			}
+		} else {
+			report = benchContext.getReport();
+			benchReports = ReportingService.getInstance().updateBenchmarkReport(report, results,
+					benchContext.getDefaultBenchmarksMetadata());
+		}
+		report.setBenchmarkSettings(benchmarkSettings);
+
+		for (BenchmarkReport benchmarkReport : benchReports) {
+			String name = benchmarkReport.getName();
+			benchmarkReport.setClassFingerprint(benchContext.getClassFingerprints().get(name));
+			benchmarkReport.setGeneratedFingerprint(benchContext.getGeneratedFingerprints().get(name));
+			benchmarkReport.setManualFingerprint(benchContext.getManualFingerprints().get(name));
+			try {
+				JMHUtils.ClassAndMethod classAndMethod = new JMHUtils.ClassAndMethod(name).invoke();
+				String clazz = classAndMethod.getClazz();
+				String method = classAndMethod.getMethod();
+				System.out.println("Adding metadata for benchmark: " + clazz + " test: " + method);
+				Class<?> aClass = Class.forName(clazz);
+				Optional<Method> benchmarkMethod = JMHUtils.getBenchmarkMethod(method, aClass);
+				appendMetadataFromMethod(benchmarkMethod, benchmarkReport);
+				appendMetadataFromClass(aClass, benchmarkReport);
+				syncReportsMetadata(benchContext, report, benchmarkReport);
+				System.out.println(report);
+
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return report;
+	}
+
+	private static Collection<RunResult> runBenchmarks(BenchmarkingContext benchContext) throws Exception {
+		Runner runner = new Runner(benchContext.getOptions());
+		Collection<RunResult> results = runner.run();
+		benchContext.getResults().addAll(results);
+		return results;
+	}
+
+	private static void buildOptions(BenchmarkingContext benchContext, LauncherConfiguration launcherConfiguration) {
+		// TODO Auto-generated method stub
+
+		if (launcherConfiguration.getClassCalled().size() > 0) {
+			for (String classname : launcherConfiguration.getClassCalled()) {
+				System.out.println("Classes selected to run: " + classname);
+				benchContext.getOptBuilder().include(classname + "\\b");
+			}
+		}
+
+		Options opt;
+		if (launcherConfiguration.isUseCyBenchBenchmarkSettings()) {
+			opt = benchContext.getOptBuilder().forks(launcherConfiguration.getForks())
+					.measurementIterations(launcherConfiguration.getMeasurementIterations())
+					.warmupIterations(launcherConfiguration.getWarmUpIterations())
+					.warmupTime(TimeValue.seconds(launcherConfiguration.getWarmUpSeconds()))
+					.threads(launcherConfiguration.getThreads())
+					.measurementTime(TimeValue.seconds(launcherConfiguration.getMeasurmentSeconds())).shouldDoGC(true)
+					.detectJvmArgs().addProfiler(GCProfiler.class).addProfiler(HotspotThreadProfiler.class)
+					.addProfiler(HotspotRuntimeProfiler.class).addProfiler(SafepointsProfiler.class).build();
+		} else {
+			opt = benchContext.getOptBuilder().shouldDoGC(true).detectJvmArgs().addProfiler(GCProfiler.class)
+					.addProfiler(HotspotThreadProfiler.class).addProfiler(HotspotRuntimeProfiler.class)
+					.addProfiler(SafepointsProfiler.class).build();
+		}
+		benchContext.setOptions(opt);
+
+	}
+
+	private static void analyzeBenchmarkClasses(BenchmarkingContext benchContext) {
+		// TODO Auto-generated method stub
+		benchContext.setSecurityBuilder(new SecurityBuilder());
+
+		List<String> benchmarkNames = JMHUtils.getAllBenchmarkClasses();
+		for (String benchmarkClass : benchmarkNames) {
+			try {
+				Class<?> classObj = Class.forName(benchmarkClass);
+				SecurityUtils.generateMethodFingerprints(classObj, benchContext.getManualFingerprints(),
+						benchContext.getClassFingerprints());
+				SecurityUtils.computeClassHashForMethods(classObj, benchContext.getGeneratedFingerprints());
+			} catch (ClassNotFoundException exc) {
+				System.out.println("Class not found in the classpath for execution");
+				exc.printStackTrace();
+			}
+		}
+
+	}
+
+	private static void initContext(BenchmarkingContext benchContext, LauncherConfiguration launcherConfiguration) {
+		if (launcherConfiguration.isIncludeHardware()) {
+			System.out.println("Collecting hardware, software information...");
+			benchContext.setHWProperties(CollectSystemInformation.getEnvironmentProperties());
+		}
+		System.out.println("Collecting JVM properties..");
+		benchContext.setJVMProperties(CollectSystemInformation.getJavaVirtualMachineProperties());
+
+		Map<String, Map<String, String>> customBenchmarksMetadata = new HashMap<String, Map<String, String>>();
+		benchContext.setDefaultBenchmarksMetadata(customBenchmarksMetadata);
+
 	}
 
 	public static boolean isErrorResponse(Map<?, ?> response) {
@@ -544,12 +596,12 @@ public class CyBenchLauncher {
 		launcherConfiguration.setRemoteQueryToken(checkNullAndReturnString(Constants.USER_QUERY_TOKEN));
 		launcherConfiguration.setEmailAddress(checkNullAndReturnString(Constants.USER_EMAIL_ADDRESS));
 
-//		if (launcherConfiguration.getRemoteAccessToken() != null
-//				&& !launcherConfiguration.getRemoteAccessToken().equals("")) {
-//			launcherConfiguration.setReportUploadStatus("private");
-//		} else {
-//			launcherConfiguration.setReportUploadStatus("public");
-//		}
+		// if (launcherConfiguration.getRemoteAccessToken() != null
+		// && !launcherConfiguration.getRemoteAccessToken().equals("")) {
+		// launcherConfiguration.setReportUploadStatus("private");
+		// } else {
+		// launcherConfiguration.setReportUploadStatus("public");
+		// }
 
 		// Set Auto Comparison Configs
 		launcherConfiguration.setAnomaliesAllowed(checkNullAndReturnInt(Constants.AUTO_ANOMALIES_ALLOWED));
@@ -627,10 +679,11 @@ public class CyBenchLauncher {
 	 * @param benchmarkReport
 	 *            report data object
 	 */
-	public static void syncReportsMetadata(BenchmarkOverviewReport report, BenchmarkReport benchmarkReport) {
+	public static void syncReportsMetadata(BenchmarkingContext benchContext, BenchmarkOverviewReport report,
+			BenchmarkReport benchmarkReport) {
 		try {
-			String projectVersion = PROJECT_METADATA_MAP.get("version");
-			String projectArtifactId = PROJECT_METADATA_MAP.get("artifactId");
+			String projectVersion = benchContext.getProjectMetadata(Constants.PROJECT_VERSION);
+			String projectArtifactId = benchContext.getProjectMetadata(Constants.PROJECT_NAME);
 
 			if (StringUtils.isNotEmpty(benchmarkReport.getProject())) {
 				report.setProject(benchmarkReport.getProject());
@@ -716,18 +769,18 @@ public class CyBenchLauncher {
 		}
 	}
 
-	public static void checkProjectMetadataExists() throws Exception {
+	public static void checkProjectMetadataExists(Map<String, String> projectMetadata) throws Exception {
 		try {
-			PROJECT_METADATA_MAP.put("artifactId", getMetadataFromBuildFile("artifactId"));
-			PROJECT_METADATA_MAP.put("version", getMetadataFromBuildFile("version"));
+			projectMetadata.put("artifactId", getMetadataFromBuildFile("artifactId"));
+			projectMetadata.put("version", getMetadataFromBuildFile("version"));
 			// make sure gradle metadata can be parsed BEFORE benchmarks are run
-			String metaProp = PROJECT_METADATA_MAP.get("artifactId");
+			String metaProp = projectMetadata.get("artifactId");
 			if (StringUtils.isEmpty(metaProp)) {
 				failBuildFromMissingMetadata("Project");
 			} else {
 				System.out.println("MetaData - Project name:    " + metaProp);
 			}
-			metaProp = PROJECT_METADATA_MAP.get("version");
+			metaProp = projectMetadata.get("version");
 			if (StringUtils.isEmpty(metaProp)) {
 				failBuildFromMissingMetadata("Version");
 			} else {
@@ -931,7 +984,7 @@ public class CyBenchLauncher {
 	private static boolean isPropUnspecified(String prop) {
 		return StringUtils.isBlank(prop) || "unspecified".equals(prop);
 	}
-	
+
 	private static Boolean getAllowedToUploadBasedOnSubscription(Map<?, ?> response) {
 		if (response == null) {
 			return false;
