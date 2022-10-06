@@ -116,7 +116,9 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 	private static Color colorGray= new Color (Display.getCurrent(),232,232,232) ;
 	
 	private Styler valueStyler ;
-
+	
+	static FontDescriptor boldDescriptor = FontDescriptor.createFrom(new FontData("Arial",8,SWT.BOLD));
+    static Font boldFont = boldDescriptor.createFont(Display.getCurrent());	
 	 
 	
 	@PostConstruct
@@ -125,8 +127,8 @@ public class ReportsDisplayView extends ViewPart implements ICybenchPartView {
 			
 			@Override
 			public void applyStyles(TextStyle textStyle) {
-				FontDescriptor boldDescriptor = FontDescriptor.createFrom(new FontData("Arial",8,SWT.BOLD));
-		        Font boldFont = boldDescriptor.createFont(Display.getCurrent());		       
+//				FontDescriptor boldDescriptor = FontDescriptor.createFrom(new FontData("Arial",8,SWT.BOLD));
+//		        Font boldFont = boldDescriptor.createFont(Display.getCurrent());		       
 		        textStyle.font = boldFont;		
 			}
 		};
