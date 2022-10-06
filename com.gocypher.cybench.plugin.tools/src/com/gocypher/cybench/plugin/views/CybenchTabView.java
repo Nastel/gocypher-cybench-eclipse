@@ -72,7 +72,7 @@ import com.gocypher.cybench.plugin.utils.LauncherUtils;
 
 public class CybenchTabView extends AbstractLaunchConfigurationTab {
 	
-	private Group configuration;
+    private Group configuration;
 
     private Text reportName;
     private Combo launchPath;
@@ -81,7 +81,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private Button browse;
 
     private Text accessToken;
-	private Text queryToken;
+    private Text queryToken;
     private Text userEmail;
     private Label emailLabel;
     
@@ -170,9 +170,11 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         FontData[] fD = repoHintText.getFont().getFontData();
         repoHintText.setText(publicRepoHint);
         fD[0].setHeight(8);
-        repoHintText.setFont(new Font(configuration.getDisplay(), fD[0]));
+        Font tempFont = new Font(configuration.getDisplay(), fD[0]);
+        repoHintText.setFont(tempFont);
         GridDataFactory.swtDefaults().span(2,1).applyTo(repoHintText);
-        
+        tempFont.dispose();
+
         
  //       Label emptyField5 = new Label(configuration, SWT.NONE);
 //		GridDataFactory.swtDefaults().span(2,1).applyTo(emptyField5);
@@ -676,8 +678,10 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
         FontData[] fD = hintText.getFont().getFontData();
     	hintText.setText(textForHint);
         fD[0].setHeight(8);
-        hintText.setFont( new Font(middle.getDisplay(),fD[0]));
+        Font tempFont = new Font(middle.getDisplay(),fD[0]);
+        hintText.setFont(tempFont);
 		GridDataFactory.swtDefaults().span(9,1).applyTo(hintText);
+		tempFont.dispose();
 		
 		GridDataFactory.fillDefaults().grab(true, true).span(8,1).applyTo(leftList);	     
 		GridDataFactory.fillDefaults().grab(true, true).span(8,1).applyTo(rightList);	       
