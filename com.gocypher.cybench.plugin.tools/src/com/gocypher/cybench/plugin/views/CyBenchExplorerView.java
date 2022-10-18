@@ -108,7 +108,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 	private boolean loadWorkspace = true;
 	
 	static FontDescriptor boldDescriptor = FontDescriptor.createFrom(new FontData("Arial",8,SWT.BOLD));
-    static Font boldFont = boldDescriptor.createFont(Display.getCurrent());	
+    	static Font boldFont = boldDescriptor.createFont(Display.getCurrent());	
     
 	@PostConstruct
 	public void init ( ) {
@@ -118,7 +118,7 @@ public class CyBenchExplorerView extends ViewPart implements ICybenchPartView {
 			
 			@Override
 			public void applyStyles(TextStyle textStyle) {
-		        textStyle.font = boldFont;		
+				textStyle.font = boldFont;		
 			}
 		};
 	}

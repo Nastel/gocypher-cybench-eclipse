@@ -72,7 +72,7 @@ import com.gocypher.cybench.plugin.utils.LauncherUtils;
 
 public class CybenchTabView extends AbstractLaunchConfigurationTab {
 	
-	private Group configuration;
+    private Group configuration;
 
     private Text reportName;
     private Combo launchPath;
@@ -81,7 +81,7 @@ public class CybenchTabView extends AbstractLaunchConfigurationTab {
     private Button browse;
 
     private Text accessToken;
-	private Text queryToken;
+    private Text queryToken;
     private Text userEmail;
     private Label emailLabel;
     
