@@ -376,6 +376,9 @@ public class CyBenchLauncher {
 						"*** Total Reports in repository/allowed: " + response.get(Constants.NUM_REPORTS_IN_REPO)
 								+ " / " + response.get(Constants.REPORTS_ALLOWED_FROM_SUB));
 			}
+			
+			System.out.println("*** Printing response...");
+			System.out.println(response);
 
 			if (!response.isEmpty() && !isErrorResponse(response)) {
 				System.out.println("Benchmark report submitted successfully to " + Constants.REPORT_URL);
@@ -666,17 +669,32 @@ public class CyBenchLauncher {
 	@SuppressWarnings("unchecked")
 	public static void verifyAnomalies(List<Map<String, Object>> automatedComparisons)
 			throws TooManyAnomaliesException {
+		System.out.println(
+				"-----------------------------------------------------------------------------------------");
+		System.out.println(
+				"                                 Verifying anomalies...                                  ");
+		System.out.println(
+				"-----------------------------------------------------------------------------------------");
 		for (Map<String, Object> automatedComparison : automatedComparisons) {
 			Integer totalFailedBenchmarks = (Integer) automatedComparison.get("totalFailedBenchmarks");
 			Map<String, Object> config = (Map<String, Object>) automatedComparison.get("config");
 			if (config.containsKey("anomaliesAllowed")) {
+				System.out.println("--- Automated regression test completed.");
 				Integer anomaliesAllowed = (Integer) config.get("anomaliesAllowed");
 				if (totalFailedBenchmarks != null && totalFailedBenchmarks > anomaliesAllowed) {
 					System.out.println(
-							"*** There were more anomaly benchmarks than configured anomalies allowed in one of your automated comparison configurations!");
+							"--- There were more anomaly benchmarks than configured anomalies allowed in one of your automated comparison configurations!");
 					System.out.println(
-							"*** Your report has still been generated, but your pipeline (if applicable) has failed.");
-					throw new TooManyAnomaliesException(totalFailedBenchmarks + ">" + anomaliesAllowed);
+							"--- Your report has still been generated, but your pipeline (if applicable) has failed.\n");
+					throw new TooManyAnomaliesException( " Total anomalies: " + totalFailedBenchmarks + " | Anomalies allowed: " + anomaliesAllowed);
+				} else {
+					if (totalFailedBenchmarks > 0) {
+						System.out.println("--- Anomaly benchmarks detected, but total amount of anomalies is less than configured threshold.");
+						System.out.println("--- Total anomalies: " + totalFailedBenchmarks + " | Anomalies allowed: " + anomaliesAllowed);
+					} else {
+						System.out.println("--- No anomaly benchmarks detected!");
+					}
+					
 				}
 			}
 		}
