@@ -2,7 +2,7 @@
 <feature
       id="com.gocypher.cybench.eclipse.feature"
       label="CyBench"
-      version="1.0.1.qualifier"
+      version="1.0.2.qualifier"
       provider-name="K2N.IO"
       plugin="com.gocypher.cybench.plugin.tools">
 
@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 02110-1301  USA
    </copyright>
 
-   <license url="http://www.example.com/license">
+   <license url="https://github.com/Nastel/gocypher-cybench-java/blob/master/CYBENCH_LICENSE">
       GNU LESSER GENERAL PUBLIC LICENSE
                        Version 2.1, February 1999
 
@@ -563,14 +563,14 @@ That&apos;s all there is to it!
          id="com.gocypher.cybench.externals"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.0.2.qualifier"
          unpack="false"/>
 
    <plugin
          id="com.gocypher.cybench.plugin.tools"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.0.2.qualifier"
          unpack="false"/>
 
 </feature>
