@@ -686,7 +686,7 @@ public class CyBenchLauncher {
 							"--- There were more anomaly benchmarks than configured anomalies allowed in one of your automated comparison configurations!");
 					System.out.println(
 							"--- Your report has still been generated, but your pipeline (if applicable) has failed.\n");
-					throw new TooManyAnomaliesException( " Total anomalies: " + totalFailedBenchmarks + " | Anomalies allowed: " + anomaliesAllowed);
+					throw new TooManyAnomaliesException( ": Total anomalies: " + totalFailedBenchmarks + " | Anomalies allowed: " + anomaliesAllowed);
 				} else {
 					if (totalFailedBenchmarks > 0) {
 						System.out.println("--- Anomaly benchmarks detected, but total amount of anomalies is less than configured threshold.");
