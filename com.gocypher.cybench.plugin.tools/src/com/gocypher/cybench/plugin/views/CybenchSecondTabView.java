@@ -64,7 +64,8 @@ public class CybenchSecondTabView extends AbstractLaunchConfigurationTab {
     private Button useCyBenchBenchmarkSettings;
     private Text classPathProperties;
     
-    private String userHome = System.getProperty("user.home");    
+    private String userHome = System.getProperty("user.home"); 
+    private String userDir = System.getProperty("user.dir");
 //    private File myFile = SystemUtils.getUserHome();
 //    private String myFileHome = myFile.getAbsolutePath(); <-- this also works if you don't use System.getProperty("user.home")
 
@@ -220,7 +221,7 @@ public class CybenchSecondTabView extends AbstractLaunchConfigurationTab {
     public void initializeFrom(ILaunchConfiguration configuration) {
         try {
 
-            String jvmArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "");
+            String jvmArguments = configuration.getAttribute(LaunchConfiguration.CUSTOM_JVM_PROPERTIES, "-Dlog4j.logs.root.path=" + userHome + "\\CyBench\\logs");
             int threadDef = configuration.getAttribute(LaunchConfiguration.TREADS_COUNT, 1);
             int forksDef  = configuration.getAttribute(LaunchConfiguration.FORKS_COUNT, 1);
             int warmupIterationsDef  = configuration.getAttribute(LaunchConfiguration.WARMUP_ITERATION, 1);
