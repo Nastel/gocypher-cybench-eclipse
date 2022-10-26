@@ -5,8 +5,8 @@
 **Deployment packages from [release page](https://github.com/K2NIO/gocypher-cybench-eclipse/releases)**
 
 * File `CyBenchTools-0.2-beta.zip` contains Eclipse update site for Eclipse 2020-09.
-* File `CyBenchTools-0.3-beta.zip` contains Eclipse update site for Eclipse 2021-09.
-* File `CyBenchToolsMars-0.3-beta.zip` contains Eclipse update site for Eclipse Mars 2.
+* File `CyBenchTools-0.4-beta.zip` contains Eclipse update site for Eclipse 2022-09.
+* File `CyBenchToolsMars-0.4-beta.zip` contains Eclipse update site for Eclipse Mars 2.
 
 **Prerequisites**
 
@@ -18,9 +18,9 @@
     * JAVA – JDK-1.8.0_201,
     * Eclipse Version: Eclipse Mars 2 (4.5.2).
 
-* Package `CyBenchTools-0.3-beta.zip` is built and tested using
+* Package `CyBenchTools-0.4-beta.zip` is built and tested using
     * JAVA - JDK-11.0.13,
-    * Eclipse Version: 2021-09 (4.21.0).
+    * Eclipse Version: 2022-09 (4.25.0).
 
 * Package `CyBenchToolsForEclipseMars-0.3-beta.zip` is built and tested using
     * JAVA - JDK-1.8.0_311,
