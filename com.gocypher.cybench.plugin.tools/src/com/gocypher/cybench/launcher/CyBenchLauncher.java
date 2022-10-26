@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -101,6 +102,7 @@ public class CyBenchLauncher {
 	private static final String benchSource = "Eclipse plugin (v0.3-beta)";
 	private static Path userDir;
 	static Properties cfg = new Properties();
+	static boolean shouldFail;
 //	private static final Map<String, String> PROJECT_METADATA_MAP = new HashMap<>(5);
 
 	public static void main(String[] args) throws Exception {
@@ -376,6 +378,9 @@ public class CyBenchLauncher {
 						"*** Total Reports in repository/allowed: " + response.get(Constants.NUM_REPORTS_IN_REPO)
 								+ " / " + response.get(Constants.REPORTS_ALLOWED_FROM_SUB));
 			}
+			
+			System.out.println("*** Printing response...");
+			System.out.println(response);
 
 			if (!response.isEmpty() && !isErrorResponse(response)) {
 				System.out.println("Benchmark report submitted successfully to " + Constants.REPORT_URL);
@@ -664,23 +669,48 @@ public class CyBenchLauncher {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void verifyAnomalies(List<Map<String, Object>> automatedComparisons)
-			throws TooManyAnomaliesException {
-		for (Map<String, Object> automatedComparison : automatedComparisons) {
-			Integer totalFailedBenchmarks = (Integer) automatedComparison.get("totalFailedBenchmarks");
-			Map<String, Object> config = (Map<String, Object>) automatedComparison.get("config");
-			if (config.containsKey("anomaliesAllowed")) {
-				Integer anomaliesAllowed = (Integer) config.get("anomaliesAllowed");
-				if (totalFailedBenchmarks != null && totalFailedBenchmarks > anomaliesAllowed) {
-					System.out.println(
-							"*** There were more anomaly benchmarks than configured anomalies allowed in one of your automated comparison configurations!");
-					System.out.println(
-							"*** Your report has still been generated, but your pipeline (if applicable) has failed.");
-					throw new TooManyAnomaliesException(totalFailedBenchmarks + ">" + anomaliesAllowed);
-				}
-			}
-		}
-	}
+    public static void verifyAnomalies(List<Map<String, Object>> automatedComparisons)
+            throws TooManyAnomaliesException {
+        List<String> comparisonAnomalySources = new ArrayList<String>();
+        System.out.println(
+                "-----------------------------------------------------------------------------------------");
+        System.out.println(
+                "                                 Verifying anomalies...                                  ");
+        System.out.println(
+                "-----------------------------------------------------------------------------------------");
+        for (Map<String, Object> automatedComparison : automatedComparisons) {
+
+            Integer totalFailedBenchmarks = (Integer) automatedComparison.get("totalFailedBenchmarks");
+            Map<String, Object> config = (Map<String, Object>) automatedComparison.get("config");
+            if (config.containsKey("anomaliesAllowed")) {
+                System.out.println("Automated regression test completed.");
+                Integer anomaliesAllowed = (Integer) config.get("anomaliesAllowed");
+                String comparisonSource = ((String) config.get("configName")).contains("Automated Comparison UI") ? "Automated Comparison UI" : "Eclipse Automated Comparison";
+                System.out.println("Comparison source: " + comparisonSource);
+                if (totalFailedBenchmarks != null && totalFailedBenchmarks > anomaliesAllowed) {
+                    System.out.println(
+                            "There were more anomaly benchmarks than configured anomalies allowed in one of your automated comparison configurations!");
+                    if (!shouldFail) {
+                    System.out.println(
+                            "Your report has still been generated, but your pipeline (if applicable) has failed.");
+                    }
+                    shouldFail = true;
+                    comparisonAnomalySources.add(comparisonSource);
+                } else {
+                    if (totalFailedBenchmarks != null && totalFailedBenchmarks > 0) {
+                        System.out.println("Anomaly benchmarks detected, but total amount of anomalies is less than configured threshold.");
+                    } else {
+                        System.out.println("No anomaly benchmarks detected!");
+                    }
+                }
+                System.out.println("Total anomalies: " + totalFailedBenchmarks + " | Anomalies allowed: " + anomaliesAllowed + " (" + comparisonSource + ")\n");
+            }
+        }
+        if (shouldFail) {
+            throw new TooManyAnomaliesException(": " + comparisonAnomalySources.toString());
+        }
+       
+    }
 
 	/**
 	 * Synchronizes overview and benchmark reports metadata.

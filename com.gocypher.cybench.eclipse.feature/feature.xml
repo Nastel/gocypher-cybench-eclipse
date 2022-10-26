@@ -20,19 +20,24 @@
 <feature
       id="com.gocypher.cybench.eclipse.feature"
       label="CyBench"
-      version="1.0.1.qualifier"
+      version="1.0.2.qualifier"
       provider-name="K2N.IO"
       plugin="com.gocypher.cybench.plugin.tools">
 
    <description url="https://cybench.io/">
       Code Benchmark Platform
-
 CyBench is an integrated code benchmark platform for running,
 storing, analyzing &amp; comparing performance benchmarks with one
 mission: help you build fast code.
+
+
+Release Version: 0.4-beta (Qualifier version 1.0.2)
+- Updated Libraries
+- Fix SWT Resource Leak
+- Updated License info
    </description>
 
-   <copyright url="https://github.com/K2NIO/gocypher-cybench-java-core/blob/main/LICENSE">
+   <copyright url="https://github.com/Nastel/gocypher-cybench-java/blob/master/CYBENCH_LICENSE">
       Copyright (C) 2020, K2N.IO.
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -48,7 +53,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 02110-1301  USA
    </copyright>
 
-   <license url="https://github.com/K2NIO/gocypher-cybench-java-core/blob/main/LICENSE">
+   <license url="https://github.com/Nastel/gocypher-cybench-java/blob/master/CYBENCH_LICENSE">
       GNU LESSER GENERAL PUBLIC LICENSE
                        Version 2.1, February 1999
 
@@ -583,14 +588,14 @@ That&apos;s all there is to it!
          id="com.gocypher.cybench.plugin.tools"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.0.2.qualifier"
          unpack="false"/>
 
    <plugin
          id="com.gocypher.cybench.externals"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.0.2.qualifier"
          unpack="false"/>
 
 </feature>
